@@ -1,5 +1,7 @@
 <template>
-  <div>Home</div>
+  <div>
+    <button @click="$store.dispatch('moveToMaps')">지도로이동</button>
+  </div>
 </template>
 
 <script>
