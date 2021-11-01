@@ -1,0 +1,136 @@
+{
+  "events": [
+    {
+      "id": 8523448,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 40.0991641,
+        "longitude": 126.4988516
+      }
+    },
+    {
+      "id": 5726898,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 35.826682,
+        "longitude": 128.0624004
+      }
+    },
+    {
+      "id": 9799091,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 38.3040296,
+        "longitude": 127.19532
+      }
+    },
+    {
+      "id": 6588623,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 38.6408894,
+        "longitude": 124.5807357
+      }
+    },
+    {
+      "id": 8212085,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 36.1004411,
+        "longitude": 128.3463096
+      }
+    },
+    {
+      "id": 2851946,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "Beach Clean Activity",
+      "title": "TEST_02",
+      "description": "TEST_TEST_TEST",
+      "location": {
+        "latitude": 36.4342267,
+        "longitude": 127.5876615
+      }
+    },
+    {
+      "id": 8331412,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 37.4953303,
+        "longitude": 126.8720685
+      }
+    },
+    {
+      "id": 9990662,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "Beach Clean Activity",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 37.4953267,
+        "longitude": 126.87208539999999
+      }
+    },
+    {
+      "id": 9642742,
+      "organizer": {
+        "id": "abc123",
+        "name": "Adam Jahr"
+      },
+      "category": "",
+      "title": "",
+      "description": "",
+      "location": {
+        "latitude": 37.4953267,
+        "longitude": 126.87208539999999
+      }
+    },
+    {
+      "id": 9990663
+    },
+    {
+      "id": 9990664
+    }
+  ]
+}

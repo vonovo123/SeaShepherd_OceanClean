@@ -3,6 +3,7 @@
 </template>
 
 <script>
+const api = require('../../API/api.js');
 export default {
   data() {
     return {
@@ -10,15 +11,20 @@ export default {
       infoWindow: null,
       curPos: { lat: 37.5510719, lng: 126.916324 },
       curMarker: null,
+      data: null,
     };
   },
   methods: {
+    async getData() {
+      this.data = await api.getEvents('events');
+      console.log(this.data);
+    },
     //구글맵 생성
     init() {
       this.infoWindow = new google.maps.InfoWindow();
       this.map = new google.maps.Map(document.getElementById('map'), {
         center: this.curPos,
-        zoom: 8,
+        zoom: 16,
       });
       this.map.addListener('click', e => {
         const lat = e.latLng.lat();
@@ -58,8 +64,8 @@ export default {
             map: this.map,
             label: 'C',
           });
+          this.map.setCenter(this.curPos);
         });
-        this.map.setCenter(this.curPos);
       } else {
         this.handleLocationError(false);
       }
@@ -76,6 +82,7 @@ export default {
     },
   },
   mounted() {
+    this.getData();
     this.init();
   },
 };
