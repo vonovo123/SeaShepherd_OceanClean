@@ -1,9 +1,16 @@
 <template>
-  <div id="map">지도</div>
+  <div class="mapsMain">
+    <div id="map"></div>
+    <ErrorMessage
+      v-show="errorMessage"
+      :errorMessage="errorMessage"
+    ></ErrorMessage>
+  </div>
 </template>
 
 <script>
 const api = require('../../API/api.js');
+import ErrorMessage from '../../UI/ErrorMessage.vue';
 export default {
   data() {
     return {
@@ -12,12 +19,21 @@ export default {
       curPos: { lat: 37.5510719, lng: 126.916324 },
       curMarker: null,
       data: null,
+      errorMessage: null,
     };
   },
+  components: { ErrorMessage },
   methods: {
     async getData() {
-      this.data = await api.getEvents('events');
-      console.log(this.data);
+      try {
+        this.data = await api.getCleanEvents('cleanEvents');
+      } catch (e) {
+        this.errorMessage = e.message;
+        console.log(this.errorMessage);
+        setTimeout(() => {
+          this.errorMessage = null;
+        }, 5000);
+      }
     },
     //구글맵 생성
     init() {
