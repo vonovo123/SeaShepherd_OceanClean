@@ -35,8 +35,6 @@ a {
 
 .errorMessage{
   background-color: #fff;
-  font-weight : bold;
-  font-size: 18px;
   font: 400 18px Roboto, Arial, sans-serif;
   box-shadow: 0 0 3px #aaa;
   transition: opacity 0.3s;

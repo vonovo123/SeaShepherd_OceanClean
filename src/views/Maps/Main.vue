@@ -2,15 +2,15 @@
   <div class="mapsMain">
     <div id="map"></div>
     <ErrorMessage
-      v-show="errorMessage"
-      :errorMessage="errorMessage"
+      v-show="cleanEventStore.isError"
+      :errorMessage="cleanEventStore.errorMessage"
     ></ErrorMessage>
   </div>
 </template>
 
 <script>
-const api = require('../../API/api.js');
 import ErrorMessage from '../../UI/ErrorMessage.vue';
+import { mapState } from 'vuex';
 export default {
   data() {
     return {
@@ -19,22 +19,10 @@ export default {
       curPos: { lat: 37.5510719, lng: 126.916324 },
       curMarker: null,
       data: null,
-      errorMessage: null,
     };
   },
   components: { ErrorMessage },
   methods: {
-    async getData() {
-      try {
-        this.data = await api.getCleanEvents('cleanEvents');
-      } catch (e) {
-        this.errorMessage = e.message;
-        console.log(this.errorMessage);
-        setTimeout(() => {
-          this.errorMessage = null;
-        }, 5000);
-      }
-    },
     //구글맵 생성
     init() {
       this.infoWindow = new google.maps.InfoWindow();
@@ -42,6 +30,8 @@ export default {
         center: this.curPos,
         zoom: 16,
       });
+      //현재위치로 초기화
+      this.goToCurPosition();
       this.map.addListener('click', e => {
         const lat = e.latLng.lat();
         const lng = e.latLng.lng();
@@ -52,8 +42,6 @@ export default {
           label: 'C',
         });
       });
-      //현재위치로 초기화
-      this.goToCurPosition();
       //화면에 현재위치로 이동 버튼 추가
       const locationBtn = document.createElement('button');
       locationBtn.textContent = '현재위치로이동';
@@ -98,8 +86,12 @@ export default {
     },
   },
   mounted() {
-    this.getData();
+    this.$store.dispatch('setCurPosition');
+    this.$store.dispatch('cleanEventStore/fetchCleanEvents');
     this.init();
+  },
+  computed: {
+    ...mapState(['cleanEventStore']),
   },
 };
 </script>

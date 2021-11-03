@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "시셰퍼드 해양정화활동 기록 페이지 개발repo",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "unset HOST && vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
