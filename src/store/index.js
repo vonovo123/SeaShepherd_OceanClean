@@ -1,19 +1,41 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import * as hyunwooStore from './modules/hyunwooStore.js';
+import * as cleanEventStore from './modules/cleanEventStore.js';
 import router from '../router/index.js';
 Vue.use(Vuex);
 export default new Vuex.Store({
   modules: {
-    hyunwooStore,
+    cleanEventStore,
   },
-  state: {},
+  state: {
+    currentPosition: { lat: 0, lng: 0 },
+  },
+  mutations: {
+    SET_CUR_POSITON(state, pos) {
+      Object.entries(pos).forEach(([key, value]) => {
+        state.currentPosition[key] = value;
+      });
+      console.log(this.state);
+    },
+  },
   actions: {
-    moveToMaps() {
+    moveToMaps: () => {
       router.replace({
         name: 'Main',
       });
     },
+    setCurPosition: ({ commit }) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          commit('SET_CUR_POSITON', pos);
+        });
+      }
+      // } else {
+      // }
+    },
   },
-  mutations: {},
 });

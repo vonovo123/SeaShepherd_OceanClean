@@ -28,12 +28,12 @@ const getApiErrorStatusMessage = (status, name) => {
 const fetchData = async (url, name) => {
   try {
     const data = await apiClient.get(url);
+    return data.data;
   } catch (e) {
     const errorStatus = getApiErrorStatusMessage(e.response.status, name);
     if (errorStatus) {
       throw Error(errorStatus);
     }
-    return data.data;
   }
 };
 
