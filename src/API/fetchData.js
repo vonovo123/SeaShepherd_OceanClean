@@ -1,3 +1,4 @@
+const TypeError = require('../util/TypeError.js');
 const axios = require('axios');
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000/',
@@ -30,9 +31,15 @@ const fetchData = async (url, name) => {
     const data = await apiClient.get(url);
     return data.data;
   } catch (e) {
-    const errorStatus = getApiErrorStatusMessage(e.response.status, name);
-    if (errorStatus) {
-      throw Error(errorStatus);
+    //api Error
+    if (e.reponse) {
+      const errorStatus = getApiErrorStatusMessage(e.response.status, name);
+      if (errorStatus) {
+        throw new TypeError(errorStatus, 'api');
+      }
+      //서버에러
+    } else {
+      throw new TypeError(e, 'critical');
     }
   }
 };
