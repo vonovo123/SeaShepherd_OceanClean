@@ -51,7 +51,12 @@ export default new Vuex.Store({
   actions: {
     moveToMaps: () => {
       router.replace({
-        name: 'Main',
+        name: 'maps/Main',
+      });
+    },
+    moveToAuth: () => {
+      router.replace({
+        name: 'auth/Main',
       });
     },
     clickCriticError: ({ commit }) => {

@@ -22,6 +22,7 @@ export default {
       infoWindow: null,
       curMarker: null,
       data: null,
+      eventMarkers: [],
     };
   },
   components: { ErrorMessage, CriticalErrorMessage },
@@ -32,12 +33,14 @@ export default {
       this.infoWindow = new google.maps.InfoWindow();
       this.map = new google.maps.Map(document.getElementById('map'), {
         center: this.currentPosition,
-        zoom: 16,
+        zoom: 8,
       });
     },
     initMapDetail() {
       //현재위치마커 추가
-      this.setMarker();
+      this.setCurMarker();
+      //이벤트 마커 추가
+      this.setEventMarkers();
       this.map.setCenter(this.currentPosition);
       //현재위치 마커 클릭 이벤트리스너 추가
       this.map.addListener('click', e => this.clickMapEvent(e));
@@ -55,10 +58,10 @@ export default {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
       store.commit('SET_SELECTED_POSITON', { lat, lng });
-      this.setMarker();
+      this.setCurMarker();
     },
     //새로운 위치마커추가
-    setMarker() {
+    setCurMarker() {
       //기존 현재위치마커 삭제
       if (this.curMarker) {
         this.curMarker.setMap(null);
@@ -69,11 +72,25 @@ export default {
         label: 'C',
       });
     },
+    //정화활동 이벤트 모두 추가
+    setEventMarkers() {
+      const cleanEvents = this.cleanEventStore.cleanEvents;
+      this.eventMarkers = cleanEvents.map(e => {
+        const marker = new google.maps.Marker({
+          position: e.location,
+          map: this.map,
+          label: 'E',
+        });
+        return marker;
+      });
+      //const eventMarker = new google.maps.Marker({})
+    },
     //현재위치로이동
     goToCurPosition() {
       this.map.setCenter(this.currentPosition);
+      this.map.setZoom(16);
       store.commit('SET_SELECTED_POSITON', this.currentPosition);
-      this.setMarker();
+      this.setCurMarker();
     },
   },
   async mounted() {
