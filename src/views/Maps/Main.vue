@@ -12,7 +12,6 @@
 <script>
 import ErrorMessage from '../../UI/ErrorMessage.vue';
 import CriticalErrorMessage from '../../UI/CriticalErrorMessage.vue';
-
 import { mapState } from 'vuex';
 import store from '../../store/index.js';
 export default {
@@ -29,7 +28,6 @@ export default {
   methods: {
     //구글맵 생성
     initMap() {
-      console.log(this.currentPosition);
       this.infoWindow = new google.maps.InfoWindow();
       this.map = new google.maps.Map(document.getElementById('map'), {
         center: this.currentPosition,
@@ -74,7 +72,7 @@ export default {
     },
     //정화활동 이벤트 모두 추가
     setEventMarkers() {
-      const cleanEvents = this.cleanEventStore.cleanEvents;
+      const cleanEvents = this.cleanEvents;
       this.eventMarkers = cleanEvents.map(e => {
         const marker = new google.maps.Marker({
           position: e.location,
@@ -105,7 +103,6 @@ export default {
   },
   computed: {
     ...mapState([
-      'cleanEventStore',
       'currentPosition',
       'selectedPosition',
       'isError',
@@ -113,6 +110,7 @@ export default {
       'isCriticError',
       'criticErrorMessage',
     ]),
+    ...mapState({ cleanEvents: state => state.cleanEventStore.cleanEvents }),
   },
 };
 </script>
