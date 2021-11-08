@@ -8,54 +8,43 @@
 </template>
 
 <script>
-const axios = require('axios');
+import { mapState, mapGetters, mapMutations } from 'vuex';
+import store from '../../store/index.js';
 export default {
   data() {
     return {
-      CLIENT_ID:
-        '819954997763-50ogor1sa12gthhqr0gc1to9th02orvk.apps.googleusercontent.com',
-      API_KEY: 'AIzaSyCXVH4IUV06E6o_wtJjllitCNf99XT2B8E',
-      DISCOVERY_DOCS: [
-        'https://www.googleapis.com/discovery/v1/apis/people/v1/rest',
-      ],
-      SCOPES: 'email',
       authorizeButton: null,
       signoutButton: null,
     };
   },
+  computed: {
+    ...mapState(['googleAuthStore']),
+    ...mapGetters({ getAuthState: 'googleAuthStore/getAuthState' }),
+  },
   methods: {
+    ...mapMutations({ setAuthState: 'googleAuthStore/SET_AUTH_STATE' }),
     handleClientLoad() {
       gapi.load('client:auth2', this.initClient);
     },
     initClient() {
-      console.log(`init`);
       this.authorizeButton = document.querySelector('#authorize_button');
       this.signoutButton = document.querySelector('#signout_button');
-      gapi.client
-        .init({
-          apiKey: this.API_KEY,
-          clientId: this.CLIENT_ID,
-          discoveryDocs: this.DISCOVERY_DOCS,
-          scope: this.SCOPES,
-        })
-        .then(
-          () => {
-            // Listen for sign-in state changes.
-            gapi.auth2
-              .getAuthInstance()
-              .isSignedIn.listen(this.updateSigninStatus);
-            // Handle the initial sign-in state.
-            //로그인여부 검사
-            this.updateSigninStatus(
-              gapi.auth2.getAuthInstance().isSignedIn.get()
-            );
-            this.authorizeButton.onclick = this.handleAuthClick;
-            this.signoutButton.onclick = this.handleSignoutClick;
-          },
-          function (error) {
-            //appendPre(JSON.stringify(error, null, 2));
-          }
-        );
+      gapi.client.init(this.googleAuthStore.apiAuthInfo).then(
+        () => {
+          const isAuth = gapi.auth2.getAuthInstance().isSignedIn.get();
+          this.updateSigninStatus(isAuth);
+          //인증상태 변화에 따라 updateSigninStatus 실행하도록
+          gapi.auth2
+            .getAuthInstance()
+            .isSignedIn.listen(this.updateSigninStatus);
+          //로그인여부 검사
+          this.authorizeButton.onclick = this.handleAuthClick;
+          this.signoutButton.onclick = this.handleSignoutClick;
+        },
+        function (error) {
+          //appendPre(JSON.stringify(error, null, 2));
+        }
+      );
     },
     handleAuthClick(event) {
       gapi.auth2.getAuthInstance().signIn();
@@ -64,7 +53,8 @@ export default {
       gapi.auth2.getAuthInstance().signOut();
     },
     updateSigninStatus(isSignedIn) {
-      if (isSignedIn) {
+      this.setAuthState(isSignedIn);
+      if (this.getAuthState) {
         this.authorizeButton.style.display = 'none';
         this.signoutButton.style.display = 'block';
         this.listConnectionNames();
@@ -82,7 +72,7 @@ export default {
       gapi.client.people.people
         .get({
           resourceName: 'people/me',
-          personFields: 'emailAddresses',
+          personFields: 'names,emailAddresses',
         })
         .then(res => {
           console.log(res);
