@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
-
+import store from '../store/index.js';
 Vue.use(VueRouter);
 
 const routes = [
@@ -28,4 +28,18 @@ const router = new VueRouter({
   routes,
 });
 
+router.beforeEach(async (to, from, next) => {
+  if (to.path !== '/Error/ErrorPage') {
+    const isOnline = await store.dispatch('setConnectionStatus');
+    console.log(isOnline);
+    if (isOnline === 'offLine') {
+      next({ path: '/Error/ErrorPage', query: { type: '404' } });
+    } else {
+      next();
+    }
+  } else {
+    console.log(to);
+    next({ query: { type: '404' } });
+  }
+});
 export default router;

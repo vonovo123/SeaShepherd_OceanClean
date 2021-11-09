@@ -23,7 +23,7 @@ export const getters = {
   },
 };
 export const actions = {
-  setAuthStatus: ({ commit }, authFlag) => {
-    console.log(authFlag);
+  setAuthState: ({ commit }, isAuth) => {
+    commit('SET_AUTH_STATE', isAuth);
   },
 };
