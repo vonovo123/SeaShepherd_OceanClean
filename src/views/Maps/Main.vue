@@ -10,15 +10,14 @@
 </template>
 
 <script>
-import ErrorMessage from '../../UI/ErrorMessage.vue';
-import CriticalErrorMessage from '../../UI/CriticalErrorMessage.vue';
-import { mapState } from 'vuex';
-import store from '../../store/index.js';
+import ErrorMessage from '../../components/ErrorMessage.vue';
+import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
+import { mapActions, mapState } from 'vuex';
 export default {
   data() {
     return {
       map: null,
-      infoWindow: null,
+      //infoWindow: null,
       curMarker: null,
       data: null,
       eventMarkers: [],
@@ -26,12 +25,17 @@ export default {
   },
   components: { ErrorMessage, CriticalErrorMessage },
   methods: {
+    //store Action
+    ...mapActions({
+      setCurPosition: 'setCurPosition',
+      setSelectedPosition: 'setSelectedPosition',
+      fetchCleanEvents: 'cleanEventStore/fetchCleanEvents',
+    }),
     //구글맵 생성
     initMap() {
-      this.infoWindow = new google.maps.InfoWindow();
       this.map = new google.maps.Map(document.getElementById('map'), {
         center: this.currentPosition,
-        zoom: 8,
+        zoom: 16,
       });
     },
     initMapDetail() {
@@ -55,7 +59,7 @@ export default {
     clickMapEvent(e) {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
-      store.commit('SET_SELECTED_POSITON', { lat, lng });
+      this.setSelectedPosition({ lat, lng });
       this.setCurMarker();
     },
     //새로운 위치마커추가
@@ -81,13 +85,12 @@ export default {
         });
         return marker;
       });
-      //const eventMarker = new google.maps.Marker({})
     },
-    //현재위치로이동
+    //현재위치마커위치 현재위치로 이동
     goToCurPosition() {
       this.map.setCenter(this.currentPosition);
       this.map.setZoom(16);
-      store.commit('SET_SELECTED_POSITON', this.currentPosition);
+      this.setSelectedPosition(this.currentPosition);
       this.setCurMarker();
     },
   },
@@ -95,11 +98,10 @@ export default {
     //지도생성
     this.initMap();
     //현재위치
-    await store.dispatch('setCurPosition').catch(() => {});
+    await this.setCurPosition().catch(() => {});
     //해양정화활동 이벤트 로드
-    await store.dispatch('cleanEventStore/fetchCleanEvents');
-    //지도에 바인딩
-    this.initMapDetail();
+    await this.fetchCleanEvents();
+    this.initMapDetail(); //지도에 바인딩
   },
   computed: {
     ...mapState([

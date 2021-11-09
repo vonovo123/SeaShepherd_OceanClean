@@ -51,22 +51,29 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    //지도로 이동
     moveToMaps: () => {
       router.replace({
         name: 'maps/Main',
       });
     },
+    //인증화면으로 이동
     moveToAuth: () => {
       router.replace({
         name: 'auth/Main',
       });
     },
+    //브라우져에러 발생시
     clickCriticError: ({ commit }) => {
       commit('INIT_ERROR');
       router.replace({
         name: 'Home',
       });
     },
+    setError: ({ commit }, message, type) => {
+      commit('SET_ERROR', new TypeError(message, type));
+    },
+    //현재위치 지정
     setCurPosition: ({ commit }) => {
       return new Promise((resolve, reject) => {
         if (navigator.geolocation) {
@@ -103,6 +110,25 @@ export default new Vuex.Store({
           reject('noGeolocation');
         }
       });
+    },
+    setConnectionStatus: ({ commit }) => {
+      return new Promise((resolve, reject) => {
+        if (!navigator.onLine) {
+          commit(
+            'SET_ERROR',
+            new TypeError(
+              '에러: 인터넷에 연결되어있지 않습니다. 연결상태를 확인해주세요.',
+              'critical'
+            )
+          );
+          resolve('offLine');
+        } else {
+          resolve('onLine');
+        }
+      });
+    },
+    setSelectedPosition: ({ commit }, pos) => {
+      commit('SET_SELECTED_POSITON', pos);
     },
   },
 });
