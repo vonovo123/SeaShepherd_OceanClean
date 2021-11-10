@@ -20,6 +20,11 @@ const routes = [
     name: 'auth/Main',
     component: () => import('../views/Auth/Main.vue'),
   },
+  {
+    path: '/error',
+    name: '/error',
+    component: () => import('../views/Error/ErrorPage.vue'),
+  },
 ];
 
 const router = new VueRouter({
@@ -28,18 +33,27 @@ const router = new VueRouter({
   routes,
 });
 
-router.beforeEach(async (to, from, next) => {
-  if (to.path !== '/Error/ErrorPage') {
-    const isOnline = await store.dispatch('setConnectionStatus');
-    console.log(isOnline);
-    if (isOnline === 'offLine') {
-      next({ path: '/Error/ErrorPage', query: { type: '404' } });
+router.beforeEach((to, from, next) => {
+  if (to.name === '/error') {
+    console.log(from);
+    console.log(to);
+    if (navigator.onLine) {
+      next({ path: to.query.prev });
     } else {
-      next();
+      next({ params: { type: to.params } });
     }
   } else {
-    console.log(to);
-    next({ query: { type: '404' } });
+    if (navigator.onLine) {
+      next();
+    } else {
+      console.log(to);
+      const prev = !to.name ? 'Home' : to.name;
+      console.log(prev);
+      next({
+        name: '/error',
+        query: { type: 'NetworkError', prev: prev },
+      });
+    }
   }
 });
 export default router;

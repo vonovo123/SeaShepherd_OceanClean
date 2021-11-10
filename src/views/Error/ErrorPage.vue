@@ -1,11 +1,11 @@
 <template>
-  <div>{{ $route.query.type }}</div>
+  <div>{{ this.$route.query.type }}</div>
 </template>
 
 <script>
 export default {
-  created() {
-    console.log($route.query.type);
+  data() {
+    return {};
   },
 };
 </script>
