@@ -1,63 +1,40 @@
-html, body {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.4;
-  font-family: 'Nanum Gothic', sans-serif;
-  height: 100%;
+@import url(http://fonts.googleapis.com/css?family=Lato:300,400,700);
+@font-face {
+	font-family: 'bpicons';
+	src:url('../fonts/bpicons/bpicons.eot');
+	src:url('../fonts/bpicons/bpicons.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/bpicons/bpicons.woff') format('woff'),
+		url('../fonts/bpicons/bpicons.ttf') format('truetype'),
+		url('../fonts/bpicons/bpicons.svg#bpicons') format('svg');
+	font-weight: normal;
+	font-style: normal;
+} 
+
+*, *:after, *:before {
+   -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; 
 }
-.body {
+
+body {
+  font-family: 'Lato', Calibri, Arial, sans-serif;
+  color: #fff;
+  background: #47a3da;
+}
+
+body, html { 
+  font-size: 100%; padding: 0; margin: 0; height: 100%;
+}
+
+.container {
   height: 100%;
   margin: 0;
   padding: 0;
 }
+
 a {
   text-decoration: none;
 }
-.mapsMain, #map{
+
+.container > .main {
   height: 100%;
-}
+} 
 
-.custom-map-control-button {
-  background-color: #fff;
-  border: 0;
-  border-radius: 2px;
-  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
-  margin: 10px;
-  padding: 0 0.5em;
-  font: 400 18px Roboto, Arial, sans-serif;
-  overflow: hidden;
-  height: 40px;
-  cursor: pointer;
-}
-.custom-map-control-button:hover {
-  background: #ebebeb;
-}
-
-.errorMessage{
-  background-color: #fff;
-  font: 400 18px Roboto, Arial, sans-serif;
-  box-shadow: 0 0 3px #aaa;
-  transition: opacity 0.3s;
-  position: fixed;
-  z-index: 1001;
-  left: 50%;
-  top: 100px;
-  transform: translate(-50%, -50%);
-}
-
-.criticalErrorMessage{
-  background-color: #111;
-  opacity: 0.4;
-  color : white;
-  font-weight: bold;
-  position: fixed;
-  z-index : 1001;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-}

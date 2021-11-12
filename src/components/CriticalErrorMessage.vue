@@ -19,4 +19,20 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.criticalErrorMessage {
+  background-color: #111;
+  opacity: 0.4;
+  color: white;
+  font-weight: bold;
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>

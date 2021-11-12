@@ -63,6 +63,13 @@ export default new Vuex.Store({
         name: 'auth/Main',
       });
     },
+    //등록화면으로
+    moveToRegistEvent: () => {
+      router.replace({
+        name: 'regist/Main',
+      });
+    },
+
     //브라우져에러 발생시
     clickCriticError: ({ commit }) => {
       commit('INIT_ERROR');

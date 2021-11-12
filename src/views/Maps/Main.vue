@@ -1,6 +1,6 @@
 <template>
-  <div class="mapsMain">
-    <div id="map"></div>
+  <div class="main">
+    <div class="map"></div>
     <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
       v-show="isCriticError"
@@ -33,7 +33,7 @@ export default {
     }),
     //구글맵 생성
     initMap() {
-      this.map = new google.maps.Map(document.getElementById('map'), {
+      this.map = new google.maps.Map(document.querySelector('.map'), {
         center: this.currentPosition,
         zoom: 16,
       });
@@ -117,4 +117,23 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.map {
+  height: 100%;
+}
+.custom-map-control-button {
+  background-color: rgb(46, 45, 45);
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
+  margin: 10px;
+  padding: 0 0.5em;
+  font: 400 18px Roboto, Arial, sans-serif;
+  overflow: hidden;
+  height: 40px;
+  cursor: pointer;
+}
+.custom-map-control-button:hover {
+  background: #ebebeb;
+}
+</style>
