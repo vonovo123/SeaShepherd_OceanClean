@@ -1,130 +1,20 @@
 {
   "cleanEvents": [
     {
-      "id": 8523448,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
+      "idx": 1,
+      "userInfo": {
+        "email": "jukdo67@gmail.com",
+        "name": "권현우"
       },
-      "category": "",
-      "title": "",
-      "description": "",
+      "startDate" : "20211101",
+      "endDate": "20211102",
+      "memo" : "1박2일간의 속초앞바다 해양정화 활동",
       "location": {
         "lat": 40.0991641,
         "lng": 126.4988516
-      }
-    },
-    {
-      "id": 5726898,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
       },
-      "category": "",
-      "title": "",
-      "description": "",
-      "location": {
-        "lat": 35.826682,
-        "lng": 128.0624004
-      }
-    },
-    {
-      "id": 9799091,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
-      },
-      "category": "",
-      "title": "",
-      "description": "",
-      "location": {
-        "lat": 38.3040296,
-        "lng": 127.19532
-      }
-    },
-    {
-      "id": 6588623,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
-      },
-      "category": "",
-      "title": "",
-      "description": "",
-      "location": {
-        "lat": 38.6408894,
-        "lng": 124.5807357
-      }
-    },
-    {
-      "id": 8212085,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
-      },
-      "category": "",
-      "title": "",
-      "description": "",
-      "location": {
-        "lat": 36.1004411,
-        "lng": 128.3463096
-      }
-    },
-    {
-      "id": 2851946,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
-      },
-      "category": "Beach Clean Activity",
-      "title": "TEST_02",
-      "description": "TEST_TEST_TEST",
-      "location": {
-        "lat": 36.4342267,
-        "lng": 127.5876615
-      }
-    },
-    {
-      "id": 8331412,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
-      },
-      "category": "",
-      "title": "",
-      "description": "",
-      "location": {
-        "lat": 37.4953303,
-        "lng": 126.8720685
-      }
-    },
-    {
-      "id": 9990662,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
-      },
-      "category": "Beach Clean Activity",
-      "title": "",
-      "description": "",
-      "location": {
-        "lat": 37.4953267,
-        "lng": 126.87208539999999
-      }
-    },
-    {
-      "id": 9642742,
-      "organizer": {
-        "id": "abc123",
-        "name": "Adam Jahr"
-      },
-      "category": "",
-      "title": "",
-      "description": "",
-      "location": {
-        "lat": 37.4953267,
-        "lng": 126.87208539999999
-      }
+      "imgUrl": [],
+      "companions" : []
     }
   ]
 }

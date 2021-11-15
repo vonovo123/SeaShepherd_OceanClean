@@ -134,9 +134,13 @@ export default {
   font-family: 'Lato', Calibri, Arial, sans-serif;
   line-height: 1.5;
   font-size: 1em;
+  --inputColor: rgb(243, 246, 246);
+  --inputHoverColor: rgb(206, 246, 244);
+
+  --fontColor: rgb(55, 53, 47);
 }
 .header {
-  background-color: rgb(247, 246, 243);
+  background-color: var(--inputColor);
   padding: 0;
   height: 3em;
 }
@@ -172,7 +176,7 @@ export default {
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  color: rgb(55, 53, 47);
+  color: var(--fontColor);
 }
 
 .cbp-mc-column > label > p {
@@ -189,9 +193,9 @@ export default {
   display: block;
   margin: 2em 2em;
   padding: 0em 1em;
-  color: rgb(55, 53, 47);
+  color: var(--fontColor);
   width: 50%;
-  background-color: rgb(247, 246, 243);
+  background-color: var(--inputColor);
 }
 .cbp-mc-column .date {
   display: inline;
@@ -203,10 +207,10 @@ export default {
   font-family: 'Lato', Calibri, Arial, sans-serif;
   line-height: 1.5;
   font-size: 1em;
-  color: rgb(55, 53, 47);
+  color: var(--fontColor);
   margin: 1em;
   padding: 1em 1em;
-  background-color: rgb(247, 246, 243);
+  background-color: var(--inputColor);
   width: 90%;
   height: 40vw;
 }
@@ -223,12 +227,12 @@ export default {
 }
 .cbp-mc-form .img-wrapper > .img-prev {
   width: 50%;
-  background-color: rgb(247, 246, 243);
+  background-color: var(--inputColor);
   transition: 0.5s;
 }
 
 .cbp-mc-form .img-wrapper > .img-prev:hover {
-  background-color: rgb(138, 137, 135);
+  background-color: var(--inputHoverColor);
   border-radius: 0.5em;
   border-collapse: collapse;
   opacity: 1;
@@ -239,7 +243,7 @@ export default {
   width: 50%;
   height: 3vw;
   margin: 1em;
-  background: rgb(247, 246, 243);
+  background-color: var(--inputHoverColor);
   border-radius: 1em;
   opacity: 0.5;
 }
@@ -249,9 +253,14 @@ export default {
   display: inline;
   padding: 0em 0.5em;
   margin: 0em 0.5em;
-  background: rgb(247, 246, 243);
+  background: var(--inputColor);
   font-size: 0.7em;
   border-radius: 1em;
+}
+
+.cbp-mc-form .companion-add-btn:hover,
+.cbp-mc-form .companion-remove-btn:hover {
+  background: var(--inputHoverColor);
 }
 
 .cbp-mc-form input:focus,
@@ -259,7 +268,7 @@ export default {
 .cbp-mc-form label:active + input,
 .cbp-mc-form label:active + textarea {
   outline: none;
-  border-bottom: 3px solid rgb(247, 246, 243);
+  background: var(--inputHoverColor);
 }
 
 ::-webkit-input-placeholder {
