@@ -135,7 +135,10 @@ export default new Vuex.Store({
       });
     },
     setSelectedPosition: ({ commit }, pos) => {
-      commit('SET_SELECTED_POSITON', pos);
+      return new Promise((resolve, reject) => {
+        commit('SET_SELECTED_POSITON', pos);
+        resolve();
+      });
     },
   },
 });
