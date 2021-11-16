@@ -12,6 +12,7 @@
 <script>
 import ErrorMessage from '../../components/ErrorMessage.vue';
 import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
+import CurLocMaker from '../../util/CurLocMarker.js';
 import { mapActions, mapState } from 'vuex';
 export default {
   data() {
@@ -63,22 +64,34 @@ export default {
     clickMapEvent(e) {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
-      this.setSelectedPosition({ lat, lng });
-      this.setCurMarker();
+      this.setSelectedPosition({ lat, lng }).then(() => {
+        this.setCurMarker();
+      });
     },
     //새로운 위치마커추가
     setCurMarker() {
+      console.log('set');
       //기존 현재위치마커 삭제
       if (this.curMarker) {
+        console.log(this.curMarker);
+        console.log('remove');
         this.curMarker.setMap(null);
       }
-      this.infoWindow.setPosition(this.selectedPosition);
-      this.infoWindow.setContent(
-        `<div class="current-location">현재위치에 등록하기</div>`
+      const content = document.createElement('div');
+      content.innerHTML = '현재위치에 등록하기';
+      this.curMarker = new CurLocMaker(
+        new google.maps.LatLng(
+          this.selectedPosition.lat,
+          this.selectedPosition.lng
+        ),
+        content
       );
-      this.infoWindow.open(this.map);
-      this.infoWindow.addListener('click', () => {
-        this.clickEvent();
+      this.curMarker.setMap(this.map);
+      this.curMarker.addListener('click', () => {
+        console.log(`this`);
+      });
+      this.curMarker.addClickEvent(() => {
+        this.$store.dispatch('moveToRegistEvent');
       });
     },
     clickEvent() {
@@ -164,5 +177,57 @@ export default {
 }
 .gm-ui-hover-effect {
   display: none !important;
+}
+
+/* The popup bubble styling. */
+.popup-bubble {
+  /* Position the bubble centred-above its parent. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -100%);
+  /* Style the bubble. */
+  background-color: white;
+  padding: 5px;
+  border-radius: 5px;
+  font-family: sans-serif;
+  overflow-y: auto;
+  max-height: 60px;
+  box-shadow: 0px 2px 10px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* The parent of the bubble. A zero-height div at the top of the tip. */
+.popup-bubble-anchor {
+  /* Position the div a fixed distance above the tip. */
+  position: absolute;
+  width: 100%;
+  bottom: 8px;
+  left: 0;
+}
+
+/* This element draws the tip. */
+.popup-bubble-anchor::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Center the tip horizontally. */
+  transform: translate(-50%, 0);
+  /* The tip is a https://css-tricks.com/snippets/css/css-triangle/ */
+  width: 0;
+  height: 0;
+  /* The tip is 8px high, and 12px wide. */
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid white;
+}
+
+/* JavaScript will position this div at the bottom of the popup tip. */
+.popup-container {
+  cursor: auto;
+  height: 0;
+  position: absolute;
+  /* The max width of the info window. */
+  width: 200px;
 }
 </style>

@@ -136,7 +136,6 @@ export default {
   font-size: 1em;
   --inputColor: rgb(243, 246, 246);
   --inputHoverColor: rgb(206, 246, 244);
-
   --fontColor: rgb(55, 53, 47);
 }
 .header {
