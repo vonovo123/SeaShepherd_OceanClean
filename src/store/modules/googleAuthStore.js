@@ -9,21 +9,27 @@ export const state = {
     ],
     scope: 'https://www.googleapis.com/auth/userinfo.profile',
   },
-  isAuth: false,
+
+  authInfo: { isAuth: false, fullName: '', gMail: '' },
 };
 export const mutations = {
-  SET_AUTH_STATE(state, isAuth) {
-    state.isAuth = isAuth;
+  SET_AUTH_INFO(state, { fullName, gMail, isAuth }) {
+    state.authInfo.fullName = fullName;
+    state.authInfo.gMail = gMail;
+    state.authInfo.isAuth = isAuth;
   },
 };
 
 export const getters = {
-  getAuthState: state => {
-    return state.isAuth;
+  getAuthInfo: state => {
+    return state.authInfo;
   },
 };
 export const actions = {
-  setAuthState: ({ commit }, isAuth) => {
-    commit('SET_AUTH_STATE', isAuth);
+  setAuthInfo: ({ commit }, authInfo) => {
+    return new Promise((resolve, reject) => {
+      commit('SET_AUTH_INFO', authInfo);
+      resolve();
+    });
   },
 };

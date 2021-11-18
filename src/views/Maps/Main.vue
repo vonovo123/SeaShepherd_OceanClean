@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="map-main">
     <div class="body"></div>
     <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
@@ -70,15 +70,12 @@ export default {
     },
     //새로운 위치마커추가
     setCurMarker() {
-      console.log('set');
       //기존 현재위치마커 삭제
       if (this.curMarker) {
-        console.log(this.curMarker);
-        console.log('remove');
         this.curMarker.setMap(null);
       }
       const content = document.createElement('div');
-      content.innerHTML = '현재위치에 등록하기';
+      content.innerHTML = '현위치에</br> 등록하기';
       this.curMarker = new CurLocMaker(
         new google.maps.LatLng(
           this.selectedPosition.lat,
@@ -87,15 +84,9 @@ export default {
         content
       );
       this.curMarker.setMap(this.map);
-      this.curMarker.addListener('click', () => {
-        console.log(`this`);
-      });
       this.curMarker.addClickEvent(() => {
         this.$store.dispatch('moveToRegistEvent');
       });
-    },
-    clickEvent() {
-      console.log(this);
     },
     //정화활동 이벤트 모두 추가
     setEventMarkers() {
@@ -141,12 +132,13 @@ export default {
 </script>
 
 <style>
-.main {
+.map-main {
   /* 1em : 16px */
   width: 100%;
   font-family: 'Lato', Calibri, Arial, sans-serif;
   font-size: 1em;
-  --inputColor: rgb(243, 246, 246);
+  height: 100%;
+  --inputColor: rgb(3, 3, 3);
   --inputHoverColor: rgb(206, 246, 244);
   --fontColor: rgb(55, 53, 47);
 }
@@ -171,10 +163,6 @@ export default {
 .custom-map-control-button:hover {
   background: #ebebeb;
 }
-.current-location {
-  font-size: 1.5em;
-  font-weight: bold;
-}
 .gm-ui-hover-effect {
   display: none !important;
 }
@@ -188,12 +176,19 @@ export default {
   transform: translate(-50%, -100%);
   /* Style the bubble. */
   background-color: white;
-  padding: 5px;
+  padding: 0.5em;
   border-radius: 5px;
-  font-family: sans-serif;
+  font-size: 1.5em;
+  font-weight: bold;
   overflow-y: auto;
   max-height: 60px;
   box-shadow: 0px 2px 10px 1px rgba(0, 0, 0, 0.5);
+  opacity: 1;
+  transition: 0.5s;
+  cursor: pointer;
+}
+.popup-bubble:hover {
+  opacity: 0.4;
 }
 
 /* The parent of the bubble. A zero-height div at the top of the tip. */
@@ -213,7 +208,6 @@ export default {
   left: 0;
   /* Center the tip horizontally. */
   transform: translate(-50%, 0);
-  /* The tip is a https://css-tricks.com/snippets/css/css-triangle/ */
   width: 0;
   height: 0;
   /* The tip is 8px high, and 12px wide. */
