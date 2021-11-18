@@ -1,51 +1,74 @@
 <template>
   <div
-    class="main"
+    class="regist-main"
     oncontextmenu="return false"
     onselectstart="return false"
     ondragstart="return false"
+    @click="showNavigation"
   >
-    <div class="header">등록</div>
+    <Navigation></Navigation>
     <div class="body">
       <form
-        class="cbp-mc-form"
+        class="regist-form"
         method="post"
         action="upload"
         enctype="multipart/form-data"
       >
-        <div class="cbp-mc-column userinfo">
-          <label for="name"> 📛 이름</label>
-          <input type="text" id="name" name="name" placeholder="Jonathan" />
-          <label for="email"> 📧 이메일</label>
+        <div class="column">
+          <label for="name" class="form-label">
+            📛 이름 {{ getAuthInfo }}</label
+          >
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="form-input"
+            placeholder="Jonathan"
+          />
+
+          <label class="form-label" for="email"> 📧 이메일</label>
           <input
             type="text"
             id="email"
             name="email"
+            class="form-input"
             placeholder="0000000@gmail.com"
           />
-          <label for="date"> 📅 활동기간</label>
+          <label class="form-label" for="date"> 📅 활동기간</label>
           <div>
-            <input type="date" class="date" id="from-date" name="from-date" />
+            <input
+              class="form-input date"
+              type="date"
+              id="from-date"
+              name="from-date"
+            />
             <p class="date-text">에서</p>
-            <input type="date" class="date" id="to-date" name="to-date" />
+            <input
+              type="date"
+              class="form-input date"
+              id="to-date"
+              name="to-date"
+            />
             <p class="date-text">까지</p>
           </div>
-          <label for="memo"> 📝 메모</label>
+          <label class="form-label" for="memo"> 📝 메모</label>
           <textarea
+            class="form-textarea"
             type="text"
             id="memo"
             name="memo"
             placeholder="간단한 활동내역을 작성해주세요."
           />
         </div>
-        <div class="cbp-mc-column photo">
-          <label>
+        <div class="column">
+          <label class="form-label">
             📷 사진업로드
             <p>(최대 4장까지 가능!)</p>
           </label>
           <div class="img-wrapper">
-            <label class="img-prev" for="imageFirst"></label>
+            <label class="form-label img-prev" for="imageFirst"></label>
             <input
+              class="form-input"
               type="file"
               id="imageFirst"
               name="imageFirst"
@@ -53,8 +76,9 @@
               @change="loadFile"
               style="display: none"
             />
-            <label class="img-prev" for="imageSecond"></label>
+            <label class="form-label img-prev" for="imageSecond"></label>
             <input
+              class="form-input"
               type="file"
               id="imageSecond"
               name="imageSecond"
@@ -62,8 +86,9 @@
               @change="loadFile"
               style="display: none"
             />
-            <label class="img-prev" for="imageThird"></label>
+            <label class="form-label img-prev" for="imageThird"></label>
             <input
+              class="form-input"
               type="file"
               id="imageThird"
               name="imageThird"
@@ -71,8 +96,9 @@
               @change="loadFile"
               style="display: none"
             />
-            <label class="img-prev" for="imageFourth"></label>
+            <label class="form-label img-prev" for="imageFourth"></label>
             <input
+              class="form-input"
               type="file"
               id="imageFourth"
               name="imageFourth"
@@ -81,13 +107,11 @@
               style="display: none"
             />
           </div>
-          <label for="companion">
+          <label class="form-label">
             👭 함께한사람들
             <p>(이메일주소를 적어주세요.)</p>
-            <div class="companion-add-btn" @click="addCompanion">➕ 추가</div>
-            <div class="companion-remove-btn" @click="removeCompanion">
-              ➖ 제거
-            </div>
+            <div class="form-btn" @click="addCompanion">➕ 추가</div>
+            <div class="form-btn" @click="removeCompanion">➖ 제거</div>
           </label>
           <div class="companion-wrapper"></div>
           <!-- <input class="companion" type="text" @keyup.enter="insertCompanion" /> -->
@@ -98,9 +122,14 @@
 </template>
 
 <script>
+import { mapState, mapGetters, mapActions } from 'vuex';
+import Navigation from '../../components/Navigation.vue';
 export default {
+  components: { Navigation },
   data() {
-    return { companionIndex: -1 };
+    return {
+      companionIndex: -1,
+    };
   },
   methods: {
     loadFile: e => {
@@ -123,12 +152,35 @@ export default {
         $companionWrapper.removeChild($companionWrapper.lastChild);
       }
     },
+    showNavigation: function (e) {
+      const targetClass = e.target.classList[0];
+      console.log(targetClass);
+      if (targetClass && (targetClass === 'body' || targetClass === 'column')) {
+        const $navMain = document.querySelector('.nav-main');
+        if ($navMain.classList.contains('appear')) {
+          $navMain.classList.add('disappear');
+          $navMain.classList.remove('appear');
+          setTimeout(function () {
+            $navMain.style.display = 'none';
+          }, 501);
+        } else {
+          $navMain.classList.add('appear');
+          $navMain.classList.remove('disappear');
+          setTimeout(function () {
+            $navMain.style.display = 'flex';
+          }, 501);
+        }
+      }
+    },
+  },
+  computed: {
+    ...mapGetters({ getAuthInfo: 'googleAuthStore/getAuthInfo' }),
   },
 };
 </script>
 
 <style>
-.main {
+.regist-main {
   /* 1em : 16px */
   width: 100%;
   font-family: 'Lato', Calibri, Arial, sans-serif;
@@ -138,36 +190,30 @@ export default {
   --inputHoverColor: rgb(206, 246, 244);
   --fontColor: rgb(55, 53, 47);
 }
-.header {
-  background-color: var(--inputColor);
-  padding: 0;
-  height: 3em;
-}
-
 .body {
   /* 1em : 16px */
   width: 100%;
   padding: 1em 2em 3em;
 }
-.cbp-mc-form {
+.regist-form {
   position: relative;
 }
 
 /* table display */
-.cbp-mc-form:before,
-.cbp-mc-form:after {
+.regist-form:before,
+.regist-form:after {
   content: ' ';
   display: table;
 }
 
 /* 각 컬럼 */
-.cbp-mc-column {
+.column {
   float: left;
   width: 50%;
 }
 
 /* 컬럼의 레이블 */
-.cbp-mc-column > label {
+.column > label {
   display: block;
   margin: 0.5em;
   font-size: 1.5em;
@@ -178,17 +224,17 @@ export default {
   color: var(--fontColor);
 }
 
-.cbp-mc-column > label > p {
+.column > label > p {
   display: inline;
   font-size: 0.5em;
   font-weight: normal;
 }
-.cbp-mc-column .date-text {
+.column .date-text {
   display: inline;
 }
 /* 칼럼내 input, select, textarea css */
-.cbp-mc-column input,
-.cbp-mc-column select {
+.column input,
+.column select {
   display: block;
   margin: 2em 2em;
   padding: 0em 1em;
@@ -196,12 +242,12 @@ export default {
   width: 50%;
   background-color: var(--inputColor);
 }
-.cbp-mc-column .date {
+.column .date {
   display: inline;
   margin: 1em 2em;
 }
 
-.cbp-mc-column textarea {
+.column textarea {
   display: block;
   font-family: 'Lato', Calibri, Arial, sans-serif;
   line-height: 1.5;
@@ -215,7 +261,7 @@ export default {
 }
 
 /* 사진등록 css start*/
-.cbp-mc-form .img-wrapper {
+.regist-form .img-wrapper {
   width: 90%;
   height: 40vw;
   margin: 2em 0em;
@@ -224,13 +270,13 @@ export default {
   flex-wrap: wrap;
   overflow: hidden;
 }
-.cbp-mc-form .img-wrapper > .img-prev {
+.regist-form .img-wrapper > .img-prev {
   width: 50%;
   background-color: var(--inputColor);
   transition: 0.5s;
 }
 
-.cbp-mc-form .img-wrapper > .img-prev:hover {
+.regist-form .img-wrapper > .img-prev:hover {
   background-color: var(--inputHoverColor);
   border-radius: 0.5em;
   border-collapse: collapse;
@@ -238,7 +284,7 @@ export default {
 }
 /* 사진등록 css end */
 
-.cbp-mc-form .companion-wrapper .companion {
+.regist-form .companion-wrapper .companion {
   width: 50%;
   height: 3vw;
   margin: 1em;
@@ -247,8 +293,7 @@ export default {
   opacity: 0.5;
 }
 
-.cbp-mc-form .companion-add-btn,
-.cbp-mc-form .companion-remove-btn {
+.form-btn {
   display: inline;
   padding: 0em 0.5em;
   margin: 0em 0.5em;
@@ -257,15 +302,14 @@ export default {
   border-radius: 1em;
 }
 
-.cbp-mc-form .companion-add-btn:hover,
-.cbp-mc-form .companion-remove-btn:hover {
+.form-btn:hover {
   background: var(--inputHoverColor);
 }
 
-.cbp-mc-form input:focus,
-.cbp-mc-form textarea:focus,
-.cbp-mc-form label:active + input,
-.cbp-mc-form label:active + textarea {
+.regist-form input:focus,
+.regist-form textarea:focus,
+.regist-form label:active + input,
+.regist-form label:active + textarea {
   outline: none;
   background: var(--inputHoverColor);
 }

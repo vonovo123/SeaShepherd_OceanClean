@@ -32,14 +32,11 @@ export default class CurLocMaker extends google.maps.OverlayView {
     const divPosition = this.getProjection().fromLatLngToDivPixel(
       this.position
     );
-    console.log('draw x ', divPosition.x);
-    console.log('draw y ', divPosition.y);
     // Hide the popup when it is far out of view.
     const display =
       Math.abs(divPosition.x) < 4000 && Math.abs(divPosition.y) < 4000
         ? 'block'
         : 'none';
-    console.log(display);
     if (display === 'block') {
       this.containerDiv.style.left = divPosition.x + 'px';
       this.containerDiv.style.top = divPosition.y + 'px';
