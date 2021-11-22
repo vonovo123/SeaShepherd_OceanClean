@@ -1,8 +1,15 @@
 <template>
   <div class="nav-main disappear">
-    <div class="header-btn">HOME</div>
-    <div class="header-btn">MAP</div>
-    <div class="header-btn">AUTH</div>
+    <router-link :to="{ name: 'Home' }" class="header-btn">HOME</router-link>
+    <router-link :to="{ name: 'maps/Main' }" class="header-btn"
+      >MAP</router-link
+    >
+    <router-link :to="{ name: 'auth/Main' }" class="header-btn"
+      >AUTH</router-link
+    >
+    <router-link :to="{ name: 'regist/Main' }" class="header-btn"
+      >REGIST</router-link
+    >
   </div>
 </template>
 
@@ -39,12 +46,12 @@ export default {};
 }
 
 .appear {
-  animation: fade-in 0.5s;
+  animation: fade-in 0.1s;
   animation-fill-mode: forwards;
 }
 
 .disappear {
-  animation: fade-out 0.5s;
+  animation: fade-out 0.3s;
   animation-fill-mode: forwards;
 }
 
@@ -53,13 +60,13 @@ export default {};
     opacity: 0;
   }
   to {
-    opacity: 0.5;
+    opacity: 1;
   }
 }
 
 @keyframes fade-out {
   from {
-    opacity: 0.5;
+    opacity: 1;
   }
   to {
     opacity: 0;

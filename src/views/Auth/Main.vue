@@ -1,27 +1,32 @@
 <template>
-  <div>
-    <p>People API Quickstart</p>
-    <button
-      id="authorize_button"
-      v-show="!googleAuthStore.authInfo.isAuth"
-      @click="this.handleAuthClick"
-    >
-      Authorize
-    </button>
-    <button
-      id="signout_button"
-      v-show="googleAuthStore.authInfo.isAuth"
-      @click="this.handleSignoutClick"
-    >
-      Sign Out
-    </button>
-    <pre id="content" style="white-space: pre-wrap"></pre>
+  <div class="auth-main" @click="showNavigation">
+    <Navigation></Navigation>
+    <div class="body">
+      <p>People API Quickstart</p>
+      <button
+        id="authorize_button"
+        v-show="!googleAuthStore.authInfo.isAuth"
+        @click="this.handleAuthClick"
+      >
+        Authorize
+      </button>
+      <button
+        id="signout_button"
+        v-show="googleAuthStore.authInfo.isAuth"
+        @click="this.handleSignoutClick"
+      >
+        Sign Out
+      </button>
+      <pre id="content" style="white-space: pre-wrap"></pre>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import Navigation from '../../components/Navigation.vue';
 export default {
+  components: { Navigation },
   data() {
     return {
       authorizeButton: null,
@@ -72,7 +77,6 @@ export default {
               gMail: res.result.emailAddresses[0].value,
               isAuth: isAuth,
             });
-            this.$store.dispatch('moveToRegistEvent');
           });
       } else {
         console.log('logout');
@@ -83,6 +87,27 @@ export default {
         });
       }
     },
+    showNavigation: function (e) {
+      console.log(e);
+      const targetClass = e.target.classList[0];
+      console.log(targetClass);
+      if (targetClass && (targetClass === 'body' || targetClass === 'column')) {
+        const $navMain = document.querySelector('.nav-main');
+        if ($navMain.classList.contains('appear')) {
+          $navMain.classList.add('disappear');
+          $navMain.classList.remove('appear');
+          setTimeout(function () {
+            $navMain.style.display = 'none';
+          }, 100);
+        } else {
+          $navMain.classList.add('appear');
+          $navMain.classList.remove('disappear');
+          setTimeout(function () {
+            $navMain.style.display = 'flex';
+          }, 100);
+        }
+      }
+    },
   },
   mounted() {
     this.handleClientLoad();
@@ -90,4 +115,14 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.regist-form {
+  position: relative;
+}
+.body {
+  /* 1em : 16px */
+  width: 100%;
+  padding: 1em 2em 3em;
+  height: 100vw;
+}
+</style>
