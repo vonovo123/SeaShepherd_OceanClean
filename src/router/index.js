@@ -41,6 +41,7 @@ const router = new VueRouter({
 //   if (to.name === '/error') {
 //     console.log(from);
 //     console.log(to);
+
 //     if (navigator.onLine) {
 //       next({ path: to.query.prev });
 //     } else {
