@@ -138,10 +138,12 @@ export default {
   data() {
     return {
       event: {
+        id: '',
         userInfo: { name: '', email: '' },
         date: { from: '', to: '' },
         memo: '',
         photos: ['', '', '', ''],
+        photoUrl: [],
         companions: [],
       },
       companionIndex: -1,
@@ -205,17 +207,28 @@ export default {
         }
       }
     },
-    regist() {
-      console.log(this.event);
+    async regist() {
+      //함깨한친구
+      this.event.id = Math.floor(Math.random() * 10000000);
       const companionArray = [...document.querySelectorAll('.companion')];
-      console.log();
       companionArray.forEach(com => {
         this.event.companions.push(com.value);
       });
-      this.event.photos.forEach(file => {
-        console.log(file);
-        upLoadFile('vonovo123', '20211122', file);
+      //이미지
+      const promises = [];
+      this.event.photos.forEach((file, idx) => {
+        if (file) {
+          let index = idx;
+          promises.push(upLoadFile('vonovo123', '20211122', file, idx));
+          //this.event.photoUrl.push(result);
+        }
       });
+      const photoUrlArray = await Promise.all(promises);
+      this.event.photoUrl = [...photoUrlArray];
+
+      delete this.event.photos;
+      const result = await api.setCleanEvent('cleanEvents', this.event);
+      console.log(JSON.stringify(result));
     },
   },
 };

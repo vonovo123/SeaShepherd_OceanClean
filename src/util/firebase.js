@@ -18,18 +18,24 @@ const metadata = {
 
 const firebase = initializeApp(firebaseConfig);
 const storage = getStorage(firebase);
-export const upLoadFile = function (id, date, file) {
+export const upLoadFile = async function (id, date, file, idx) {
+  // return new Promise((resolve, reject) => {
+  //   const imageRef = ref(storage, `images/${id}/${date}/${file.name}`);
+  //   let data = null;
+  //   uploadBytesResumable(imageRef, file, metadata)
+  //     .then(snapshot => {
+  //       getDownloadURL(snapshot.ref).then(url => {
+  //         resolve(url);
+  //       });
+  //     })
+  //     .catch(error => {
+  //       reject(error);
+  //     });
+  // });
   const imageRef = ref(storage, `images/${id}/${date}/${file.name}`);
-  uploadBytesResumable(imageRef, file, metadata)
-    .then(snapshot => {
-      getDownloadURL(snapshot.ref).then(url => {
-        console.log('File available at', url);
-        // ...
-      });
-    })
-    .catch(error => {
-      console.log(err);
-    });
+  const snapshot = await uploadBytesResumable(imageRef, file, metadata);
+  const url = await getDownloadURL(snapshot.ref);
+  return url;
 };
 
 export const desertFile = function (name) {

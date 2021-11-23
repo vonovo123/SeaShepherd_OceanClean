@@ -2,11 +2,11 @@ const TypeError = require('../util/TypeError.js');
 const axios = require('axios');
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000/',
-  // ,withCredentials: false
-  // ,headers: {
-  //     Accept: 'application/json',
-  //     'Content-type' : 'application/json'
-  // }
+  withCredentials: false,
+  headers: {
+    Accept: 'application/json',
+    'Content-type': 'application/json',
+  },
 });
 
 const statusErrorMessages = [
@@ -26,10 +26,17 @@ const getApiErrorStatusMessage = (status, name) => {
     return `API request error : ${statusErrorMessages[i]} with status code ${status} from ${name}`;
   }
 };
-const fetchData = async (url, name) => {
+const fetchData = async (url, name, param) => {
   try {
-    const data = await apiClient.get(url);
-    return data.data;
+    if (name === 'getCleanEvents') {
+      //전체 이벤트 조회
+      const data = await apiClient.get(url);
+      return data.data;
+      //이벤트 등록
+    } else if (name === 'setCleanEvent') {
+      console.log(param);
+      return apiClient.post(url, param);
+    }
   } catch (e) {
     //api Error
     if (e.reponse) {

@@ -1,9 +1,8 @@
 const fetchData = require('./fetchData.js');
-const fetchFileData = require('./fetchFileData.js');
 
 const api = {
   getCleanEvents: url => fetchData(url, 'getCleanEvents'),
-  setImageFiles: formData => fetchFileData(formData, 'setImageFiles'),
+  setCleanEvent: (url, event) => fetchData(url, 'setCleanEvent', event),
 };
 
 module.exports = api;
