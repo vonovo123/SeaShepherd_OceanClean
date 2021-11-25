@@ -50,6 +50,11 @@ export default new Vuex.Store({
       state.criticErrorMessage = '';
     },
   },
+  getters: {
+    getCurPosition: state => {
+      return state.currentPosition;
+    },
+  },
   actions: {
     //지도로 이동
     moveToMaps: () => {
