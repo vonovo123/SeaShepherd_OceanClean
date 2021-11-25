@@ -1,6 +1,10 @@
 <template>
   <div class="map-main">
     <div class="body"></div>
+    <div class="under-bar" @click="showEventReport">
+      <div class="under-bar-text">눌러서 활동리포트 보기</div>
+      <div class="under-bar-content"></div>
+    </div>
     <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
       v-show="isCriticError"
@@ -93,7 +97,7 @@ export default {
       const cleanEvents = this.cleanEvents;
       this.eventMarkers = cleanEvents.map(e => {
         const marker = new google.maps.Marker({
-          position: e.location,
+          position: e.position,
           map: this.map,
           label: 'E',
         });
@@ -106,6 +110,19 @@ export default {
       this.map.setZoom(16);
       this.setSelectedPosition(this.currentPosition);
       this.setCurMarker();
+    },
+    showEventReport(event) {
+      event.stopPropagation();
+      const $target = document.querySelector('.under-bar');
+      if ($target.classList.contains('appear')) {
+        $target.childNodes[0].textContent = '눌러서 활동리포트 보기';
+        $target.classList.add('disappear');
+        $target.classList.remove('appear');
+      } else {
+        $target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
+        $target.classList.add('appear');
+        $target.classList.remove('disappear');
+      }
     },
   },
   async mounted() {
@@ -141,12 +158,67 @@ export default {
   --inputColor: rgb(3, 3, 3);
   --inputHoverColor: rgb(206, 246, 244);
   --fontColor: rgb(55, 53, 47);
+  overflow: hidden;
 }
 
 .body {
   /* 1em : 16px */
+  position: absolute;
   width: 100%;
   height: 100%;
+}
+.under-bar {
+  position: relative;
+  background-color: rgb(255, 255, 255);
+  width: 100%;
+  height: 100%;
+  top: 93%;
+  border: #ebebeb solid 2px;
+  border-top-left-radius: 2em;
+  border-top-right-radius: 2em;
+}
+.under-bar-text {
+  display: inline;
+  position: relative;
+  top: 1em;
+  left: 50%;
+  margin-left: calc((145px) / -2);
+  color: black;
+  font-weight: bold;
+}
+
+.under-bar-content {
+  position: relative;
+  top: 2.5em;
+  background-color: rgba(255, 250, 250, 1);
+  width: 100%;
+  height: 100%;
+}
+.appear {
+  animation: fade-in 0.3s;
+  animation-fill-mode: forwards;
+}
+
+.disappear {
+  animation: fade-out 0.3s;
+  animation-fill-mode: forwards;
+}
+@keyframes fade-in {
+  from {
+    top: 93%;
+  }
+  to {
+    top: 10%;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    top: 10%;
+  }
+  to {
+    top: 93%;
+  }
 }
 .custom-map-control-button {
   background-color: rgb(255, 255, 255);
@@ -158,6 +230,8 @@ export default {
   font: 400 18px Roboto, Arial, sans-serif;
   overflow: hidden;
   height: 40px;
+  left: 50% !important;
+  margin-left: calc((110px) / -2);
   cursor: pointer;
 }
 .custom-map-control-button:hover {

@@ -23,6 +23,14 @@
             class="form-input"
             v-model="event.userInfo.name"
           />
+          <label for="address" class="form-label"> 📛 위치 </label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            class="form-input"
+            v-model="event.address"
+          />
 
           <label class="form-label" for="email"> 📧 이메일</label>
           <input
@@ -139,18 +147,23 @@ export default {
     return {
       event: {
         id: '',
+        address: '',
         userInfo: { name: '', email: '' },
         date: { from: '', to: '' },
         memo: '',
         photos: ['', '', '', ''],
         photoUrl: [],
         companions: [],
+        position: { lat: '', lng: '' },
       },
       companionIndex: -1,
     };
   },
   computed: {
-    ...mapGetters({ authInfo: 'googleAuthStore/getAuthInfo' }),
+    ...mapGetters({
+      authInfo: 'googleAuthStore/getAuthInfo',
+      curPosition: 'getCurPosition',
+    }),
   },
   mounted() {
     this.init();
@@ -161,6 +174,20 @@ export default {
       this.event.userInfo.email = this.authInfo.gMail;
       this.event.date.from = new Date().toISOString().substring(0, 10);
       this.event.date.to = new Date().toISOString().substring(0, 10);
+      this.event.id = `${
+        this.event.date.from.split('-').join('') +
+        this.event.userInfo.email.slice()
+      }`;
+      this.event.position = { ...this.curPosition };
+      const geocoder = new google.maps.Geocoder();
+      geocoder
+        .geocode({ location: this.curPosition })
+        .then(response => {
+          this.event.address = response.results[0].formatted_address;
+        })
+        .catch(e => {
+          this.event.address = '주소가 정확하지않습니다.';
+        });
     },
     loadFile(e) {
       const $label = e.target.previousSibling;
@@ -209,7 +236,6 @@ export default {
     },
     async regist() {
       //함깨한친구
-      this.event.id = Math.floor(Math.random() * 10000000);
       const companionArray = [...document.querySelectorAll('.companion')];
       companionArray.forEach(com => {
         this.event.companions.push(com.value);

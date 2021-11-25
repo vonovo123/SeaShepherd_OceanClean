@@ -1,41 +1,31 @@
 {
   "cleanEvents": [
     {
-      "idx": 1,
+      "id": 1678105,
+      "address": "대한민국 서울특별시 구로구 구로동 650-4",
       "userInfo": {
-        "email": "jukdo67@gmail.com",
-        "name": "권현우"
-      },
-      "startDate": "20211101",
-      "endDate": "20211102",
-      "memo": "1박2일간의 속초앞바다 해양정화 활동",
-      "location": {
-        "lat": 40.0991641,
-        "lng": 126.4988516
-      },
-      "imgUrl": [],
-      "companions": []
-    },
-    {
-      "id": 4569365,
-      "userInfo": {
-        "name": "권현우",
-        "email": "vonovo123@naver.com"
+        "name": "hyunwoo kwon",
+        "email": "jukdo67@gmail.com"
       },
       "date": {
         "from": "2021-11-23",
         "to": "2021-11-23"
       },
-      "memo": "adsfasdfasdfas\nsadfasdfasd\nsadfasdf",
+      "memo": "테스트입니다.",
       "photoUrl": [
-        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.28.03.png?alt=media&token=b310c981-6448-4c7f-9cd3-ab09e7e27600",
-        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.28.27.png?alt=media&token=a4eac372-eabb-49e9-a355-1d8b33cb776f",
-        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.27.56.png?alt=media&token=ba92af10-c185-4da5-b283-8df511fb0f33",
-        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.28.11.png?alt=media&token=1f013937-223c-4cad-af2c-3232b173d17f"
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.27.39.png?alt=media&token=405d7c97-ca3e-468d-ba59-7f45820ca97a",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.28.21.png?alt=media&token=a7f04542-cdf2-4729-a606-953740e90ada",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.28.21.png?alt=media&token=a7f04542-cdf2-4729-a606-953740e90ada",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2Fvonovo123%2F20211122%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.27.56.png?alt=media&token=f6aaba2d-ded0-4c73-bdea-7599434006be"
       ],
       "companions": [
-        "sadfasf"
-      ]
+        "ㅁㅇㄴㄹㅁㄴㅇㄹ",
+        "ㅁㄴㅇㄹㅁㄴㅇㄹ"
+      ],
+      "position": {
+        "lat": 37.4955298,
+        "lng": 126.8730737
+      }
     }
   ]
 }
