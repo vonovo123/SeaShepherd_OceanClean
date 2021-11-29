@@ -26,23 +26,35 @@ const getApiErrorStatusMessage = (status, name) => {
     return `API request error : ${statusErrorMessages[i]} with status code ${status} from ${name}`;
   }
 };
-const fetchData = async (url, name, param) => {
+const fetchData = async (name, param) => {
   try {
-    if (name === 'getCleanEvents') {
-      //전체 이벤트 조회
-      const data = await apiClient.get(url);
-      return data.data;
+    if (name === 'get') {
+      if (param.id) {
+        //단건 조회
+        const { data } = await apiClient.get(`cleanEvents/${param.id}`);
+        return data;
+      } else {
+        //다건 조회
+        const { data } = await apiClient.get(`cleanEvents`);
+        return data;
+      }
       //이벤트 등록
-    } else if (name === 'setCleanEvent') {
-      console.log(param);
-      return apiClient.post(url, param);
+    } else if (name === 'post') {
+      const { data } = await apiClient.post(`cleanEvents`, param.obj);
+      return data;
+      //수정
+    } else if (name === 'patch') {
+      return await apiClient.patch(`cleanEvents/${param.id}`, param.obj);
+      //삭제
+    } else if (name === 'delete') {
+      return await apiClient.delete(`cleanEvents/${param.id}`);
     }
   } catch (e) {
     //api Error
     if (e.reponse) {
       const errorStatus = getApiErrorStatusMessage(e.response.status, name);
       if (errorStatus) {
-        throw new TypeError(errorStatus, 'api');
+        throw new TypeError(errorStatus, 'api', name);
       }
       //서버에러
     } else {

@@ -133,16 +133,23 @@
         </div> -->
       </form>
     </div>
+
+    <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
+    <CriticalErrorMessage
+      v-show="isCriticError"
+      :criticalErrorMessage="criticErrorMessage"
+    ></CriticalErrorMessage>
   </div>
 </template>
 
 <script>
+import ErrorMessage from '../../components/ErrorMessage.vue';
+import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import Navigation from '../../components/Navigation.vue';
-import { upLoadFile, desertFile } from '../../util/firebase.js';
 import api from '../../API/api.js';
 export default {
-  components: { Navigation },
+  components: { Navigation, ErrorMessage, CriticalErrorMessage },
   data() {
     return {
       event: {
@@ -164,20 +171,33 @@ export default {
       authInfo: 'googleAuthStore/getAuthInfo',
       curPosition: 'getCurPosition',
     }),
+    ...mapState([
+      'isError',
+      'errorMessage',
+      'isCriticError',
+      'criticErrorMessage',
+    ]),
   },
   mounted() {
     this.init();
   },
   methods: {
+    ...mapActions({
+      fetchCleanEvent: 'cleanEventStore/fetchCleanEvent',
+    }),
     init() {
       this.event.userInfo.name = this.authInfo.fullName;
       this.event.userInfo.email = this.authInfo.gMail;
-      this.event.date.from = new Date().toISOString().substring(0, 10);
-      this.event.date.to = new Date().toISOString().substring(0, 10);
-      this.event.id = `${
-        this.event.date.from.split('-').join('') +
-        this.event.userInfo.email.slice()
-      }`;
+      this.event.date.from = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .substring(0, 10);
+      this.event.date.to = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .substring(0, 10);
       this.event.position = { ...this.curPosition };
       const geocoder = new google.maps.Geocoder();
       geocoder
@@ -210,6 +230,7 @@ export default {
     removeCompanion(e) {
       const $companionWrapper = document.querySelector('.companion-wrapper');
       console.log(this.companionIndex);
+
       if (this.companionIndex > -1) {
         this.companionIndex--;
         $companionWrapper.removeChild($companionWrapper.lastChild);
@@ -235,26 +256,15 @@ export default {
       }
     },
     async regist() {
-      //함깨한친구
+      this.event.id = `${
+        this.event.date.from.split('-').join('') +
+        this.event.userInfo.email.slice()
+      }`;
       const companionArray = [...document.querySelectorAll('.companion')];
       companionArray.forEach(com => {
         this.event.companions.push(com.value);
       });
-      //이미지
-      const promises = [];
-      this.event.photos.forEach((file, idx) => {
-        if (file) {
-          let index = idx;
-          promises.push(upLoadFile('vonovo123', '20211122', file, idx));
-          //this.event.photoUrl.push(result);
-        }
-      });
-      const photoUrlArray = await Promise.all(promises);
-      this.event.photoUrl = [...photoUrlArray];
-
-      delete this.event.photos;
-      const result = await api.setCleanEvent('cleanEvents', this.event);
-      console.log(JSON.stringify(result));
+      await this.fetchCleanEvent(this.event);
     },
   },
 };

@@ -18,35 +18,23 @@ const metadata = {
 
 const firebase = initializeApp(firebaseConfig);
 const storage = getStorage(firebase);
-export const upLoadFile = async function (id, date, file, idx) {
-  // return new Promise((resolve, reject) => {
-  //   const imageRef = ref(storage, `images/${id}/${date}/${file.name}`);
-  //   let data = null;
-  //   uploadBytesResumable(imageRef, file, metadata)
-  //     .then(snapshot => {
-  //       getDownloadURL(snapshot.ref).then(url => {
-  //         resolve(url);
-  //       });
-  //     })
-  //     .catch(error => {
-  //       reject(error);
-  //     });
-  // });
-  const imageRef = ref(storage, `images/${id}/${date}/${file.name}`);
-  const snapshot = await uploadBytesResumable(imageRef, file, metadata);
-  const url = await getDownloadURL(snapshot.ref);
-  return url;
-};
 
-export const desertFile = function (name) {
-  const desertRef = ref(storage, 'images/' + name);
-  deleteObject(desertRef)
-    .then(() => {
-      // File deleted successfully
-      console.log('delete');
-    })
-    .catch(error => {
-      // Uh-oh, an error occurred!
-    });
+//스토리지 파일 등록
+export const upLoadFile = async function (date, email, file) {
+  // eslint-disable-next-line no-async-promise-executor
+  try {
+    console.log('upload');
+    const imageRef = ref(storage, `images/${date}/${email}/${file.name}`);
+    const snapshot = await uploadBytesResumable(imageRef, file, metadata);
+    const url = await getDownloadURL(snapshot.ref);
+    return url;
+  } catch (error) {
+    return 'error';
+  }
+};
+//스토리지 파일 삭제
+export const desertFile = function (date, email, fileName) {
+  const desertRef = ref(storage, `images/${date}/${email}/${fileName}`);
+  deleteObject(desertRef).then(() => {});
 };
 export default firebase;
