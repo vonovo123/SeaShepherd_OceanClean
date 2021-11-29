@@ -29,16 +29,16 @@ export default new Vuex.Store({
     },
     SET_ERROR(state, error) {
       if (error) {
-        if (error.type !== 'critical') {
+        if (error.type === 'critical') {
+          state.isCriticError = true;
+          state.criticErrorMessage = error.message;
+        } else {
           state.isError = true;
           state.errorMessage = error.message;
           setTimeout(() => {
             state.isError = false;
             state.errorMessage = '';
           }, 5000);
-        } else {
-          state.isCriticError = true;
-          state.criticErrorMessage = error.message;
         }
       }
     },

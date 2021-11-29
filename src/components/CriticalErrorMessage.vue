@@ -3,7 +3,7 @@
     class="criticalErrorMessage"
     @click="$store.dispatch('clickCriticError')"
   >
-    {{ criticalErrorMessage }}<br />
+    CRITICAL ERROR : {{ criticalErrorMessage }}<br />
     페이지 클릭시 메인화면으로 돌아갑니다.
   </div>
 </template>
@@ -21,7 +21,7 @@ export default {
 
 <style>
 .criticalErrorMessage {
-  background-color: #111;
+  background-color: rgb(195, 78, 78);
   opacity: 0.4;
   color: white;
   font-weight: bold;

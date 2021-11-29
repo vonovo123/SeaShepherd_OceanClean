@@ -1,7 +1,8 @@
 class TypeError extends Error {
-  constructor(message, type) {
+  constructor(message, type, name) {
     super(message);
     this.type = type;
+    this.name = name;
   }
 }
 
