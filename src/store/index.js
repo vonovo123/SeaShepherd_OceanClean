@@ -51,8 +51,11 @@ export default new Vuex.Store({
     },
   },
   getters: {
-    getCurPosition: state => {
+    CurPosition: state => {
       return state.currentPosition;
+    },
+    SelPosition: state => {
+      return state.selectedPosition;
     },
   },
   actions: {
@@ -70,11 +73,15 @@ export default new Vuex.Store({
     },
     //등록화면으로
     moveToRegistEvent: () => {
-      router.replace({
+      router.push({
         name: 'regist/Main',
       });
     },
-
+    moveToRealHome: () => {
+      router.push({
+        name: 'realhome',
+      });
+    },
     //브라우져에러 발생시
     clickCriticError: ({ commit }) => {
       commit('INIT_ERROR');

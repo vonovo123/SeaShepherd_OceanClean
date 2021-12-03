@@ -21,7 +21,7 @@ export const mutations = {
 };
 
 export const getters = {
-  getAuthInfo: state => {
+  AuthInfo: state => {
     return state.authInfo;
   },
 };

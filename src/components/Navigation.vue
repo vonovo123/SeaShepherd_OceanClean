@@ -1,13 +1,9 @@
 <template>
-  <div class="nav-main disappear">
-    <router-link :to="{ name: 'Home' }" class="header-btn">HOME</router-link>
-    <router-link :to="{ name: 'maps/Main' }" class="header-btn"
-      >MAP</router-link
-    >
-    <router-link :to="{ name: 'auth/Main' }" class="header-btn"
-      >AUTH</router-link
-    >
-    <router-link :to="{ name: 'regist/Main' }" class="header-btn"
+  <div class="nav-main nav-appear">
+    <router-link :to="{ name: 'Home' }" class="nav-btn">HOME</router-link>
+    <router-link :to="{ name: 'maps/Main' }" class="nav-btn">MAP</router-link>
+    <router-link :to="{ name: 'auth/Main' }" class="nav-btn">AUTH</router-link>
+    <router-link :to="{ name: 'regist/Main' }" class="nav-btn"
       >REGIST</router-link
     >
   </div>
@@ -25,14 +21,13 @@ export default {};
   position: fixed;
   width: 100%;
   background: var(--navColor);
-  opacity: 0;
   height: 5em;
   z-index: 100;
   flex-direction: row-reverse;
   align-items: center;
 }
 
-.header-btn {
+.nav-btn {
   font-size: 1em;
   border-radius: 1em;
   margin: 1em 0.5em;
@@ -44,18 +39,17 @@ export default {};
   align-items: center;
   justify-content: center;
 }
-
-.appear {
-  animation: fade-in 0.1s;
+.nav-appear {
+  animation: nav-fade-in 0.1s;
   animation-fill-mode: forwards;
 }
 
-.disappear {
-  animation: fade-out 0.3s;
+.nav-disappear {
+  animation: nav-fade-out 0.3s;
   animation-fill-mode: forwards;
 }
 
-@keyframes fade-in {
+@keyframes nav-fade-in {
   from {
     opacity: 0;
   }
@@ -64,7 +58,7 @@ export default {};
   }
 }
 
-@keyframes fade-out {
+@keyframes nav-fade-out {
   from {
     opacity: 1;
   }

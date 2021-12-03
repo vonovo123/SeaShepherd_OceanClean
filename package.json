@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@deck.gl/google-maps": "^8.6.4",
+    "@deck.gl/layers": "^8.6.4",
     "axios": "^0.24.0",
     "core-js": "^3.6.5",
     "firebase": "^9.5.0",

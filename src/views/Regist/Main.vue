@@ -1,13 +1,7 @@
 <template>
-  <div
-    class="regist-main"
-    oncontextmenu="return false"
-    onselectstart="return false"
-    ondragstart="return false"
-    @click="showNavigation"
-  >
+  <div @click="showNavigation" class="regist-main">
     <Navigation></Navigation>
-    <div class="body">
+    <div class="regist-body">
       <form
         class="regist-form"
         method="post"
@@ -15,7 +9,7 @@
         enctype="multipart/form-data"
       >
         <div class="column">
-          <label for="name" class="form-label"> 📛 이름 </label>
+          <label for="name" class="form-label"> 🐟 이름 </label>
           <input
             type="text"
             id="name"
@@ -23,7 +17,16 @@
             class="form-input"
             v-model="event.userInfo.name"
           />
-          <label for="address" class="form-label"> 📛 위치 </label>
+          <label class="form-label" for="email"> 📮 이메일</label>
+          <input
+            type="text"
+            id="email"
+            name="email"
+            class="form-input"
+            v-model="event.userInfo.email"
+          />
+
+          <label for="address" class="form-label"> 🌊 위치 </label>
           <input
             type="text"
             id="address"
@@ -32,15 +35,7 @@
             v-model="event.address"
           />
 
-          <label class="form-label" for="email"> 📧 이메일</label>
-          <input
-            type="text"
-            id="email"
-            name="email"
-            class="form-input"
-            v-model="event.userInfo.email"
-          />
-          <label class="form-label" for="date"> 📅 활동기간</label>
+          <label class="form-label" for="date"> ⏱️ 일자</label>
           <input
             class="form-input date"
             type="date"
@@ -57,7 +52,8 @@
             v-model="event.date.to"
           />
           <p class="date-text">까지</p>
-          <label class="form-label" for="memo"> 📝 메모</label>
+
+          <label class="form-label" for="memo"> 📝 청소 이야기</label>
           <textarea
             class="form-textarea"
             type="text"
@@ -69,8 +65,8 @@
         </div>
         <div class="column">
           <label class="form-label">
-            📷 사진업로드
-            <p>(최대 4장까지 가능!)</p>
+            🤳 사진 보여주기
+            <p>(최대 4장)</p>
           </label>
           <!-- <div class="form-btn" @click="addImageFile">➕ 추가</div> -->
           <div class="img-wrapper">
@@ -129,11 +125,8 @@
           <!-- <input class="companion" type="text" @keyup.enter="insertCompanion" /> -->
         </div>
         <div class="regist-btn" @click="regist">등록</div>
-        <!-- <div class="column btn">
-        </div> -->
       </form>
     </div>
-
     <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
       v-show="isCriticError"
@@ -168,8 +161,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      authInfo: 'googleAuthStore/getAuthInfo',
-      curPosition: 'getCurPosition',
+      authInfo: 'googleAuthStore/AuthInfo',
+      selPosition: 'SelPosition',
     }),
     ...mapState([
       'isError',
@@ -183,7 +176,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchCleanEvent: 'cleanEventStore/fetchCleanEvent',
+      setCleanEvent: 'cleanEventStore/setCleanEvent',
     }),
     init() {
       this.event.userInfo.name = this.authInfo.fullName;
@@ -198,10 +191,10 @@ export default {
       )
         .toISOString()
         .substring(0, 10);
-      this.event.position = { ...this.curPosition };
+      this.event.position = { ...this.selPosition };
       const geocoder = new google.maps.Geocoder();
       geocoder
-        .geocode({ location: this.curPosition })
+        .geocode({ location: this.selPosition })
         .then(response => {
           this.event.address = response.results[0].formatted_address;
         })
@@ -238,17 +231,21 @@ export default {
     },
     showNavigation: function (e) {
       const targetClass = e.target.classList[0];
-      if (targetClass && (targetClass === 'body' || targetClass === 'column')) {
+      if (
+        targetClass &&
+        (targetClass === 'regist-regist-body' || targetClass === 'column')
+      ) {
         const $navMain = document.querySelector('.nav-main');
-        if ($navMain.classList.contains('appear')) {
-          $navMain.classList.add('disappear');
-          $navMain.classList.remove('appear');
+        if ($navMain.classList.contains('nav-appear')) {
+          $navMain.classList.add('nav-disappear');
+          $navMain.classList.remove('nav-appear');
           setTimeout(function () {
             $navMain.style.display = 'none';
           }, 100);
         } else {
-          $navMain.classList.add('appear');
-          $navMain.classList.remove('disappear');
+          $navMain.classList.add('nav-appear');
+          $navMain.classList.remove('nav-disappear');
+
           setTimeout(function () {
             $navMain.style.display = 'flex';
           }, 100);
@@ -264,7 +261,7 @@ export default {
       companionArray.forEach(com => {
         this.event.companions.push(com.value);
       });
-      await this.fetchCleanEvent(this.event);
+      await this.setCleanEvent(this.event);
     },
   },
 };
@@ -282,7 +279,7 @@ export default {
   --fontColor: rgb(55, 53, 47);
   --footerColor: rgb(55, 53, 47);
 }
-.body {
+.regist-body {
   /* 1em : 16px */
   width: 100%;
   padding: 1em 2em 1em 2em;
@@ -437,4 +434,8 @@ export default {
   align-items: center;
   justify-content: center;
 }
+
+/* <!-- oncontextmenu="return false"
+    onselectstart="return false"
+    ondragstart="return false" --> */
 </style>

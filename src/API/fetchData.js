@@ -26,28 +26,30 @@ const getApiErrorStatusMessage = (status, name) => {
     return `API request error : ${statusErrorMessages[i]} with status code ${status} from ${name}`;
   }
 };
-const fetchData = async (name, param) => {
+const fetchData = async (name, { method, table, id, obj }) => {
+  /**
+   * dbParam : {
+   *  method : '',
+   *  table : '',
+   *  id : ''
+   * }
+   */
   try {
-    if (name === 'get') {
-      if (param.id) {
-        //단건 조회
-        const { data } = await apiClient.get(`cleanEvents/${param.id}`);
-        return data;
-      } else {
-        //다건 조회
-        const { data } = await apiClient.get(`cleanEvents`);
-        return data;
-      }
+    //조회
+    if (method === 'get') {
+      const { data } = await apiClient.get(`${table}${id ? `/${id}` : ``}`);
+      return data;
       //이벤트 등록
-    } else if (name === 'post') {
-      const { data } = await apiClient.post(`cleanEvents`, param.obj);
+    } else if (method === 'post') {
+      const { data } = await apiClient.post(`${table}`, obj);
       return data;
       //수정
-    } else if (name === 'patch') {
-      return await apiClient.patch(`cleanEvents/${param.id}`, param.obj);
+    } else if (method === 'patch') {
+      return await apiClient.patch(`${table}/${id}`, obj);
       //삭제
-    } else if (name === 'delete') {
-      return await apiClient.delete(`cleanEvents/${param.id}`);
+    } else if (method === 'delete') {
+      await apiClient.delete(`${table}/${id}`);
+      return null;
     }
   } catch (e) {
     //api Error

@@ -1,10 +1,8 @@
 <template>
   <div class="map-main">
     <div class="body"></div>
-    <div class="under-bar" @click="showEventReport">
-      <div class="under-bar-text">눌러서 활동리포트 보기</div>
-      <div class="under-bar-content"></div>
-    </div>
+    <div class="block" v-show="showBlock" @click="minDetailReport"></div>
+    <event-detail v-show="detailFlag" @setIsAppear="setIsAppear"></event-detail>
     <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
       v-show="isCriticError"
@@ -17,7 +15,8 @@
 import ErrorMessage from '../../components/ErrorMessage.vue';
 import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 import CurLocMaker from '../../util/CurLocMarker.js';
-import { mapActions, mapState } from 'vuex';
+import EventDetail from '../../components/EventDetail.vue';
+import { mapGetters, mapActions, mapState } from 'vuex';
 export default {
   data() {
     return {
@@ -26,16 +25,24 @@ export default {
       curMarker: null,
       data: null,
       eventMarkers: [],
+      detailFlag: false,
+      //리포트 올라왔을때 지도 블락
+      showBlock: false,
     };
   },
-  components: { ErrorMessage, CriticalErrorMessage },
+  components: { ErrorMessage, CriticalErrorMessage, EventDetail },
   methods: {
     //store Action
     ...mapActions({
       setCurPosition: 'setCurPosition',
       setSelectedPosition: 'setSelectedPosition',
-      fetchCleanEvents: 'cleanEventStore/fetchCleanEvents',
+      getEventMarkers: 'cleanEventStore/getEventMarkers',
+      getCleanEvent: 'cleanEventStore/getCleanEvent',
     }),
+    //리포트 올라오면 지도 배경막도록
+    setIsAppear(flag) {
+      this.showBlock = flag;
+    },
     //구글맵 생성
     initMap() {
       this.map = new google.maps.Map(document.querySelector('.body'), {
@@ -74,6 +81,10 @@ export default {
     },
     //새로운 위치마커추가
     setCurMarker() {
+      //이벤트 리포트 컴포넌트 초기화
+      const $target = document.querySelector('.event-detail');
+      this.detailFlag = false;
+      $target.classList.remove('detail-disappear');
       //기존 현재위치마커 삭제
       if (this.curMarker) {
         this.curMarker.setMap(null);
@@ -92,16 +103,36 @@ export default {
         this.$store.dispatch('moveToRegistEvent');
       });
     },
+    //지도블락 클릭시 리포트 작게
+    minDetailReport() {
+      console.log('hide');
+      const $target = document.querySelector('.event-detail');
+      $target.childNodes[0].textContent = '눌러서 활동리포트 보기';
+      $target.classList.add('detail-disappear');
+      $target.classList.remove('detail-appear');
+      //블락끄기
+      this.showBlock = false;
+    },
     //정화활동 이벤트 모두 추가
     setEventMarkers() {
-      const cleanEvents = this.cleanEvents;
-      this.eventMarkers = cleanEvents.map(e => {
-        const marker = new google.maps.Marker({
-          position: e.position,
-          map: this.map,
-          label: 'E',
+      this.eventMarkers = this.eventMarkerData.map(e => {
+        const content = document.createElement('div');
+        content.innerHTML = '마커';
+        const marker = new CurLocMaker(
+          new google.maps.LatLng(e.position.lat, e.position.lng),
+          content
+        );
+        marker.setMap(this.map);
+        marker.addClickEvent(async () => {
+          if (
+            !this.eventDetail ||
+            (this.eventDetail && e.id != this.eventDetail.id)
+          ) {
+            await this.getCleanEvent(e.id);
+          }
+
+          this.detailFlag = true;
         });
-        return marker;
       });
     },
     //현재위치마커위치 현재위치로 이동
@@ -111,19 +142,6 @@ export default {
       this.setSelectedPosition(this.currentPosition);
       this.setCurMarker();
     },
-    showEventReport(event) {
-      event.stopPropagation();
-      const $target = document.querySelector('.under-bar');
-      if ($target.classList.contains('appear')) {
-        $target.childNodes[0].textContent = '눌러서 활동리포트 보기';
-        $target.classList.add('disappear');
-        $target.classList.remove('appear');
-      } else {
-        $target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
-        $target.classList.add('appear');
-        $target.classList.remove('disappear');
-      }
-    },
   },
   async mounted() {
     //지도생성
@@ -131,7 +149,7 @@ export default {
     //현재위치
     await this.setCurPosition().catch(() => {});
     //해양정화활동 이벤트 로드
-    await this.fetchCleanEvents();
+    await this.getEventMarkers();
     this.initMapDetail(); //지도에 바인딩
   },
   computed: {
@@ -143,7 +161,10 @@ export default {
       'isCriticError',
       'criticErrorMessage',
     ]),
-    ...mapState({ cleanEvents: state => state.cleanEventStore.cleanEvents }),
+    ...mapGetters({
+      eventMarkerData: 'cleanEventStore/EventMarkerData',
+      eventDetail: 'cleanEventStore/EventDetail',
+    }),
   },
 };
 </script>
@@ -167,59 +188,16 @@ export default {
   width: 100%;
   height: 100%;
 }
-.under-bar {
-  position: relative;
-  background-color: rgb(255, 255, 255);
+
+.block {
+  /* 1em : 16px */
+  position: absolute;
   width: 100%;
   height: 100%;
-  top: 93%;
-  border: #ebebeb solid 2px;
-  border-top-left-radius: 2em;
-  border-top-right-radius: 2em;
-}
-.under-bar-text {
-  display: inline;
-  position: relative;
-  top: 1em;
-  left: 50%;
-  margin-left: calc((145px) / -2);
-  color: black;
-  font-weight: bold;
+  background-color: black;
+  opacity: 0.1;
 }
 
-.under-bar-content {
-  position: relative;
-  top: 2.5em;
-  background-color: rgba(255, 250, 250, 1);
-  width: 100%;
-  height: 100%;
-}
-.appear {
-  animation: fade-in 0.3s;
-  animation-fill-mode: forwards;
-}
-
-.disappear {
-  animation: fade-out 0.3s;
-  animation-fill-mode: forwards;
-}
-@keyframes fade-in {
-  from {
-    top: 93%;
-  }
-  to {
-    top: 10%;
-  }
-}
-
-@keyframes fade-out {
-  from {
-    top: 10%;
-  }
-  to {
-    top: 93%;
-  }
-}
 .custom-map-control-button {
   background-color: rgb(255, 255, 255);
   border: 0;
