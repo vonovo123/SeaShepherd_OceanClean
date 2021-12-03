@@ -25,6 +25,11 @@ const routes = [
     component: () => import('../views/Regist/Main.vue'),
   },
   {
+    path: '/realhome',
+    name: 'realhome',
+    component: () => import('../views/RealHome.vue'),
+  },
+  {
     path: '/error',
     name: '/error',
     component: () => import('../views/Error/ErrorPage.vue'),

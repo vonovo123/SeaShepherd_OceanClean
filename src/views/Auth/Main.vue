@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     ...mapState(['googleAuthStore']),
-    ...mapGetters({ getAuthInfo: 'googleAuthStore/getAuthInfo' }),
+    ...mapGetters({ authInfo: 'googleAuthStore/AuthInfo' }),
   },
   methods: {
     ...mapActions({ setAuthInfo: 'googleAuthStore/setAuthInfo' }),
@@ -93,15 +93,15 @@ export default {
       console.log(targetClass);
       if (targetClass && (targetClass === 'body' || targetClass === 'column')) {
         const $navMain = document.querySelector('.nav-main');
-        if ($navMain.classList.contains('appear')) {
-          $navMain.classList.add('disappear');
-          $navMain.classList.remove('appear');
+        if ($navMain.classList.contains('nav-appear')) {
+          $navMain.classList.add('nav-disappear');
+          $navMain.classList.remove('nav-appear');
           setTimeout(function () {
             $navMain.style.display = 'none';
           }, 100);
         } else {
-          $navMain.classList.add('appear');
-          $navMain.classList.remove('disappear');
+          $navMain.classList.add('nav-appear');
+          $navMain.classList.remove('nav-disappear');
           setTimeout(function () {
             $navMain.style.display = 'flex';
           }, 100);
