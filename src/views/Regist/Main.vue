@@ -52,23 +52,38 @@
             v-model="event.date.to"
           />
           <p class="date-text">까지</p>
+          <label class="form-label"> ⚖️ 쓰레기 수거량 </label>
+          <div class="trash-scale">
+            <div class="trash-scale-wrapper">
+              <img
+                class="trash-scale-content"
+                v-for="idx in 6"
+                :key="idx"
+                @click="clickTrachCan(idx)"
+                src="../../assets/images/recycling-bag.png"
+              />
+            </div>
+            <div class="trash-scale-text" v-if="event.scale < 6">
+              {{ 20 * event.scale }}kg 미만의 쓰레기를 수거했습니다.
+            </div>
+            <div class="trash-scale-text" v-else>
+              100kg 이상의 쓰레기를 수거했습니다.
+            </div>
+          </div>
 
-          <label class="form-label" for="memo"> 📝 청소 이야기</label>
-          <textarea
-            class="form-textarea"
-            type="text"
-            id="memo"
-            name="memo"
-            placeholder="간단한 활동내역을 작성해주세요."
-            v-model="event.memo"
-          />
+          <label class="form-label">
+            👭 함께한사람들
+            <p>(이메일주소를 적어주세요.)</p>
+          </label>
+          <div class="form-btn" @click="addCompanion">➕ 추가</div>
+          <div class="form-btn" @click="removeCompanion">➖ 제거</div>
+          <div class="companion-wrapper"></div>
         </div>
         <div class="column">
           <label class="form-label">
             🤳 사진 보여주기
             <p>(최대 4장)</p>
           </label>
-          <!-- <div class="form-btn" @click="addImageFile">➕ 추가</div> -->
           <div class="img-wrapper">
             <label class="form-label img-prev" for="imageFirst"></label>
             <input
@@ -115,17 +130,29 @@
               data-index="3"
             />
           </div>
-          <label class="form-label">
-            👭 함께한사람들
-            <p>(이메일주소를 적어주세요.)</p>
-          </label>
-          <div class="form-btn" @click="addCompanion">➕ 추가</div>
-          <div class="form-btn" @click="removeCompanion">➖ 제거</div>
-          <div class="companion-wrapper"></div>
-          <!-- <input class="companion" type="text" @keyup.enter="insertCompanion" /> -->
+
+          <label class="form-label" for="memo"> 📝 청소 이야기</label>
+          <textarea
+            class="form-textarea"
+            type="text"
+            id="memo"
+            name="memo"
+            placeholder="간단한 활동내역을 작성해주세요."
+            v-model="event.memo"
+          />
         </div>
         <div class="regist-btn" @click="regist">등록</div>
       </form>
+      <div class="copyright">
+        Icons made by
+        <a href="https://www.freepik.com" title="Freepik">
+          &nbsp; Freepik &nbsp;
+        </a>
+        from
+        <a href="https://www.flaticon.com/" title="Flaticon">
+          &nbsp; www.flaticon.com &nbsp;</a
+        >
+      </div>
     </div>
     <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
@@ -155,6 +182,7 @@ export default {
         photoUrl: [],
         companions: [],
         position: { lat: '', lng: '' },
+        scale: 1,
       },
       companionIndex: -1,
     };
@@ -210,9 +238,6 @@ export default {
       $label.style.opacity = '1';
       this.event.photos[e.target.dataset.index] = e.target.files[0];
     },
-    // removeImageFile() {
-    //   desertFile(this.event.photos[0].name);
-    // },
     addCompanion(e) {
       this.companionIndex++;
       const $companionWrapper = document.querySelector('.companion-wrapper');
@@ -252,6 +277,19 @@ export default {
         }
       }
     },
+    clickTrachCan: function (index) {
+      //target.style.opacity = 1;
+      const trashs = document.querySelectorAll('.trash-scale-content');
+      this.event.scale = index;
+      trashs.forEach((trash, idx) => {
+        if (idx < index) {
+          trash.style.opacity = 1;
+        } else {
+          trash.style.opacity = 0.5;
+        }
+      });
+      console.log(this.event.scale);
+    },
     async regist() {
       this.event.id = `${
         this.event.date.from.split('-').join('') +
@@ -268,6 +306,23 @@ export default {
 </script>
 
 <style>
+a:link {
+  text-decoration: none;
+  color: rgb(55, 53, 47);
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+a:active {
+  text-decoration: none;
+}
+
 .regist-main {
   /* 1em : 16px */
   width: 100%;
@@ -284,10 +339,16 @@ export default {
   width: 100%;
   padding: 1em 2em 1em 2em;
 }
+.copyright {
+  width: 100%;
+  background-color: antiquewhite;
+  display: flex;
+  justify-content: center;
+  border-radius: 1em;
+}
 .regist-form {
   position: relative;
 }
-
 /* table display */
 .regist-form:before,
 .regist-form:after {
@@ -350,7 +411,27 @@ export default {
   min-width: 90%;
   min-height: 40vw;
 }
-
+.column .trash-scale {
+  margin: 2em 2em;
+  width: 70%;
+}
+.column .trash-scale .trash-scale-wrapper {
+  width: 100%;
+  display: flex;
+}
+.column .trash-scale .trash-scale-wrapper .trash-scale-content {
+  margin: 0 0.5em;
+  width: 13%;
+  opacity: 0.5;
+}
+.column .trash-scale .trash-scale-text {
+  width: 100%;
+  padding: 0.5em 0.5em;
+  text-align: center;
+}
+.column .trash-scale .trash-scale-wrapper .trash-scale-content:first-child {
+  opacity: 1;
+}
 /* 사진등록 css start*/
 .regist-form .img-wrapper {
   width: 90%;
