@@ -1,0 +1,85 @@
+{
+  "markers": [
+    {
+      "id": "20211201vonovo123@naver.com",
+      "position": {
+        "lat": "37.568163999783714",
+        "lng": "126.98597123386841"
+      },
+      "capacity": "100"
+    },
+    {
+      "id": "20211202vonovo123@nate.com",
+      "position": {
+        "lat": "37.56140383183157",
+        "lng": "126.97837461793823"
+      },
+      "capacity": "20"
+    }
+  ],
+  "cleanEvents": [
+    {
+      "id": "20211201vonovo123@naver.com",
+      "address": "대한민국 서울특별시 중구 명동 50-1",
+      "userInfo": {
+        "name": "권현우",
+        "email": "vonovo123@naver.com"
+      },
+      "date": {
+        "from": "2021-12-01",
+        "to": "2021-12-01"
+      },
+      "memo": "",
+      "photos": [
+        {},
+        {},
+        {},
+        {}
+      ],
+      "photoUrl": [
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-01%2Fvonovo123%40naver.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%202.49.01.png?alt=media&token=c28a54f1-3712-4d35-baca-d9b9ad237626",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-01%2Fvonovo123%40naver.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.17.46.png?alt=media&token=a2c59c72-0a6e-4931-9f63-f67dc92fd16b",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-01%2Fvonovo123%40naver.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.26.53.png?alt=media&token=0b0ea299-e99f-47b0-8778-9e42deb68438",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-01%2Fvonovo123%40naver.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.27.02.png?alt=media&token=75115546-967c-4125-bbf2-8bb0dea74a02"
+      ],
+      "companions": [],
+      "position": {
+        "lat": 37.568163999783714,
+        "lng": 126.98597123386841
+      }
+    },
+    {
+      "id": "20211202vonovo123@nate.com",
+      "address": "대한민국 서울특별시 중구 북창동 130-4",
+      "userInfo": {
+        "name": "권현우",
+        "email": "vonovo123@nate.com"
+      },
+      "date": {
+        "from": "2021-12-02",
+        "to": "2021-12-02"
+      },
+      "memo": "asdfadfsdf",
+      "photos": [
+        {},
+        {},
+        {},
+        {}
+      ],
+      "photoUrl": [
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-02%2Fvonovo123%40nate.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%202.49.01.png?alt=media&token=83e0a82f-bb3e-4815-a80d-018682981238",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-02%2Fvonovo123%40nate.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.17.46.png?alt=media&token=fd1d4622-1207-44a0-82f5-5e3b0edf5f84",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-02%2Fvonovo123%40nate.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.26.53.png?alt=media&token=55d354a2-a06c-4e01-ab4a-05c364729d03",
+        "https://firebasestorage.googleapis.com/v0/b/seashepherd-oceanclean.appspot.com/o/images%2F2021-12-02%2Fvonovo123%40nate.com%2F%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-08-14%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%203.27.02.png?alt=media&token=88da02a9-7e6f-4ec7-af14-d9258e174f6e"
+      ],
+      "companions": [
+        "fasdffdsf",
+        "qweqweqwe"
+      ],
+      "position": {
+        "lat": 37.56140383183157,
+        "lng": 126.97837461793823
+      }
+    }
+  ]
+}
