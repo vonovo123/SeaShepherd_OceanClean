@@ -173,7 +173,6 @@ export default {
 .map-main {
   /* 1em : 16px */
   width: 100%;
-  font-family: 'Lato', Calibri, Arial, sans-serif;
   font-size: 1em;
   height: 100%;
   --inputColor: rgb(3, 3, 3);
@@ -209,7 +208,7 @@ export default {
   overflow: hidden;
   height: 40px;
   left: 50% !important;
-  margin-left: calc((110px) / -2);
+  margin-left: calc((8em) / -2);
   cursor: pointer;
 }
 .custom-map-control-button:hover {
