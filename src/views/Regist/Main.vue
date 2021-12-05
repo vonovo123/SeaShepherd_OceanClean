@@ -75,9 +75,11 @@
             👭 함께한사람들
             <p>(이메일주소를 적어주세요.)</p>
           </label>
-          <div class="form-btn" @click="addCompanion">➕ 추가</div>
-          <div class="form-btn" @click="removeCompanion">➖ 제거</div>
-          <div class="companion-wrapper"></div>
+          <div class="form-btn-wrapper">
+            <div class="form-btn" @click="addCompanion">➕ 추가</div>
+            <div class="form-btn" @click="removeCompanion">➖ 제거</div>
+          </div>
+          <div class="companions-wrapper"></div>
         </div>
         <div class="column">
           <label class="form-label">
@@ -142,17 +144,17 @@
           />
         </div>
         <div class="regist-btn" @click="regist">등록</div>
+        <div class="copyright">
+          Icons made by
+          <a href="https://www.freepik.com" title="Freepik">
+            &nbsp; Freepik &nbsp;
+          </a>
+          from
+          <a href="https://www.flaticon.com/" title="Flaticon">
+            &nbsp; www.flaticon.com &nbsp;</a
+          >
+        </div>
       </form>
-      <div class="copyright">
-        Icons made by
-        <a href="https://www.freepik.com" title="Freepik">
-          &nbsp; Freepik &nbsp;
-        </a>
-        from
-        <a href="https://www.flaticon.com/" title="Flaticon">
-          &nbsp; www.flaticon.com &nbsp;</a
-        >
-      </div>
     </div>
     <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
@@ -168,6 +170,13 @@ import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import Navigation from '../../components/Navigation.vue';
 import api from '../../API/api.js';
+import Vue from 'vue';
+import Loading from 'vue-loading-overlay';
+// Import stylesheet
+import 'vue-loading-overlay/dist/vue-loading.css';
+// Init plugin
+Vue.use(Loading);
+
 export default {
   components: { Navigation, ErrorMessage, CriticalErrorMessage },
   data() {
@@ -238,18 +247,21 @@ export default {
       $label.style.opacity = '1';
       this.event.photos[e.target.dataset.index] = e.target.files[0];
     },
+    //같이간사람 추가하기
     addCompanion(e) {
       this.companionIndex++;
-      const $companionWrapper = document.querySelector('.companion-wrapper');
-      const $temp = document.createElement('div');
-      $temp.innerHTML = `<input class="companion" type="text" id= 'companion-${this.companionIndex}'/>`;
-      $companionWrapper.append($temp);
+      if (this.companionIndex < 30) {
+        const $companionWrapper = document.querySelector('.companions-wrapper');
+        const $temp = document.createElement('div');
+        $temp.classList.add('companion-wrapper');
+        $temp.innerHTML = `<input class="companion" type="text" id= 'companion-${this.companionIndex}'/>`;
+        $companionWrapper.append($temp);
+      }
     },
     removeCompanion(e) {
-      const $companionWrapper = document.querySelector('.companion-wrapper');
-      console.log(this.companionIndex);
+      const $companionWrapper = document.querySelector('.companions-wrapper');
 
-      if (this.companionIndex > -1) {
+      if (this.companionIndex >= 0) {
         this.companionIndex--;
         $companionWrapper.removeChild($companionWrapper.lastChild);
       }
@@ -258,7 +270,7 @@ export default {
       const targetClass = e.target.classList[0];
       if (
         targetClass &&
-        (targetClass === 'regist-regist-body' || targetClass === 'column')
+        (targetClass === 'regist-body' || targetClass === 'column')
       ) {
         const $navMain = document.querySelector('.nav-main');
         if ($navMain.classList.contains('nav-appear')) {
@@ -288,9 +300,14 @@ export default {
           trash.style.opacity = 0.5;
         }
       });
-      console.log(this.event.scale);
     },
     async regist() {
+      let loader = this.$loading.show({
+        // Optional parameters
+        isFullPage: true,
+        canCancel: false,
+        onCancel: null,
+      });
       this.event.id = `${
         this.event.date.from.split('-').join('') +
         this.event.userInfo.email.slice()
@@ -300,190 +317,239 @@ export default {
         this.event.companions.push(com.value);
       });
       await this.setCleanEvent(this.event);
+      loader.hide();
+      this.$store.dispatch('moveToMaps');
     },
   },
 };
 </script>
 
 <style>
-a:link {
-  text-decoration: none;
-  color: rgb(55, 53, 47);
-}
-
-a:visited {
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: none;
-}
-
-a:active {
-  text-decoration: none;
-}
-
+/* 1em : 16px */
 .regist-main {
-  /* 1em : 16px */
-  width: 100%;
-  font-family: 'Lato', Calibri, Arial, sans-serif;
-  line-height: 1.5;
-  font-size: 1em;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  width: 100vw;
   --inputColor: rgb(243, 246, 246);
   --inputHoverColor: rgb(206, 246, 244);
   --fontColor: rgb(55, 53, 47);
   --footerColor: rgb(55, 53, 47);
 }
-.regist-body {
+
+.regist-main > .regist-body {
   /* 1em : 16px */
   width: 100%;
-  padding: 1em 2em 1em 2em;
-}
-.copyright {
-  width: 100%;
-  background-color: antiquewhite;
-  display: flex;
-  justify-content: center;
-  border-radius: 1em;
-}
-.regist-form {
-  position: relative;
-}
-/* table display */
-.regist-form:before,
-.regist-form:after {
-  content: ' ';
-  display: table;
+  padding: 3% 6%;
 }
 
+.regist-body > .regist-form {
+  position: relative;
+}
 /* 각 컬럼 */
-.column {
+.regist-form > .column {
   float: left;
   width: 50%;
-  padding-bottom: 4em;
-  min-height: 80vw;
+  padding-bottom: 6%;
 }
+
 /* 컬럼의 레이블 */
-.column > label {
-  width: 50%;
+.regist-form > .column > label {
+  width: 60%;
   display: block;
-  margin: 0.5em;
+  margin: 5% 1%;
   font-size: 1.5em;
   font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.1em;
   cursor: pointer;
   color: var(--fontColor);
 }
 
-.column > label > p {
+.regist-form > .column .form-input {
+  display: block;
+  margin: 10% 5%;
+  padding: 1% 3%;
+  color: var(--fontColor);
+  width: 50%;
+  background-color: var(--inputColor);
+}
+
+.regist-form > .column > label > p {
   display: inline;
   font-size: 0.5em;
   font-weight: normal;
 }
-.column .date-text {
+
+.regist-form > .column > .date {
   display: inline;
-}
-/* 칼럼내 input, select, textarea css */
-.column input,
-.column select {
-  display: block;
-  margin: 2em 2em;
-  padding: 0em 1em;
-  color: var(--fontColor);
-  width: 50%;
-  background-color: var(--inputColor);
-}
-.column .date {
-  display: inline;
-  margin: 1em 2em;
+  margin: 8% 5%;
 }
 
-.column textarea {
-  display: block;
-  font-family: 'Lato', Calibri, Arial, sans-serif;
-  line-height: 1.5;
-  font-size: 1em;
-  color: var(--fontColor);
-  margin: 1em;
-  padding: 1em 1em;
-  background-color: var(--inputColor);
-  min-width: 90%;
-  min-height: 40vw;
+.regist-form > .column > .date-text {
+  display: inline;
 }
-.column .trash-scale {
-  margin: 2em 2em;
-  width: 70%;
+
+.regist-form > .column > .trash-scale {
+  background-color: none;
+  margin: 10% 5%;
+  width: 80%;
 }
-.column .trash-scale .trash-scale-wrapper {
+
+.regist-form > .column > .trash-scale > .trash-scale-wrapper {
   width: 100%;
   display: flex;
 }
-.column .trash-scale .trash-scale-wrapper .trash-scale-content {
-  margin: 0 0.5em;
+
+.regist-form
+  > .column
+  > .trash-scale
+  > .trash-scale-wrapper
+  > .trash-scale-content {
+  margin: 0 2%;
   width: 13%;
   opacity: 0.5;
+  cursor: pointer;
 }
-.column .trash-scale .trash-scale-text {
+.regist-form > .column > .trash-scale > .trash-scale-text {
   width: 100%;
-  padding: 0.5em 0.5em;
+  padding: 10% 0;
   text-align: center;
 }
-.column .trash-scale .trash-scale-wrapper .trash-scale-content:first-child {
-  opacity: 1;
+
+@media only screen and (max-width: 992px) {
+  .regist-form > .column {
+    width: 100%;
+  }
+  .regist-form > .column > label {
+    width: 60%;
+  }
+  .regist-form > .column .form-input {
+    width: 80%;
+  }
+
+  .regist-form > .column > label > p {
+    width: 80%;
+    display: block;
+    margin: 5% 15%;
+    font-size: 0.5em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    color: var(--fontColor);
+  }
 }
-/* 사진등록 css start*/
-.regist-form .img-wrapper {
-  width: 90%;
-  height: 40vw;
-  margin: 2em 0em;
-  border-radius: 0.5em;
+
+.regist-form > .column > .companions-wrapper {
+  width: 95%;
+  min-height: 450px;
+  max-height: 450px;
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
-  overflow: hidden;
-}
-.regist-form .img-wrapper > .img-prev {
-  width: 50%;
   background-color: var(--inputColor);
-  transition: 0.5s;
+  border-radius: 10px;
 }
 
-.regist-form .img-wrapper > .img-prev:hover {
-  background-color: var(--inputHoverColor);
-  border-radius: 0.5em;
-  border-collapse: collapse;
-  opacity: 1;
+.regist-form > .column > .companions-wrapper > .companion-wrapper {
+  width: 25%;
+  margin: 6px 3%;
 }
-/* 사진등록 css end */
-
-.regist-form .companion-wrapper .companion {
-  width: 50%;
-  height: 3vw;
-  margin: 1em;
+.regist-form > .column > .companions-wrapper .companion {
+  width: 100%;
+  height: 30px;
+  margin: 0;
   background-color: var(--inputHoverColor);
-  border-radius: 1em;
+  border-radius: 10px;
   opacity: 0.5;
+  padding: 0 1%;
 }
 
-.form-btn {
+.regist-form > .column > .form-btn-wrapper {
+  display: block;
+  margin: 10% 0%;
+}
+.regist-form > .column > .form-btn-wrapper > .form-btn {
   display: inline;
   padding: 1em 1.5em;
   margin: 2em 1em;
   background: var(--inputColor);
   font-size: 0.8em;
-  border-radius: 1em;
+  border-radius: 10px;
 }
 
-.form-btn:hover {
+.regist-form > .column > .form-btn-wrapper > .form-btn:hover {
   background: var(--inputHoverColor);
 }
+.regist-form
+  > .column
+  > .trash-scale
+  > .trash-scale-wrapper
+  > .trash-scale-content:first-child {
+  opacity: 1;
+}
+/* 사진등록 css start*/
+.regist-form > .column > .img-wrapper {
+  width: 95%;
+  height: 500px;
+  margin: 2em 0em;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+.regist-form > .column > .img-wrapper > .img-prev {
+  width: 50%;
+  background-color: var(--inputColor);
+  transition: 0.5s;
+}
 
-.regist-form input:focus,
-.regist-form textarea:focus,
-.regist-form label:active + input,
-.regist-form label:active + textarea {
+.regist-form > .column > .img-wrapper > .img-prev:hover {
+  background-color: var(--inputHoverColor);
+  border-radius: 10px;
+  border-collapse: collapse;
+  opacity: 1;
+}
+
+.regist-form > .column > textarea {
+  display: block;
+  font-size: 1em;
+  color: var(--fontColor);
+  padding: 3% 3%;
+  background-color: var(--inputColor);
+  width: 95%;
+  min-height: 450px;
+  border-radius: 10px;
+}
+/* 사진등록 css end */
+
+.regist-form > .column > input:focus,
+.regist-form > .column > textarea:focus,
+.regist-form > .column > label:active + input,
+.regist-form > .column > label:active + textarea {
   outline: none;
   background: var(--inputHoverColor);
+}
+
+.regist-form > .regist-btn {
+  position: relative;
+  height: 4em;
+  background: var(--footerColor);
+  width: 100%;
+  color: var(--inputColor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5% 0;
+}
+
+.regist-body .copyright {
+  width: 100%;
+  background-color: antiquewhite;
+  display: flex;
+  justify-content: center;
+  border-radius: 10px;
 }
 
 ::-webkit-input-placeholder {
@@ -505,18 +571,20 @@ a:active {
   /* Internet Explorer 10+ */
   color: #8e9091;
 }
-.regist-btn {
-  position: relative;
-  height: 4em;
-  background: var(--footerColor);
-  width: 100%;
-  color: var(--inputColor);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+a:link {
+  text-decoration: none;
+  color: rgb(55, 53, 47);
 }
 
-/* <!-- oncontextmenu="return false"
-    onselectstart="return false"
-    ondragstart="return false" --> */
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+a:active {
+  text-decoration: none;
+}
 </style>

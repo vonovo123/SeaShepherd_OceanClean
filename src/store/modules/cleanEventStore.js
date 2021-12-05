@@ -64,6 +64,7 @@ export const actions = {
         obj: {
           id: eventObj.id,
           position: eventObj.position,
+          scale: eventObj.scale,
         },
       });
       //스토리지에 파일 업로드
