@@ -36,7 +36,6 @@ export default {
     ...mapActions({
       setCurPosition: 'setCurPosition',
       setSelectedPosition: 'setSelectedPosition',
-      getEventMarkers: 'cleanEventStore/getEventMarkers',
       getCleanEvent: 'cleanEventStore/getCleanEvent',
     }),
     //리포트 올라오면 지도 배경막도록
@@ -151,6 +150,7 @@ export default {
     //해양정화활동 이벤트 로드
     await this.getEventMarkers();
     this.initMapDetail(); //지도에 바인딩
+    //await this.getCleanEvent('20211205tttt@tttt');
   },
   computed: {
     ...mapState([

@@ -1,6 +1,7 @@
 export const namespaced = true;
 import TypeError from '../../util/TypeError.js';
-const api = require('../../API/api.js');
+//const api = require('../../API/api.js');
+import api from '../../API/api.js';
 export const state = {
   eventMarkers: [],
   eventDetail: '',
@@ -40,7 +41,7 @@ export const actions = {
   getCleanEvent: async ({ commit }, id) => {
     const event = await api.fetch('getCleanEvent', {
       method: 'get',
-      table: 'cleanEvents',
+      table: 'events',
       id: id,
     });
 
@@ -48,26 +49,28 @@ export const actions = {
   },
   setCleanEvent: async ({ commit }, eventObj) => {
     let photoUrl = [];
+    const files = [...eventObj.photos];
+    delete eventObj.photos;
     try {
-      //이미지
-      const files = [...eventObj.photos];
       //이벤트 등록
       await api.fetch('setCleanEvent', {
         method: 'post',
-        table: 'cleanEvents',
+        table: 'events',
+        id: eventObj.id,
         obj: eventObj,
       });
-      //마커등록
+      // //마커등록
       await api.fetch('setEventMarker', {
         method: 'post',
         table: 'markers',
+        id: eventObj.id,
         obj: {
           id: eventObj.id,
           position: eventObj.position,
           scale: eventObj.scale,
         },
       });
-      //스토리지에 파일 업로드
+      // //스토리지에 파일 업로드
       const promises = [];
 
       files.forEach(file => {
@@ -77,7 +80,8 @@ export const actions = {
           );
         }
       });
-      //병렬처리
+
+      // //병렬처리
       const photoUrlArray = await Promise.all(promises);
       //storage url get
       photoUrl = [...photoUrlArray];
@@ -88,20 +92,22 @@ export const actions = {
           'storageUpload'
         );
       }
+      //이미지 url 업로드
       await api.fetch('updateEventDetail', {
         method: 'patch',
-        table: 'cleanEvents',
+        table: 'events',
         id: eventObj.id,
         obj: { photoUrl: photoUrl },
       });
       //에러시롤백
     } catch (error) {
+      console.log(`files`, files);
       if (error.type !== 'critical') {
         if (error.name === 'patch' || error.name === 'storageUpload') {
           //스토리지에 이미지 업로드 실패 또는 db에 url 업데이트에 실패했으면 전체 롤백
           await api.fetch('deleteEventDetail', {
             method: 'delete',
-            table: 'cleanEvents',
+            table: 'events',
             id: eventObj.id,
           });
           await api.fetch('deleteEventMarker', {
@@ -110,7 +116,7 @@ export const actions = {
             id: eventObj.id,
           });
           const promises = [];
-          eventObj.photos.forEach((file, idx) => {
+          files.forEach((file, idx) => {
             if (photoUrl[idx] !== 'error') {
               if (file) {
                 promises.push(
