@@ -176,13 +176,11 @@ export default {
   user-select: none;
   position: relative;
   background-color: rgb(255, 255, 255);
-  width: 100%;
-  height: 100%;
+  width: 100vw;
   top: 93%;
   border: #ebebeb solid 2px;
   border-top-left-radius: 2em;
   border-top-right-radius: 2em;
-  line-height: 1.5;
   font-size: 1em;
   --inputColor: rgb(243, 246, 246);
   --inputHoverColor: rgb(206, 246, 244);
@@ -191,8 +189,8 @@ export default {
 }
 
 .event-detail > .event-detail-text {
-  position: relative;
-  top: 1em;
+  position: absolute;
+  top: 2%;
   width: 100%;
   text-align: center;
   color: black;
@@ -202,11 +200,11 @@ export default {
 
 .event-detail > .event-detail-body {
   position: relative;
-  top: 2.5em;
+  top: 40px;
   background-color: rgba(255, 250, 250, 1);
   width: 100%;
-  height: 100%;
-  padding: 1em 2em 1em 2em;
+  max-height: 100vh;
+  padding: 3% 6%;
   overflow: scroll;
 }
 
@@ -215,17 +213,16 @@ export default {
 }
 
 /* 각 컬럼 */
-.event-detail-body > .detail-form > .column {
+.detail-form > .column {
   float: left;
   width: 50%;
-  padding-bottom: 4em;
-  min-height: 80vw;
+  padding-bottom: 6%;
 }
 /* 컬럼의 레이블 */
 .detail-form > .column > label {
-  width: 50%;
+  width: 60%;
   display: block;
-  margin: 0.5em;
+  margin: 5% 1%;
   font-size: 1.5em;
   font-weight: bold;
   text-transform: uppercase;
@@ -242,8 +239,8 @@ export default {
 /* 칼럼내 input, select, textarea css */
 .detail-form > .column .form-input {
   display: block;
-  margin: 2em 2em;
-  padding: 0em 1em;
+  margin: 10% 5%;
+  padding: 1% 3%;
   color: var(--fontColor);
   width: 50%;
   background-color: var(--inputColor);
@@ -251,15 +248,16 @@ export default {
 }
 .detail-form > .column > .date {
   display: inline;
-  margin: 1em 2em;
+  margin: 8% 5%;
 }
 
 .detail-form > .column > .date-text {
   display: inline;
 }
 .detail-form > .column > .trash-scale {
-  margin: 2em 2em;
-  width: 70%;
+  background-color: none;
+  margin: 10% 5%;
+  width: 80%;
 }
 .detail-form > .column > .trash-scale > .trash-scale-wrapper {
   width: 100%;
@@ -270,34 +268,71 @@ export default {
   > .trash-scale
   > .trash-scale-wrapper
   > .trash-scale-content {
-  margin: 0 0.5em;
+  margin: 0 2%;
   width: 13%;
+  opacity: 1;
   cursor: pointer;
 }
 .detail-form > .column > .trash-scale > .trash-scale-text {
   width: 100%;
-  padding: 0.5em 0.5em;
+  padding: 10% 0;
   text-align: center;
 }
 
-.detail-form > .column > textarea {
-  display: block;
-  line-height: 1.5;
-  font-size: 1em;
-  color: var(--fontColor);
-  padding: 1em 1em;
+@media only screen and (max-width: 992px) {
+  .detail-form > .column {
+    width: 100%;
+  }
+  .detail-form > .column > label {
+    width: 70%;
+  }
+  .detail-form > .column .form-input {
+    width: 80%;
+  }
+
+  .detail-form > .column > label > p {
+    width: 80%;
+    display: block;
+    margin: 5% 15%;
+    font-size: 0.5em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    color: var(--fontColor);
+  }
+}
+
+.detail-form > .column > .companions-wrapper {
+  width: 95%;
+  padding-top: 5%;
+  min-height: 450px;
+  max-height: 450px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
   background-color: var(--inputColor);
-  min-width: 90%;
-  min-height: 40vw;
-  margin: 1em 0em;
+  border-radius: 10px;
+}
+.detail-form > .column > .companions-wrapper > .companion-wrapper {
+  width: 25%;
+  margin: 6px 3%;
+}
+.detail-form > .column > .companions-wrapper .companion {
+  width: 100%;
+  height: 30px;
+  margin: 0;
+  background-color: var(--inputHoverColor);
+  border-radius: 10px;
+  opacity: 0.5;
+  padding: 0 1%;
 }
 
 /* 사진등록 css start*/
 .detail-form > .column > .img-wrapper {
-  width: 90%;
-  height: 40vw;
+  width: 95%;
+  height: 500px;
   margin: 2em 0em;
-  border-radius: 0.5em;
+  border-radius: 10px;
   display: flex;
   flex-wrap: wrap;
   overflow: hidden;
@@ -310,32 +345,21 @@ export default {
 
 .detail-form .img-wrapper > .img-prev:hover {
   background-color: var(--inputHoverColor);
-  border-radius: 0.5em;
+  border-radius: 10px;
   border-collapse: collapse;
   opacity: 1;
 }
 /* 사진등록 css end */
-.detail-form > .column > .companions-wrapper {
-  width: 80%;
+
+.detail-form > .column > textarea {
+  display: block;
+  font-size: 1em;
+  color: var(--fontColor);
+  padding: 3% 3%;
+  background-color: var(--inputColor);
+  width: 95%;
   min-height: 450px;
-  max-height: 450px;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  margin: 1em 0em;
-}
-.detail-form > .column > .companions-wrapper > .companion-wrapper {
-  width: 33%;
-  margin-top: 20px;
-  margin-left: 20px;
-}
-.detail-form > .column > .companions-wrapper .companion {
-  width: 100%;
-  margin: 0;
-  background-color: var(--inputHoverColor);
-  border-radius: 1em;
-  opacity: 0.5;
-  padding: 0em 1em;
+  border-radius: 10px;
 }
 
 .detail-form input:focus,

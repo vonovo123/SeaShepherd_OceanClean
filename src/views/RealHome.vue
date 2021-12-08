@@ -2,7 +2,7 @@
   <div class="home-main">
     <div class="body"></div>
     <div class="cover">
-      <div class="title">TEST</div>
+      <div class="title">SEASHEOHERD_OCEANCLEN</div>
     </div>
   </div>
 </template>
@@ -11,11 +11,14 @@
 import { ScatterplotLayer } from '@deck.gl/layers';
 import { GoogleMapsOverlay } from '@deck.gl/google-maps';
 import mapStyle from '../assets/style/map-style.js';
-import data from '../../db.json';
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
+import gsap from 'gsap';
 export default {
   name: 'ReadHome',
   computed: {
+    ...mapGetters({
+      eventMarkerData: 'cleanEventStore/EventMarkerData',
+    }),
     ...mapState(['currentPosition']),
   },
   data: function () {
@@ -26,8 +29,10 @@ export default {
   methods: {
     ...mapActions({
       setCurPosition: 'setCurPosition',
+      getEventMarkers: 'cleanEventStore/getEventMarkers',
     }),
     initMap() {
+      console.log(this.eventMarkerData);
       console.log(this.currentPosition);
       const mapOptions = {
         center: this.currentPosition,
@@ -38,7 +43,7 @@ export default {
       this.map = new google.maps.Map(mapDiv, mapOptions);
       const layerOptions = {
         id: 'scatterplot',
-        data: data.markers,
+        data: this.eventMarkerData,
         getPosition: d => [
           parseFloat(d.position.lng),
           parseFloat(d.position.lat),
@@ -57,13 +62,31 @@ export default {
       googleMapsOverlay.setMap(this.map);
     },
   },
+  created() {
+    console.log('created');
+  },
   async mounted() {
+    const $title = document.querySelector('.title');
+    console.log($title);
+    $title.style.transfrom = 'translateY(-60px)';
+    $title.style.opacity = 0;
+    gsap.to($title, {
+      duration: 1,
+      y: 0,
+      opacity: 1,
+    });
+    console.log('mounted');
     await this.setCurPosition().catch(() => {});
+    await this.getEventMarkers();
     this.initMap();
     const $cover = document.querySelector('.cover');
-    setTimeout(() => {
-      $cover.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    }, 2000);
+    gsap.to($cover, {
+      duration: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    });
+    // setTimeout(() => {
+    //   $cover.style.
+    // }, 2000);
   },
 };
 </script>
@@ -77,8 +100,6 @@ export default {
 .home-main {
   /* 1em : 16px */
   width: 100%;
-  font-family: 'Lato', Calibri, Arial, sans-serif;
-  font-size: 1em;
   height: 100%;
   overflow: hidden;
   background-color: black;
@@ -89,7 +110,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: black;
+  background-color: white;
 }
 .home-main > .cover {
   position: fixed;
@@ -107,6 +128,8 @@ export default {
 .home-main > .cover > .title {
   position: relative;
   top: 30%;
-  font-size: 8rem;
+  text-align: center;
+  font-size: 7vw;
+  font-weight: bold;
 }
 </style>

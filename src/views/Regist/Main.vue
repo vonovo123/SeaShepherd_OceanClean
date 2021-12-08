@@ -169,11 +169,11 @@ import ErrorMessage from '../../components/ErrorMessage.vue';
 import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import Navigation from '../../components/Navigation.vue';
-import api from '../../API/api.js';
 import Vue from 'vue';
 import Loading from 'vue-loading-overlay';
 // Import stylesheet
 import 'vue-loading-overlay/dist/vue-loading.css';
+
 // Init plugin
 Vue.use(Loading);
 
@@ -374,6 +374,7 @@ export default {
   color: var(--fontColor);
   width: 50%;
   background-color: var(--inputColor);
+  cursor: pointer;
 }
 
 .regist-form > .column > label > p {
@@ -423,7 +424,7 @@ export default {
     width: 100%;
   }
   .regist-form > .column > label {
-    width: 60%;
+    width: 70%;
   }
   .regist-form > .column .form-input {
     width: 80%;
@@ -443,6 +444,7 @@ export default {
 
 .regist-form > .column > .companions-wrapper {
   width: 95%;
+  padding-top: 5%;
   min-height: 450px;
   max-height: 450px;
   display: flex;
@@ -547,8 +549,7 @@ export default {
 .regist-body .copyright {
   width: 100%;
   background-color: antiquewhite;
-  display: flex;
-  justify-content: center;
+  text-align: center;
   border-radius: 10px;
 }
 
