@@ -24,6 +24,9 @@ export const getters = {
   AuthInfo: state => {
     return state.authInfo;
   },
+  ApiAuthInfo: state => {
+    return state.apiAuthInfo;
+  },
 };
 export const actions = {
   setAuthInfo: ({ commit }, authInfo) => {

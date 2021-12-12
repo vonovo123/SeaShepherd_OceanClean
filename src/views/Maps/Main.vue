@@ -13,10 +13,10 @@
 
 <script>
 import ErrorMessage from '../../components/ErrorMessage.vue';
-import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 import CurLocMaker from '../../util/CurLocMarker.js';
 import EventDetail from '../../components/EventDetail.vue';
 import { mapGetters, mapActions, mapState } from 'vuex';
+import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 export default {
   data() {
     return {
@@ -37,6 +37,7 @@ export default {
       setCurPosition: 'setCurPosition',
       setSelectedPosition: 'setSelectedPosition',
       getCleanEvent: 'cleanEventStore/getCleanEvent',
+      getEventMarkers: 'cleanEventStore/getEventMarkers',
     }),
     //리포트 올라오면 지도 배경막도록
     setIsAppear(flag) {
@@ -89,7 +90,8 @@ export default {
         this.curMarker.setMap(null);
       }
       const content = document.createElement('div');
-      content.innerHTML = '현위치에</br> 등록하기';
+      content.innerHTML = '여기로 </br> 등록하기';
+      content.classList.add('custom-marker-text');
       this.curMarker = new CurLocMaker(
         new google.maps.LatLng(
           this.selectedPosition.lat,
@@ -115,8 +117,10 @@ export default {
     //정화활동 이벤트 모두 추가
     setEventMarkers() {
       this.eventMarkers = this.eventMarkerData.map(e => {
-        const content = document.createElement('div');
-        content.innerHTML = '마커';
+        const content = document.createElement('img');
+        content.classList.add('custom-marker-img');
+        content.src = require('@/assets/images/pngwing.png');
+        //content.innerHTML = '마커';
         const marker = new CurLocMaker(
           new google.maps.LatLng(e.position.lat, e.position.lng),
           content
@@ -127,10 +131,9 @@ export default {
             !this.eventDetail ||
             (this.eventDetail && e.id != this.eventDetail.id)
           ) {
-            await this.getCleanEvent(e.id);
+            const result = await this.getCleanEvent(e.id);
+            if (result) this.detailFlag = true;
           }
-
-          this.detailFlag = true;
         });
       });
     },
@@ -219,14 +222,14 @@ export default {
 }
 
 /* The popup bubble styling. */
-.popup-bubble {
+.custom-marker-text {
   /* Position the bubble centred-above its parent. */
   position: absolute;
   top: 0;
   left: 0;
   transform: translate(-50%, -100%);
   /* Style the bubble. */
-  background-color: white;
+  background-color: rgba(0, 0, 0, 1);
   padding: 0.5em;
   border-radius: 5px;
   font-size: 1.5em;
@@ -237,14 +240,25 @@ export default {
   opacity: 1;
   transition: 0.5s;
   cursor: pointer;
+  color: white;
+  text-align: center;
 }
-.popup-bubble:hover {
+.custom-marker-text:hover {
   opacity: 0.4;
 }
 
+.custom-marker-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -100%);
+  box-shadow: 0px 2px 10px 1px rgba(0, 0, 0, 1);
+  width: 50px;
+  border-radius: 25px;
+}
+
 /* The parent of the bubble. A zero-height div at the top of the tip. */
-.popup-bubble-anchor {
-  /* Position the div a fixed distance above the tip. */
+.custom-marker-anchor {
   position: absolute;
   width: 100%;
   bottom: 8px;
@@ -252,7 +266,7 @@ export default {
 }
 
 /* This element draws the tip. */
-.popup-bubble-anchor::after {
+.custom-marker-anchor::after {
   content: '';
   position: absolute;
   top: 0;
@@ -264,15 +278,14 @@ export default {
   /* The tip is 8px high, and 12px wide. */
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 8px solid white;
+  border-top: 8px solid rgba(0, 0, 0, 1);
 }
 
 /* JavaScript will position this div at the bottom of the popup tip. */
-.popup-container {
+.custom-marker-container {
   cursor: auto;
   height: 0;
   position: absolute;
-  /* The max width of the info window. */
   width: 200px;
 }
 </style>

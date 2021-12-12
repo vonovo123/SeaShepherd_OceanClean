@@ -44,8 +44,13 @@ export const actions = {
       table: 'events',
       id: id,
     });
-
+    console.log(event);
+    if (!event) {
+      alert('데이터없음');
+      return false;
+    }
     commit(SET_EVENT_DETAIL, event);
+    return true;
   },
   setCleanEvent: async ({ commit }, eventObj) => {
     let photoUrl = [];
