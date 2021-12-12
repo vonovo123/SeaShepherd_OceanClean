@@ -1,6 +1,6 @@
 <template>
   <div class="nav-main nav-appear">
-    <router-link :to="{ name: 'Home' }" class="nav-btn">HOME</router-link>
+    <router-link :to="{ name: 'realhome' }" class="nav-btn">HOME</router-link>
     <router-link :to="{ name: 'maps/Main' }" class="nav-btn">MAP</router-link>
     <router-link :to="{ name: 'auth/Main' }" class="nav-btn">AUTH</router-link>
     <router-link :to="{ name: 'regist/Main' }" class="nav-btn"

@@ -136,6 +136,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import gsap from 'gsap';
 export default {
   props: {},
   methods: {
@@ -150,11 +151,19 @@ export default {
           $target.childNodes[0].textContent = '눌러서 활동리포트 보기';
           $target.classList.add('detail-disappear');
           $target.classList.remove('detail-appear');
+          gsap.to($target, {
+            duration: 0.5,
+            top: '93%',
+          });
           this.$emit('setIsAppear', false);
         } else {
           $target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
           $target.classList.add('detail-appear');
           $target.classList.remove('detail-disappear');
+          gsap.to($target, {
+            duration: 0.5,
+            top: '0',
+          });
           this.$emit('setIsAppear', true);
         }
       }
@@ -378,7 +387,7 @@ export default {
   animation: detail-fade-out 0.3s;
   animation-fill-mode: forwards;
 }
-@keyframes detail-fade-in {
+/* @keyframes detail-fade-in {
   from {
     top: 93%;
   }
@@ -394,5 +403,5 @@ export default {
   to {
     top: 93%;
   }
-}
+} */
 </style>
