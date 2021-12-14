@@ -46,7 +46,6 @@ export const actions = {
     });
     console.log(event);
     if (!event) {
-      alert('데이터없음');
       return false;
     }
     commit(SET_EVENT_DETAIL, event);
