@@ -327,7 +327,7 @@ export default {
 
 .home-main > .home-body > .home-content {
   position: relative;
-  height: 100vh;
+  height: 100%;
 }
 
 .home-body > .home-cover > .home-cover-content {
@@ -340,23 +340,23 @@ export default {
 
 .home-body > .home-cover > .home-cover-content > .one {
   position: relative;
-  top: 40vh;
+  top: 40%;
   text-align: center;
 }
 
 .home-body > .home-cover > .home-cover-content > .two {
   position: relative;
-  top: 45vh;
+  top: 45%;
   text-align: center;
 }
 .home-body > .home-cover > .home-cover-content > .three {
   position: relative;
-  top: 55vh;
+  top: 55%;
   text-align: center;
 }
 .home-body > .home-cover > .home-cover-content > .four {
   position: relative;
-  top: 60vh;
+  top: 60%;
   text-align: center;
 }
 .home-body > .home-cover > .home-cover-content > .button {
@@ -365,7 +365,7 @@ export default {
   width: 40%;
   border-radius: 0.5em;
   padding: 2% 2%;
-  top: 60vh;
+  top: 60%;
   left: 50%;
   font-size: 4vw;
   margin-left: calc(36vw / -2);
@@ -388,18 +388,18 @@ export default {
 
 .home-body > .home-auth > .home-auth-content {
   position: relative;
-  top: 20vh;
+  top: 20%;
   width: 50vw;
-  height: 50vh;
+  height: 50%;
   left: 50%;
   margin-left: calc(50vw / -2);
   background-color: white;
   border-radius: 0.5em;
-  padding: 7vh 3vw;
+  padding: 7% 3vw;
 }
 
 .home-body > .home-auth > .home-auth-content > .content {
-  margin-bottom: 15vh;
+  margin-bottom: 15%;
   padding: 3%;
   background-color: rgb(43, 39, 39, 0.5);
   border-radius: 10px;

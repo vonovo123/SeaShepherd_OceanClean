@@ -12,7 +12,7 @@ export default new Vuex.Store({
   },
   state: {
     currentPosition: { lat: 0, lng: 0 },
-    selectedPosition: { lat: 0, lng: 0 },
+    currentAddress: '주소가 정확히자 않습니다.',
     isError: false,
     isCriticError: false,
     errorMessage: '',
@@ -23,9 +23,8 @@ export default new Vuex.Store({
       Vue.set(state.currentPosition, 'lat', pos.lat);
       Vue.set(state.currentPosition, 'lng', pos.lng);
     },
-    SET_SELECTED_POSITON(state, pos) {
-      Vue.set(state.selectedPosition, 'lat', pos.lat);
-      Vue.set(state.selectedPosition, 'lng', pos.lng);
+    SET_CUR_ADDRESS(state, address) {
+      state.currentAddress = address;
     },
     SET_ERROR(state, error) {
       if (error) {
@@ -53,9 +52,6 @@ export default new Vuex.Store({
   getters: {
     CurPosition: state => {
       return state.currentPosition;
-    },
-    SelPosition: state => {
-      return state.selectedPosition;
     },
   },
   actions: {
@@ -93,42 +89,49 @@ export default new Vuex.Store({
       commit('SET_ERROR', new TypeError(message, type));
     },
     //현재위치 지정
-    setCurPosition: ({ commit }) => {
+    setCurPosition: ({ commit }, pos) => {
       return new Promise((resolve, reject) => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(position => {
-            if (position) {
-              const pos = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              };
-              //현재위치
-              commit('SET_CUR_POSITON', pos);
-              //선택된 마커위치
-              commit('SET_SELECTED_POSITON', pos);
-              resolve('setCurLoc');
-            } else {
-              commit(
-                'SET_ERROR',
-                new TypeError(
-                  '에러: 현재위치를 불러오는데 실패했습니다.',
-                  'browser'
-                )
-              );
-              reject('noGeolocation');
-            }
-          });
+        if (!pos) {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+              if (position) {
+                const pos = {
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                };
+                //현재위치
+                commit('SET_CUR_POSITON', pos);
+                //선택된 마커위치
+                resolve('setCurLoc');
+              } else {
+                commit(
+                  'SET_ERROR',
+                  new TypeError(
+                    '에러: 현재위치를 불러오는데 실패했습니다.',
+                    'browser'
+                  )
+                );
+                reject('noGeolocation');
+              }
+            });
+          } else {
+            commit(
+              'SET_ERROR',
+              new TypeError(
+                '에러: 브라우저가 현재위치를 제공하지 않습니다. 브라우저의 위치정보접근을 허용해주세요.',
+                'browser'
+              )
+            );
+            reject('noGeolocation');
+          }
         } else {
-          commit(
-            'SET_ERROR',
-            new TypeError(
-              '에러: 브라우저가 현재위치를 제공하지 않습니다. 브라우저의 위치정보접근을 허용해주세요.',
-              'browser'
-            )
-          );
-          reject('noGeolocation');
+          commit('SET_CUR_POSITON', pos);
+          resolve();
         }
       });
+    },
+    setCurAddress({ commit }, address) {
+      commit('SET_CUR_ADDRESS', address);
     },
     setConnectionStatus: ({ commit }) => {
       return new Promise((resolve, reject) => {
@@ -144,12 +147,6 @@ export default new Vuex.Store({
         } else {
           resolve('onLine');
         }
-      });
-    },
-    setSelectedPosition: ({ commit }, pos) => {
-      return new Promise((resolve, reject) => {
-        commit('SET_SELECTED_POSITON', pos);
-        resolve();
       });
     },
   },

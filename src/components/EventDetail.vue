@@ -1,7 +1,25 @@
 <template>
-  <div class="event-detail" @click="showEventDetail">
-    <div class="event-detail-text">눌러서 청소리포트 보기</div>
+  <div class="event-detail" @click="hideEventDetail">
+    <div class="event-detail-header">눌러서 청소리포트 닫기</div>
     <div class="event-detail-body" v-if="eventDetail">
+      <div class="photos">
+        <img
+          class="detail-image"
+          v-for="(url, idx) in eventDetail.photoUrl"
+          :key="idx"
+          :src="url"
+          :class="
+            idx === 0
+              ? 'left-top'
+              : idx === 1
+              ? 'right-top'
+              : idx === 2
+              ? 'left-bottom'
+              : 'right-bottom'
+          "
+          alt=""
+        />
+      </div>
       <div class="detail-form">
         <div class="column">
           <label for="name" class="form-label"> 🐟 이름 </label>
@@ -52,23 +70,6 @@
             readonly
           />
           <p class="date-text">까지</p>
-          <label class="form-label"> ⚖️ 쓰레기 수거량 </label>
-          <div class="trash-scale">
-            <div class="trash-scale-wrapper">
-              <img
-                class="trash-scale-content"
-                v-for="idx in eventDetail.scale"
-                :key="idx"
-                src="../assets/images/recycling-bag.png"
-              />
-            </div>
-            <div class="trash-scale-text" v-if="eventDetail.scale < 6">
-              {{ 20 * eventDetail.scale }}kg 미만의 쓰레기를 수거했습니다.
-            </div>
-            <div class="trash-scale-text" v-else>
-              100kg 이상의 쓰레기를 수거했습니다.
-            </div>
-          </div>
           <label class="form-label"> 👭 함께한사람들 </label>
           <div class="companions-wrapper">
             <div
@@ -86,7 +87,24 @@
           </div>
         </div>
         <div class="column">
-          <label class="form-label"> 🤳 사진 </label>
+          <label class="form-label"> ⚖️ 쓰레기 수거량 </label>
+          <div class="trash-scale">
+            <div class="trash-scale-wrapper">
+              <img
+                class="trash-scale-content"
+                v-for="idx in eventDetail.scale"
+                :key="idx"
+                src="../assets/images/recycling-bag.png"
+              />
+            </div>
+            <div class="trash-scale-text" v-if="eventDetail.scale < 6">
+              {{ 20 * eventDetail.scale }}kg 미만의 쓰레기를 수거했습니다.
+            </div>
+            <div class="trash-scale-text" v-else>
+              100kg 이상의 쓰레기를 수거했습니다.
+            </div>
+          </div>
+          <!-- <label class="form-label"> 🤳 사진 </label>
           <div class="img-wrapper">
             <label
               class="form-label img-prev"
@@ -116,7 +134,7 @@
                 backgroundImage: 'url(' + eventDetail.photoUrl[3] + ')',
               }"
             ></label>
-          </div>
+          </div> -->
 
           <label class="form-label" for="memo"> 📝 청소 이야기</label>
           <textarea
@@ -140,33 +158,15 @@ import gsap from 'gsap';
 export default {
   props: {},
   methods: {
-    showEventDetail(event) {
-      const classList = [...event.target.classList];
-      if (
-        classList.includes('event-detail') ||
-        classList.includes('event-detail-text')
-      ) {
-        const $target = document.querySelector('.event-detail');
-        if ($target.classList.contains('detail-appear')) {
-          $target.childNodes[0].textContent = '눌러서 활동리포트 보기';
-          $target.classList.add('detail-disappear');
-          $target.classList.remove('detail-appear');
-          gsap.to($target, {
-            duration: 0.5,
-            top: '93%',
-          });
-          this.$emit('setIsAppear', false);
-        } else {
-          $target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
-          $target.classList.add('detail-appear');
-          $target.classList.remove('detail-disappear');
-          gsap.to($target, {
-            duration: 0.5,
-            top: '0',
-          });
-          this.$emit('setIsAppear', true);
-        }
-      }
+    hideEventDetail() {
+      const $target = document.querySelector('.event-detail');
+      gsap.to($target, {
+        duration: 0.5,
+        top: '100%',
+        borderTopLeftRadius: '2vh',
+        borderTopRightRadius: '2vh',
+      });
+      this.$emit('setIsAppear', false);
     },
   },
   computed: {
@@ -183,10 +183,11 @@ export default {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  position: relative;
+  position: absolute;
   background-color: rgb(255, 255, 255);
   width: 100vw;
-  top: 93%;
+  height: 100%;
+  top: 100%;
   border: #ebebeb solid 2px;
   border-top-left-radius: 2em;
   border-top-right-radius: 2em;
@@ -197,28 +198,61 @@ export default {
   --footerColor: rgb(55, 53, 47);
 }
 
-.event-detail > .event-detail-text {
-  position: absolute;
+.event-detail > .event-detail-header {
+  position: relative;
   top: 2%;
   width: 100%;
+  height: 5%;
   text-align: center;
   color: black;
   font-weight: bold;
   cursor: pointer;
+  padding-top: 3%;
+  margin-bottom: 5%;
 }
 
 .event-detail > .event-detail-body {
   position: relative;
-  top: 40px;
   background-color: rgba(255, 250, 250, 1);
   width: 100%;
-  max-height: 100vh;
-  padding: 3% 6%;
+  height: 90%;
+  padding-left: 6%;
+  padding-right: 6%;
   overflow: scroll;
 }
+.event-detail > .event-detail-body > .photos {
+  position: relative;
+  width: 100%;
+  height: 90%;
+  display: flex;
+  margin: 5% 0;
+  padding: 0;
+  border-radius: 20px;
+  flex-wrap: wrap;
+}
 
+.event-detail > .event-detail-body > .photos > .detail-image {
+  width: 50%;
+  height: 50%;
+  object-fit: cover;
+  padding: 0.5%;
+}
+
+.photos > .detail-image.left-top {
+  border-top-left-radius: 10px;
+}
+.photos > .detail-image.right-top {
+  border-top-right-radius: 10px;
+}
+.photos > .detail-image.left-bottom {
+  border-bottom-left-radius: 10px;
+}
+.photos > .detail-image.right-bottom {
+  border-bottom-right-radius: 10px;
+}
 .event-detail > .event-detail-body > .detail-form {
   position: relative;
+  height: 100%;
 }
 
 /* 각 컬럼 */
@@ -279,6 +313,7 @@ export default {
   > .trash-scale-content {
   margin: 0 2%;
   width: 13%;
+  height: 13%;
   opacity: 1;
   cursor: pointer;
 }
@@ -297,6 +332,7 @@ export default {
   }
   .detail-form > .column .form-input {
     width: 80%;
+    margin-left: 10%;
   }
 
   .detail-form > .column > label > p {
@@ -308,6 +344,17 @@ export default {
     letter-spacing: 0.1em;
     cursor: pointer;
     color: var(--fontColor);
+  }
+  .event-detail > .event-detail-body > .photos {
+    flex-wrap: nowrap;
+    overflow: scroll;
+    height: 50%;
+  }
+  .event-detail > .event-detail-body > .photos > .detail-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px !important;
   }
 }
 
@@ -377,31 +424,4 @@ export default {
 .detail-form label:active + textarea {
   outline: none;
 }
-
-.detail-appear {
-  animation: detail-fade-in 0.3s;
-  animation-fill-mode: forwards;
-}
-
-.detail-disappear {
-  animation: detail-fade-out 0.3s;
-  animation-fill-mode: forwards;
-}
-/* @keyframes detail-fade-in {
-  from {
-    top: 93%;
-  }
-  to {
-    top: 0%;
-  }
-}
-
-@keyframes detail-fade-out {
-  from {
-    top: 0%;
-  }
-  to {
-    top: 93%;
-  }
-} */
 </style>

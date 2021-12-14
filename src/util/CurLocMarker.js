@@ -1,6 +1,7 @@
 export default class CurLocMaker extends google.maps.OverlayView {
   position;
   containerDiv;
+  content;
   constructor(position, content) {
     super();
     this.position = position;
@@ -10,10 +11,11 @@ export default class CurLocMaker extends google.maps.OverlayView {
     this.containerDiv = document.createElement('div');
     this.containerDiv.classList.add('custom-marker-container');
     this.containerDiv.appendChild(bubbleAnchor);
+    this.content = content;
     CurLocMaker.preventMapHitsAndGesturesFrom(this.containerDiv);
   }
   addClickEvent(cb) {
-    this.containerDiv.addEventListener('click', () => {
+    this.content.addEventListener('click', e => {
       cb();
     });
   }
