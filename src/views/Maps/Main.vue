@@ -40,6 +40,7 @@ export default {
       setCurAddress: 'setCurAddress',
       getCleanEvent: 'cleanEventStore/getCleanEvent',
       getEventMarkers: 'cleanEventStore/getEventMarkers',
+      setMapSnapshot: 'cleanEventStore/setMapSnapshot',
     }),
     //구글맵 생성
     initMap() {
@@ -100,8 +101,6 @@ export default {
         gsap.to($target, {
           duration: 0.5,
           top: '-1%',
-          borderTopLeftRadius: '0',
-          borderTopRightRadius: '0',
         });
       });
     },
@@ -116,6 +115,28 @@ export default {
       this.setCurPosition({ lat, lng }).then(() => {
         this.setCurMarker();
       });
+    },
+    snapShot(position) {
+      var staticMapUrl = 'https://maps.googleapis.com/maps/api/staticmap';
+
+      //Set the Google Map Center.
+      staticMapUrl += '?center=' + position.lat + ',' + position.lng;
+
+      //Set the Google Map Size.
+      staticMapUrl += '&size=220x220';
+
+      //Set the Google Map Zoom.
+      staticMapUrl += '&zoom=16';
+
+      //Set the Google Map Type.
+      //staticMapUrl += '&maptype=' + mapOptions.mapTypeId;
+
+      //Loop and add Markers.
+      staticMapUrl +=
+        '&markers=color:black|' + position.lat + ',' + position.lng;
+      staticMapUrl += '&key=AIzaSyBa6g8Z_9Tm2vH7HG9j6YXgzJsUh3LgveI';
+      console.log(staticMapUrl);
+      this.setMapSnapshot(staticMapUrl);
     },
     //정화활동 이벤트 모두 추가
     setEventMarkers() {
@@ -136,20 +157,23 @@ export default {
             (this.eventDetail && e.id != this.eventDetail.id)
           ) {
             const result = await this.getCleanEvent(e.id);
+
             if (!result) {
               alert('데이터 없음');
               return;
             }
+            this.snapShot(result.position);
           }
+
           //이미 조회한 데이터를 다시 조회하는 경우 화면만 올리기
           this.showBlock = true;
           const $target = document.querySelector('.event-detail');
-          $target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
+          // $target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
           gsap.to($target, {
             duration: 0.5,
             top: '0',
-            borderTopLeftRadius: '0',
-            borderTopRightRadius: '0',
+            // borderTopLeftRadius: '0',
+            // borderTopRightRadius: '0',
           });
         });
       });
@@ -198,6 +222,7 @@ export default {
   --fontColor: rgb(55, 53, 47);
   position: relative;
   overflow: hidden;
+  background-color: rgba(49, 48, 48, 1);
 }
 
 .body {
@@ -213,7 +238,7 @@ export default {
   width: 100%;
   height: 100%;
   background-color: black;
-  opacity: 0.1;
+  opacity: 0.5;
 }
 
 .custom-map-control-button {

@@ -10,6 +10,9 @@
   "dependencies": {
     "@deck.gl/google-maps": "^8.6.4",
     "@deck.gl/layers": "^8.6.4",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/vue-fontawesome": "^2.0.6",
     "animated-number-vue": "^1.0.0",
     "axios": "^0.24.0",
     "core-js": "^3.6.5",

@@ -1,7 +1,37 @@
 <template>
   <div class="event-regist" @click="hideEventRegist">
-    <div class="event-regist-header">눌러서 등록폼 닫기</div>
-    <div class="regist-body">
+    <div class="event-regist-header">청소리포트 등록하기</div>
+    <div class="event-regist-body">
+      <div class="photo-wrapper">
+        <div class="title">활동 사진</div>
+        <div class="photo" id="photo">
+          <div class="photo-prev" />
+          <div class="photo-prev" />
+          <div class="photo-prev" />
+          <div class="photo-prev" />
+          <!-- <label class="photo-prev"> </label>
+            <label class="photo-prev"> </label>
+            <label class="photo-prev"> </label> -->
+          <!-- <label class="photo-regist" for="photoFirst">
+            <font-awesome-icon
+              class="icon"
+              :icon="['fas', 'camera']"
+              size="5x"
+            />
+          </label> -->
+          <input
+            class="form-input"
+            type="file"
+            id="photoFirst"
+            name="photoFirst"
+            accept="image/*"
+            @change="loadFile"
+            style="display: none"
+            data-index="0"
+            multiple
+          />
+        </div>
+      </div>
       <form
         class="regist-form"
         method="post"
@@ -82,11 +112,11 @@
           <div class="companions-wrapper"></div>
         </div>
         <div class="column second">
-          <label class="form-label">
+          <!-- <label class="form-label">
             🤳 사진 보여주기
             <p>(최대 4장)</p>
-          </label>
-          <div class="img-wrapper">
+          </label> -->
+          <!-- <div class="img-wrapper">
             <label class="form-label img-prev" for="imageFirst"></label>
             <input
               class="form-input"
@@ -131,7 +161,7 @@
               style="display: none"
               data-index="3"
             />
-          </div>
+          </div> -->
 
           <label class="form-label" for="memo"> 📝 청소 이야기</label>
           <textarea
@@ -155,12 +185,7 @@
           >
         </div>
       </form>
-
-      <!-- <div class="regist-btn-wrapper">
-        <div class="regist-btn" @click="regist">등록</div>
-      </div> -->
     </div>
-    <!--  -->
     <!-- <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
       v-show="isCriticError"
@@ -178,6 +203,9 @@ import Loading from 'vue-loading-overlay';
 // Import stylesheet
 import 'vue-loading-overlay/dist/vue-loading.css';
 import gsap from 'gsap';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
+library.add(faCamera);
 // Init plugin
 Vue.use(Loading);
 
@@ -198,6 +226,7 @@ export default {
         scale: 1,
       },
       companionIndex: -1,
+      maxImgCount: 10,
     };
   },
   computed: {
@@ -214,13 +243,15 @@ export default {
     ]),
   },
   mounted() {
-    document.querySelector('.regist-body').addEventListener('scroll', e => {
-      console.log(document.documentElement.scrollHeight);
-      console.log(e.target.scrollTop);
-      if (document.documentElement.scrollHeight * 1.5 < e.target.scrollTop) {
-        //alert('show');
-      }
-    });
+    document
+      .querySelector('.event-regist-body')
+      .addEventListener('scroll', e => {
+        console.log(document.documentElement.scrollHeight);
+        console.log(e.target.scrollTop);
+        if (document.documentElement.scrollHeight * 1.5 < e.target.scrollTop) {
+          //alert('show');
+        }
+      });
     this.init();
   },
   methods: {
@@ -240,25 +271,27 @@ export default {
       )
         .toISOString()
         .substring(0, 10);
-      // //this.event.position = { ...this.selPosition };
-      // console.log(this.event.position);
-      // const geocoder = new google.maps.Geocoder();
-      // geocoder
-      //   .geocode({ location: this.selPosition })
-      //   .then(response => {
-      //     this.event.address = response.results[0].formatted_address;
-      //   })
-      //   .catch(e => {
-      //     this.event.address = '주소가 정확하지않습니다.';
-      //   });
     },
     loadFile(e) {
-      const $label = e.target.previousSibling;
-      $label.style.backgroundImage = `url('${URL.createObjectURL(
-        e.target.files[0]
-      )}')`;
-      $label.style.opacity = '1';
-      this.event.photos[e.target.dataset.index] = e.target.files[0];
+      console.log(e.target);
+      const $photo = document.querySelector('#photo');
+      const files = [...e.target.files];
+      if (files.length > this.maxImgCount) {
+        alert('최대 10개의 사진을 공유할 수 있습니다.');
+        return;
+      }
+      files.forEach(element => {
+        const url = `url('${URL.createObjectURL(element)}')`;
+        const $div = document.createElement('div');
+        $div.classList.add('photo-prev');
+        $div.style.backgroundImage = url;
+        $photo.appendChild($div);
+      });
+      // $label.style.backgroundImage = `url('${URL.createObjectURL(
+      //   e.target.files[0]
+      // )}')`;
+      //$label.style.opacity = '1';
+      //this.event.photos[e.target.dataset.index] = e.target.files[0];
     },
     //같이간사람 추가하기
     addCompanion(e) {
@@ -334,49 +367,99 @@ export default {
 <style>
 /* 1em : 16px */
 .event-regist {
+  --backgroundColor: rgba(49, 48, 48, 1);
+  --fontColor: rgb(246, 237, 237);
+  --objectColor: rgba(63, 59, 59, 0.959);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
   position: absolute;
-  background-color: rgb(255, 255, 255);
+  background-color: var(--backgroundColor);
   width: 100vw;
   height: 101%;
   top: 100%;
-  border: #ebebeb solid 2px;
+  border: var(--backgroundColor), solid 2px;
   border-top-left-radius: 2em;
   border-top-right-radius: 2em;
-  --inputColor: rgb(243, 246, 246);
-  --inputHoverColor: rgb(206, 246, 244);
-  --fontColor: rgb(55, 53, 47);
-  --footerColor: rgb(55, 53, 47);
+  font-size: 15px;
+  color: var(--fontColor);
+  padding-bottom: 3%;
 }
 
 .event-regist > .event-regist-header {
   position: relative;
-  top: 2%;
   width: 100%;
+  padding: 3% 0;
   height: 5%;
   text-align: center;
-  color: black;
   font-weight: bold;
   cursor: pointer;
-  margin-bottom: 20px;
+  border-top-left-radius: 2em;
+  border-top-right-radius: 2em;
+  background-color: var(--objectColor);
 }
 
-.event-regist > .regist-body {
+.event-regist > .event-regist-body {
   position: relative;
-  background-color: rgba(255, 250, 250, 1);
+  background-color: var(--backgroundColor);
   width: 100%;
+  height: 90%;
   padding-left: 6%;
   padding-right: 6%;
   overflow: scroll;
-  height: 90%;
 }
 
-.regist-body > .regist-form {
+.photo-wrapper {
   position: relative;
+  width: 100%;
+  height: 80%;
+  margin-bottom: 5%;
+  padding: 2%;
+  margin-top: 3%;
+  background-color: var(--objectColor);
+  border-radius: 10px;
+}
+.photo-wrapper > .photo {
+  position: relative;
+  width: 100%;
+  height: 90%;
+  margin: 0;
+  padding: 1%;
+  border-radius: 20px;
+  overflow: scroll;
+}
+
+.photo-wrapper > .photo > .photo-prev {
+  width: 100%;
   height: 100%;
+  padding: 0.5%;
+  border-radius: 10px;
+  float: right;
+  background-color: red;
+}
+
+.photo-wrapper > .photo > .photo-regist {
+  width: 100%;
+  background-color: var(--objectColor);
+  display: flex;
+  justify-content: center;
+}
+
+.photo-wrapper > .photo > .photo-regist > .icon {
+  position: relative;
+  top: calc(40% - (75px / 2));
+}
+
+.event-regist-body > .regist-form {
+  position: relative;
+}
+
+.title {
+  font-size: 2em;
+  font-weight: bold;
+  width: 100%;
+  margin: 2%;
 }
 /* 각 컬럼 */
 .regist-form > .column {
@@ -404,7 +487,7 @@ export default {
   padding: 1% 3%;
   color: var(--fontColor);
   width: 50%;
-  background-color: var(--inputColor);
+  background-color: var(--objectColor);
   cursor: pointer;
 }
 
@@ -459,7 +542,7 @@ export default {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  background-color: var(--inputColor);
+  background-color: var(--objectColor);
   border-radius: 10px;
 }
 
@@ -471,7 +554,7 @@ export default {
   width: 100%;
   height: 30px;
   margin: 0;
-  background-color: var(--inputHoverColor);
+  background-color: var(--backgroundColor);
   border-radius: 10px;
   opacity: 0.5;
   padding: 0 1%;
@@ -485,14 +568,11 @@ export default {
   display: inline;
   padding: 1em 1.5em;
   margin: 2em 1em;
-  background: var(--inputColor);
+  background-color: var(--objectColor);
   font-size: 0.8em;
   border-radius: 10px;
 }
 
-.regist-form > .column > .form-btn-wrapper > .form-btn:hover {
-  background: var(--inputHoverColor);
-}
 .regist-form
   > .column
   > .trash-scale
@@ -501,34 +581,12 @@ export default {
   opacity: 1;
 }
 /* 사진등록 css start*/
-.regist-form > .column > .img-wrapper {
-  width: 95%;
-  height: 500px;
-  margin: 2em 0em;
-  border-radius: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  overflow: hidden;
-}
-.regist-form > .column > .img-wrapper > .img-prev {
-  width: 50%;
-  background-color: var(--inputColor);
-  transition: 0.5s;
-}
-
-.regist-form > .column > .img-wrapper > .img-prev:hover {
-  background-color: var(--inputHoverColor);
-  border-radius: 10px;
-  border-collapse: collapse;
-  opacity: 1;
-}
 
 .regist-form > .column > textarea {
   display: block;
   font-size: 1em;
-  color: var(--fontColor);
   padding: 3% 3%;
-  background-color: var(--inputColor);
+  background-color: var(--objectColor);
   width: 95%;
   min-height: 450px;
   border-radius: 10px;
@@ -540,25 +598,24 @@ export default {
 .regist-form > .column > label:active + input,
 .regist-form > .column > label:active + textarea {
   outline: none;
-  background: var(--inputHoverColor);
+  background-color: var(--objectColor);
 }
 .regist-form > .regist-btn {
   position: relative;
   height: 10%;
   width: 100%;
-  color: var(--inputColor);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 5% 0;
-  background: var(--footerColor);
+  background-color: var(--objectColor);
 }
 
 .copyright {
   position: relative;
   height: 10%;
   width: 100%;
-  background-color: antiquewhite;
+  background-color: var(--objectColor);
   text-align: center;
   border-radius: 10px;
   align-items: center;
@@ -587,32 +644,31 @@ export default {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     cursor: pointer;
-    color: var(--fontColor);
   }
 }
 
 ::-webkit-input-placeholder {
   /* WebKit browsers */
-  color: #8e9091;
+  color: var(--fontColor);
 }
 
 :-moz-placeholder {
   /* Mozilla Firefox 4 to 18 */
-  color: #8e9091;
+  color: var(--fontColor);
 }
 
 ::-moz-placeholder {
   /* Mozilla Firefox 19+ */
-  color: #8e9091;
+  color: var(--fontColor);
 }
 
 :-ms-input-placeholder {
   /* Internet Explorer 10+ */
-  color: #8e9091;
+  color: var(--fontColor);
 }
 a:link {
   text-decoration: none;
-  color: rgb(55, 53, 47);
+  color: var(--fontColor);
 }
 
 a:visited {

@@ -5,6 +5,7 @@ import api from '../../API/api.js';
 export const state = {
   eventMarkers: [],
   eventDetail: '',
+  mapSnapshot: '',
 };
 const SET_EVENT_MARKERS = 'SET_EVENT_MARKERS';
 const SET_EVENT_DETAIL = 'SET_EVENT_DETAIL';
@@ -15,6 +16,9 @@ export const mutations = {
   [SET_EVENT_DETAIL](state, eventDetail) {
     state.eventDetail = eventDetail;
   },
+  SET_MAP_SNAPSHOT(state, src) {
+    state.mapSnapshot = src;
+  },
 };
 import { upLoadFile, desertFile } from '../../util/firebase.js';
 export const getters = {
@@ -23,6 +27,9 @@ export const getters = {
   },
   EventDetail: state => {
     return state.eventDetail;
+  },
+  MapSnapShot: state => {
+    return state.mapSnapshot;
   },
 };
 export const actions = {
@@ -44,12 +51,14 @@ export const actions = {
       table: 'events',
       id: id,
     });
-    console.log(event);
     if (!event) {
       return false;
     }
     commit(SET_EVENT_DETAIL, event);
-    return true;
+    return event;
+  },
+  setMapSnapshot: ({ commit }, src) => {
+    commit('SET_MAP_SNAPSHOT', src);
   },
   setCleanEvent: async ({ commit }, eventObj) => {
     let photoUrl = [];
