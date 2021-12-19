@@ -1,94 +1,71 @@
 <template>
-  <div class="event-detail" @click="hideEventDetail">
-    <div class="event-detail-header">눌러서 청소리포트 닫기</div>
-    <div class="event-detail-body" v-if="eventDetail">
-      <div class="photos">
-        <img
-          class="detail-image"
-          v-for="(url, idx) in eventDetail.photoUrl"
-          :key="idx"
-          :src="url"
-          :class="
-            idx === 0
-              ? 'left-top'
-              : idx === 1
-              ? 'right-top'
-              : idx === 2
-              ? 'left-bottom'
-              : 'right-bottom'
-          "
-          alt=""
-        />
+  <div class="event-detail" @click="hideEventDetail" v-if="eventDetail">
+    <div class="event-detail-header">
+      {{ eventDetail.userInfo.name }} ({{ eventDetail.userInfo.email }}) 님의
+      청소리포트
+    </div>
+    <div class="event-detail-body">
+      <div class="photos-wrapper">
+        <div class="title">활동 사진</div>
+        <div class="photos">
+          <img
+            class="detail-image"
+            v-for="(url, idx) in eventDetail.photoUrl"
+            :key="idx"
+            :src="url"
+            alt=""
+          />
+        </div>
       </div>
+
       <div class="detail-form">
-        <div class="column">
-          <label for="name" class="form-label"> 🐟 이름 </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            class="form-input"
-            :value="eventDetail.userInfo.name"
-            readonly
-          />
-          <label class="form-label" for="email"> 📮 이메일</label>
-          <input
-            type="text"
-            id="email"
-            name="email"
-            class="form-input"
-            :value="eventDetail.userInfo.email"
-            readonly
-          />
-
-          <label for="address" class="form-label"> 🌊 위치 </label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            class="form-input"
-            :value="eventDetail.address"
-            readonly
-          />
-
-          <label class="form-label" for="date"> ⏱️ 일자</label>
-          <input
-            class="form-input date"
-            type="date"
-            id="from-date"
-            name="from-date"
-            :value="eventDetail.date.from"
-            readonly
-          />
-          <p class="date-text">에서</p>
-          <input
-            type="date"
-            class="form-input date"
-            id="to-date"
-            name="to-date"
-            :value="eventDetail.date.to"
-            readonly
-          />
-          <p class="date-text">까지</p>
-          <label class="form-label"> 👭 함께한사람들 </label>
-          <div class="companions-wrapper">
-            <div
-              class="companion-wrapper"
-              v-for="(companion, idx) in this.eventDetail.companions"
-              :key="idx"
-            >
-              <input
-                class="companion"
-                type="text"
-                readonly
-                :value="companion"
+        <div class="column personal">
+          <div class="personal-wrapper">
+            <div class="title">위치와 날짜</div>
+            <div class="personal-info date">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'calendar-week']"
+                size="lg"
               />
+              <div class="text">
+                {{ eventDetail.date.from }} 부터 {{ eventDetail.date.to }} 까지
+              </div>
+            </div>
+            <div class="personal-info location">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'globe-asia']"
+                size="lg"
+              />
+              <div class="text">{{ eventDetail.address }}</div>
+              <img class="map-img" :src="this.mapSnapshot" />
+            </div>
+
+            <div class="personal-info companion">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'users']"
+                size="lg"
+              />
+              <div class="text">
+                {{ eventDetail.companions.length }} 명의 사람과 함께 했습니다.
+              </div>
+            </div>
+            <div class="personal-info companion-list">
+              <div
+                class="companion"
+                v-for="(com, idx) in eventDetail.companions"
+                :key="idx"
+              >
+                {{ com }}
+              </div>
             </div>
           </div>
         </div>
         <div class="column">
-          <label class="form-label"> ⚖️ 쓰레기 수거량 </label>
           <div class="trash-scale">
+            <div class="title">쓰레기 수거량</div>
             <div class="trash-scale-wrapper">
               <img
                 class="trash-scale-content"
@@ -104,48 +81,18 @@
               100kg 이상의 쓰레기를 수거했습니다.
             </div>
           </div>
-          <!-- <label class="form-label"> 🤳 사진 </label>
-          <div class="img-wrapper">
-            <label
-              class="form-label img-prev"
-              for="imageFirst"
-              v-bind:style="{
-                backgroundImage: 'url(' + eventDetail.photoUrl[0] + ')',
-              }"
-            ></label>
-            <label
-              class="form-label img-prev"
-              for="imageSecond"
-              v-bind:style="{
-                backgroundImage: 'url(' + eventDetail.photoUrl[1] + ')',
-              }"
-            ></label>
-            <label
-              class="form-label img-prev"
-              for="imageThird"
-              v-bind:style="{
-                backgroundImage: 'url(' + eventDetail.photoUrl[2] + ')',
-              }"
-            ></label>
-            <label
-              class="form-label img-prev"
-              for="imageFourth"
-              v-bind:style="{
-                backgroundImage: 'url(' + eventDetail.photoUrl[3] + ')',
-              }"
-            ></label>
-          </div> -->
-
-          <label class="form-label" for="memo"> 📝 청소 이야기</label>
-          <textarea
-            class="form-textarea"
-            type="text"
-            id="memo"
-            name="memo"
-            placeholder="간단한 활동내역을 작성해주세요."
-            :value="eventDetail.memo"
-            readonly
-          />
+          <div class="trash-review">
+            <div class="title">청소 후기</div>
+            <textarea
+              class="form-textarea"
+              type="text"
+              id="memo"
+              name="memo"
+              placeholder="간단한 활동내역을 작성해주세요."
+              :value="eventDetail.memo"
+              readonly
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -155,6 +102,19 @@
 <script>
 import { mapGetters } from 'vuex';
 import gsap from 'gsap';
+
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+  faEnvelopeOpenText,
+  faGlobeAsia,
+  faCalendarWeek,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons';
+library.add(faEnvelopeOpenText);
+library.add(faGlobeAsia);
+library.add(faCalendarWeek);
+library.add(faUsers);
+
 export default {
   props: {},
   methods: {
@@ -163,8 +123,8 @@ export default {
       gsap.to($target, {
         duration: 0.5,
         top: '100%',
-        borderTopLeftRadius: '2vh',
-        borderTopRightRadius: '2vh',
+        // borderTopLeftRadius: '2vh',
+        // borderTopRightRadius: '2vh',
       });
       this.$emit('setIsAppear', false);
     },
@@ -172,6 +132,7 @@ export default {
   computed: {
     ...mapGetters({
       eventDetail: 'cleanEventStore/EventDetail',
+      mapSnapshot: 'cleanEventStore/MapSnapShot',
     }),
   },
 };
@@ -179,80 +140,75 @@ export default {
 
 <style>
 .event-detail {
+  --backgroundColor: rgba(49, 48, 48, 1);
+  --fontColor: rgb(246, 237, 237);
+  --objectColor: rgba(63, 59, 59, 0.959);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
   position: absolute;
-  background-color: rgb(255, 255, 255);
+  background-color: var(--backgroundColor);
   width: 100vw;
   height: 100%;
   top: 100%;
-  border: #ebebeb solid 2px;
+  border: var(--backgroundColor), solid 2px;
   border-top-left-radius: 2em;
   border-top-right-radius: 2em;
-  font-size: 1em;
-  --inputColor: rgb(243, 246, 246);
-  --inputHoverColor: rgb(206, 246, 244);
-  --fontColor: rgb(55, 53, 47);
-  --footerColor: rgb(55, 53, 47);
+  font-size: 15px;
+  color: var(--fontColor);
+  padding-bottom: 3%;
 }
 
 .event-detail > .event-detail-header {
   position: relative;
-  top: 2%;
   width: 100%;
+  padding: 3% 0;
   height: 5%;
   text-align: center;
-  color: black;
   font-weight: bold;
   cursor: pointer;
-  padding-top: 3%;
-  margin-bottom: 5%;
+  border-top-left-radius: 2em;
+  border-top-right-radius: 2em;
+  background-color: var(--objectColor);
 }
 
 .event-detail > .event-detail-body {
   position: relative;
-  background-color: rgba(255, 250, 250, 1);
+  background-color: var(--backgroundColor);
   width: 100%;
   height: 90%;
   padding-left: 6%;
   padding-right: 6%;
   overflow: scroll;
 }
-.event-detail > .event-detail-body > .photos {
+.photos-wrapper {
+  width: 100%;
+  height: 80%;
+  margin-bottom: 5%;
+  padding: 2%;
+  margin-top: 3%;
+  background-color: var(--objectColor);
+  border-radius: 10px;
+}
+.photos-wrapper > .photos {
   position: relative;
   width: 100%;
   height: 90%;
   display: flex;
-  margin: 5% 0;
-  padding: 0;
+  margin: 0;
+  padding: 1%;
   border-radius: 20px;
-  flex-wrap: wrap;
+  overflow: scroll;
 }
-
-.event-detail > .event-detail-body > .photos > .detail-image {
-  width: 50%;
-  height: 50%;
+.photos-wrapper > .photos > .detail-image {
+  width: 40%;
   object-fit: cover;
   padding: 0.5%;
-}
-
-.photos > .detail-image.left-top {
-  border-top-left-radius: 10px;
-}
-.photos > .detail-image.right-top {
-  border-top-right-radius: 10px;
-}
-.photos > .detail-image.left-bottom {
-  border-bottom-left-radius: 10px;
-}
-.photos > .detail-image.right-bottom {
-  border-bottom-right-radius: 10px;
+  border-radius: 10px;
 }
 .event-detail > .event-detail-body > .detail-form {
   position: relative;
-  height: 100%;
 }
 
 /* 각 컬럼 */
@@ -260,52 +216,87 @@ export default {
   float: left;
   width: 50%;
   padding-bottom: 6%;
+  margin-left: 5%;
 }
-/* 컬럼의 레이블 */
-.detail-form > .column > label {
+
+.detail-form > .column.personal {
+  box-shadow: 0 1px 4px -1px var(--objectColor);
+  background-color: var(--objectColor);
+  width: 45%;
+  margin-left: 0;
+  border-radius: 15px;
+}
+.detail-form > .column.personal .personal-wrapper {
+  margin: 5%;
+}
+
+.column.personal > .personal-wrapper > .personal-info {
+  margin-top: 10%;
+  font-size: 1.3em;
+  display: flex;
+}
+
+.column.personal > .personal-wrapper > .personal-info {
+  flex-wrap: wrap;
+}
+.column.personal > .personal-wrapper > .personal-info > .map-img {
+  margin-top: 5%;
+  width: 100%;
+  height: 20%;
+  border-radius: 15px;
+}
+.cal {
+  color: black;
+}
+.personal-info.companion {
+  margin-bottom: 2%;
+}
+.personal-info.companion-list {
+  margin-left: 2%;
+  display: flex;
+  flex-direction: column;
+}
+
+.personal-info.companion-list > .companion {
   width: 60%;
-  display: block;
-  margin: 5% 1%;
-  font-size: 1.5em;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  color: var(--fontColor);
+  height: 20%;
+  margin: 3% 0;
+  padding: 3%;
+  background-color: var(--backgroundColor);
+  border-radius: 10px;
+  padding-left: 10%;
 }
 
-.detail-form > .column > label > p {
-  display: inline;
-  font-size: 0.5em;
-  font-weight: normal;
+.column.personal > .personal-wrapper > .personal-info > .icon {
+  margin: 2% 3%;
 }
-/* 칼럼내 input, select, textarea css */
-.detail-form > .column .form-input {
-  display: block;
-  margin: 10% 5%;
-  padding: 1% 3%;
-  color: var(--fontColor);
-  width: 50%;
-  background-color: var(--inputColor);
-  cursor: pointer;
-}
-.detail-form > .column > .date {
-  display: inline;
-  margin: 8% 5%;
+.column.personal > .personal-wrapper > .personal-info > .text {
+  padding-top: 3%;
 }
 
-.detail-form > .column > .date-text {
-  display: inline;
+.column.personal > .personal-wrapper > .personal-info.name {
+  font-size: 2em;
 }
+
 .detail-form > .column > .trash-scale {
-  background-color: none;
-  margin: 10% 5%;
-  width: 80%;
+  background-color: var(--objectColor);
+  width: 100%;
+  padding: 5%;
+  border-radius: 15px;
+  margin-bottom: 5%;
+}
+.title {
+  font-size: 2em;
+  font-weight: bold;
+  width: 100%;
+  margin: 2%;
 }
 .detail-form > .column > .trash-scale > .trash-scale-wrapper {
   width: 100%;
+  margin: 5% 7% 0 0;
   display: flex;
 }
+
 .detail-form
   > .column
   > .trash-scale
@@ -319,103 +310,50 @@ export default {
 }
 .detail-form > .column > .trash-scale > .trash-scale-text {
   width: 100%;
-  padding: 10% 0;
+  padding: 5% 0;
   text-align: center;
 }
 
-@media only screen and (max-width: 992px) {
-  .detail-form > .column {
+.detail-form > .column > .trash-review {
+  background-color: var(--objectColor);
+  width: 100%;
+  padding: 5%;
+  border-radius: 15px;
+}
+
+.detail-form > .column > .trash-review > textarea {
+  display: block;
+  font-size: 1em;
+  color: var(--fontColor);
+  padding: 3% 3%;
+  background-color: var(--objectColor);
+  width: 100%;
+  min-height: 450px;
+}
+
+@media only screen and (max-width: 414px) {
+  .event-detail {
+    font-size: 0.7em;
+  }
+  .detail-form > .column,
+  .detail-form > .column.personal {
     width: 100%;
-  }
-  .detail-form > .column > label {
-    width: 70%;
-  }
-  .detail-form > .column .form-input {
-    width: 80%;
-    margin-left: 10%;
+    margin: 5% 0;
   }
 
-  .detail-form > .column > label > p {
-    width: 80%;
-    display: block;
-    margin: 5% 15%;
-    font-size: 0.5em;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    color: var(--fontColor);
-  }
-  .event-detail > .event-detail-body > .photos {
-    flex-wrap: nowrap;
+  .photos-wrapper > .photos {
     overflow: scroll;
-    height: 50%;
   }
-  .event-detail > .event-detail-body > .photos > .detail-image {
+  .event-detail
+    > .event-detail-body
+    > .photos-wrapper
+    > .photos
+    > .detail-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 20px !important;
   }
-}
-
-.detail-form > .column > .companions-wrapper {
-  width: 95%;
-  padding-top: 5%;
-  min-height: 450px;
-  max-height: 450px;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  background-color: var(--inputColor);
-  border-radius: 10px;
-}
-.detail-form > .column > .companions-wrapper > .companion-wrapper {
-  width: 25%;
-  margin: 6px 3%;
-}
-.detail-form > .column > .companions-wrapper .companion {
-  width: 100%;
-  height: 30px;
-  margin: 0;
-  background-color: var(--inputHoverColor);
-  border-radius: 10px;
-  opacity: 0.5;
-  padding: 0 1%;
-}
-
-/* 사진등록 css start*/
-.detail-form > .column > .img-wrapper {
-  width: 95%;
-  height: 500px;
-  margin: 2em 0em;
-  border-radius: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  overflow: hidden;
-}
-.detail-form > .column > .img-wrapper > .img-prev {
-  width: 50%;
-  background-color: var(--inputColor);
-  transition: 0.5s;
-}
-
-.detail-form .img-wrapper > .img-prev:hover {
-  background-color: var(--inputHoverColor);
-  border-radius: 10px;
-  border-collapse: collapse;
-  opacity: 1;
-}
-/* 사진등록 css end */
-
-.detail-form > .column > textarea {
-  display: block;
-  font-size: 1em;
-  color: var(--fontColor);
-  padding: 3% 3%;
-  background-color: var(--inputColor);
-  width: 95%;
-  min-height: 450px;
-  border-radius: 10px;
 }
 
 .detail-form input:focus,
