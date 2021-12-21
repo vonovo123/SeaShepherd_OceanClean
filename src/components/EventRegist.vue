@@ -1,24 +1,24 @@
 <template>
   <div class="event-regist" @click="hideEventRegist">
     <div class="event-regist-header">청소리포트 등록하기</div>
-    <div class="event-regist-body">
+    <div class="event-regist-body" id="registBody">
       <div class="photo-wrapper">
-        <div class="title">활동 사진</div>
+        <div class="title-wrap">
+          <div class="title">활동 사진</div>
+          <div class="sub">최대 10장까지 가능합니다.</div>
+        </div>
         <div class="photo" id="photo">
-          <div class="photo-prev" />
-          <div class="photo-prev" />
-          <div class="photo-prev" />
-          <div class="photo-prev" />
-          <!-- <label class="photo-prev"> </label>
-            <label class="photo-prev"> </label>
-            <label class="photo-prev"> </label> -->
-          <!-- <label class="photo-regist" for="photoFirst">
+          <label
+            class="photo-regist"
+            for="photoFirst"
+            v-show="event.photos.length < 10"
+          >
             <font-awesome-icon
               class="icon"
               :icon="['fas', 'camera']"
               size="5x"
             />
-          </label> -->
+          </label>
           <input
             class="form-input"
             type="file"
@@ -32,147 +32,138 @@
           />
         </div>
       </div>
-      <form
-        class="regist-form"
-        method="post"
-        action="upload"
-        enctype="multipart/form-data"
-      >
-        <div class="column first">
-          <label for="name" class="form-label"> 🐟 이름 </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            class="form-input"
-            v-model="event.userInfo.name"
-          />
-          <label class="form-label" for="email"> 📮 이메일</label>
-          <input
-            type="text"
-            id="email"
-            name="email"
-            class="form-input"
-            v-model="event.userInfo.email"
-          />
-
-          <label for="address" class="form-label"> 🌊 위치 </label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            class="form-input"
-            v-model="currentAddress"
-          />
-
-          <label class="form-label" for="date"> ⏱️ 일자</label>
-          <input
-            class="form-input date"
-            type="date"
-            id="from-date"
-            name="from-date"
-            v-model="event.date.from"
-          />
-          <p class="date-text">에서</p>
-          <input
-            type="date"
-            class="form-input date"
-            id="to-date"
-            name="to-date"
-            v-model="event.date.to"
-          />
-          <p class="date-text">까지</p>
-          <label class="form-label"> ⚖️ 쓰레기 수거량 </label>
-          <div class="trash-scale">
-            <div class="trash-scale-wrapper">
+      <div class="regist-form" id="registForm">
+        <div class="column">
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">사용자 정보</div>
+            </div>
+            <div class="content">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'user']"
+                size="lg"
+              />
+              <input
+                type="text"
+                class="text"
+                v-model="event.userInfo.name"
+                autocomplete="off"
+              />
+            </div>
+            <div class="content">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'envelope-square']"
+                size="lg"
+              />
+              <input
+                type="text"
+                class="text"
+                v-model="event.userInfo.email"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">날짜와 위치</div>
+            </div>
+            <div class="content">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'globe-asia']"
+                size="lg"
+              />
+              <input
+                type="text"
+                class="text"
+                v-model="currentAddress"
+                autocomplete="off"
+              />
+            </div>
+            <div class="title-wrap">
+              <div class="sub">시작일</div>
+            </div>
+            <div class="content">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'calendar-week']"
+                size="lg"
+              />
+              <input
+                class="text"
+                type="date"
+                v-model="event.date.from"
+                autocomplete="off"
+              />
+            </div>
+            <div class="title-wrap">
+              <div class="sub">종료일</div>
+            </div>
+            <div class="content">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'calendar-week']"
+                size="lg"
+              />
+              <input
+                class="text"
+                type="date"
+                v-model="event.date.to"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">함께한 사람</div>
+              <div class="sub">EMAIL 주소를 적어주세요.</div>
+            </div>
+            <div class="btn-wrapper">
+              <div class="btn" @click="addCompanion">➕ 추가</div>
+              <div class="btn" @click="removeCompanion">➖ 제거</div>
+            </div>
+            <div class="wrapper companions"></div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">쓰레기 수거량</div>
+              <div class="sub">대략적인 수거량을 선택해주세요.</div>
+            </div>
+            <div class="content trash-scale">
               <img
-                class="trash-scale-content"
+                class="img"
                 v-for="idx in 6"
                 :key="idx"
                 @click="clickTrachCan(idx)"
                 src="../assets/images/recycling-bag.png"
               />
             </div>
-            <div class="trash-scale-text" v-if="event.scale < 6">
+            <div class="text trash-scale" v-if="event.scale < 6">
               {{ 20 * event.scale }}kg 미만의 쓰레기를 수거했습니다.
             </div>
-            <div class="trash-scale-text" v-else>
+            <div class="text trash-scale" v-else>
               100kg 이상의 쓰레기를 수거했습니다.
             </div>
           </div>
-
-          <label class="form-label">
-            👭 함께한사람들
-            <p>(이메일주소를 적어주세요.)</p>
-          </label>
-          <div class="form-btn-wrapper">
-            <div class="form-btn" @click="addCompanion">➕ 추가</div>
-            <div class="form-btn" @click="removeCompanion">➖ 제거</div>
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">청소 후기</div>
+              <div class="sub">청소 후기를 공유해주세요.</div>
+            </div>
+            <textarea
+              class="textarea"
+              type="text"
+              placeholder="간단한 활동내역을 작성해주세요."
+              v-model="event.memo"
+            />
           </div>
-          <div class="companions-wrapper"></div>
         </div>
-        <div class="column second">
-          <!-- <label class="form-label">
-            🤳 사진 보여주기
-            <p>(최대 4장)</p>
-          </label> -->
-          <!-- <div class="img-wrapper">
-            <label class="form-label img-prev" for="imageFirst"></label>
-            <input
-              class="form-input"
-              type="file"
-              id="imageFirst"
-              name="imageFirst"
-              accept="image/*"
-              @change="loadFile"
-              style="display: none"
-              data-index="0"
-            />
-            <label class="form-label img-prev" for="imageSecond"></label>
-            <input
-              class="form-input"
-              type="file"
-              id="imageSecond"
-              name="imageSecond"
-              accept="image/*"
-              @change="loadFile"
-              style="display: none"
-              data-index="1"
-            />
-            <label class="form-label img-prev" for="imageThird"></label>
-            <input
-              class="form-input"
-              type="file"
-              id="imageThird"
-              name="imageThird"
-              accept="image/*"
-              @change="loadFile"
-              style="display: none"
-              data-index="2"
-            />
-            <label class="form-label img-prev" for="imageFourth"></label>
-            <input
-              class="form-input"
-              type="file"
-              id="imageFourth"
-              name="imageFourth"
-              accept="image/*"
-              @change="loadFile"
-              style="display: none"
-              data-index="3"
-            />
-          </div> -->
-
-          <label class="form-label" for="memo"> 📝 청소 이야기</label>
-          <textarea
-            class="form-textarea"
-            type="text"
-            id="memo"
-            name="memo"
-            placeholder="간단한 활동내역을 작성해주세요."
-            v-model="event.memo"
-          />
-        </div>
+        <div id="observe">observe</div>
+        <!--
         <div class="regist-btn" @click="regist">등록</div>
         <div class="copyright">
           Icons made by
@@ -183,8 +174,8 @@
           <a href="https://www.flaticon.com/" title="Flaticon">
             &nbsp; www.flaticon.com &nbsp;</a
           >
-        </div>
-      </form>
+        </div> -->
+      </div>
     </div>
     <!-- <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
@@ -219,14 +210,13 @@ export default {
         userInfo: { name: '', email: '' },
         date: { from: '', to: '' },
         memo: '',
-        photos: ['', '', '', ''],
+        photos: [],
         photoUrl: [],
         companions: [],
         position: this.currentPosition,
         scale: 1,
       },
       companionIndex: -1,
-      maxImgCount: 10,
     };
   },
   computed: {
@@ -243,16 +233,17 @@ export default {
     ]),
   },
   mounted() {
-    document
-      .querySelector('.event-regist-body')
-      .addEventListener('scroll', e => {
-        console.log(document.documentElement.scrollHeight);
-        console.log(e.target.scrollTop);
-        if (document.documentElement.scrollHeight * 1.5 < e.target.scrollTop) {
-          //alert('show');
-        }
-      });
     this.init();
+    //observe test
+    const $observe = document.querySelector('#observe');
+    const $root = document.querySelector('#registForm');
+    const cb = (target, intersectionRatio) => {
+      console.log(target);
+      console.log(intersectionRatio);
+      console.log('observe');
+    };
+    let observer = new IntersectionObserver(cb);
+    observer.observe($observe, { rootMargin: '500px' });
   },
   methods: {
     ...mapActions({
@@ -273,39 +264,51 @@ export default {
         .substring(0, 10);
     },
     loadFile(e) {
-      console.log(e.target);
       const $photo = document.querySelector('#photo');
       const files = [...e.target.files];
-      if (files.length > this.maxImgCount) {
+      if (files.length + this.event.photos.length > 10) {
         alert('최대 10개의 사진을 공유할 수 있습니다.');
+        e.target.value = '';
         return;
       }
-      files.forEach(element => {
-        const url = `url('${URL.createObjectURL(element)}')`;
-        const $div = document.createElement('div');
-        $div.classList.add('photo-prev');
-        $div.style.backgroundImage = url;
-        $photo.appendChild($div);
+      files.forEach(file => {
+        //db에 업로드할 file array
+        this.event.photos.push(file);
+        const $img = document.createElement('img');
+        $img.classList.add('photo-prev');
+        //등록화면에 임시로 보여주기용 src
+        $img.src = `${URL.createObjectURL(file)}`;
+        $img.setAttribute('data-id', this.event.photos.length - 1);
+        $photo.insertBefore($img, $photo.firstChild);
+        $img.addEventListener('click', el => {
+          const start = Number(el.target.dataset.id);
+          console.log(start);
+          el.target.remove();
+          for (let i = start + 1; i < this.event.photos.length; i++) {
+            this.event.photos[i - 1] = this.event.photos[i];
+          }
+          this.event.photos.pop();
+        });
       });
-      // $label.style.backgroundImage = `url('${URL.createObjectURL(
-      //   e.target.files[0]
-      // )}')`;
-      //$label.style.opacity = '1';
-      //this.event.photos[e.target.dataset.index] = e.target.files[0];
+      e.target.value = '';
     },
     //같이간사람 추가하기
     addCompanion(e) {
       this.companionIndex++;
       if (this.companionIndex < 30) {
-        const $companionWrapper = document.querySelector('.companions-wrapper');
+        const $companionWrapper = document.querySelector('.companions');
         const $temp = document.createElement('div');
-        $temp.classList.add('companion-wrapper');
-        $temp.innerHTML = `<input class="companion" type="text" id= 'companion-${this.companionIndex}'/>`;
+        $temp.classList.add('content');
+        // $temp.innerHTML = `<input class="companion" type="text" id= 'companion-${this.companionIndex}'/>`;
+        $temp.innerHTML = `
+                <i class="icon fas fa-user-tag fa-lg"></i>
+                  <input class="text" type="text" id= 'companion-${this.companionIndex} 'autocomplete="off"/>
+              `;
         $companionWrapper.append($temp);
       }
     },
     removeCompanion(e) {
-      const $companionWrapper = document.querySelector('.companions-wrapper');
+      const $companionWrapper = document.querySelector('companions');
 
       if (this.companionIndex >= 0) {
         this.companionIndex--;
@@ -314,7 +317,7 @@ export default {
     },
     clickTrachCan: function (index) {
       //target.style.opacity = 1;
-      const trashs = document.querySelectorAll('.trash-scale-content');
+      const trashs = document.querySelectorAll('.trash-scale .img');
       this.event.scale = index;
       trashs.forEach((trash, idx) => {
         if (idx < index) {
@@ -360,16 +363,18 @@ export default {
         this.$emit('setIsAppear', false);
       }
     },
+    observeBottomOf() {},
   },
 };
 </script>
 
-<style>
+<style scoped>
 /* 1em : 16px */
 .event-regist {
   --backgroundColor: rgba(49, 48, 48, 1);
   --fontColor: rgb(246, 237, 237);
   --objectColor: rgba(63, 59, 59, 0.959);
+  --objectHoverColor: rgb(20, 17, 17);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -411,7 +416,6 @@ export default {
 }
 
 .photo-wrapper {
-  position: relative;
   width: 100%;
   height: 80%;
   margin-bottom: 5%;
@@ -424,6 +428,7 @@ export default {
   position: relative;
   width: 100%;
   height: 90%;
+  display: flex;
   margin: 0;
   padding: 1%;
   border-radius: 20px;
@@ -431,16 +436,15 @@ export default {
 }
 
 .photo-wrapper > .photo > .photo-prev {
-  width: 100%;
-  height: 100%;
-  padding: 0.5%;
+  width: 40%;
+  object-fit: cover;
+  padding: 1%;
   border-radius: 10px;
-  float: right;
-  background-color: red;
 }
 
 .photo-wrapper > .photo > .photo-regist {
-  width: 100%;
+  width: 50%;
+  min-width: 50%;
   background-color: var(--objectColor);
   display: flex;
   justify-content: center;
@@ -452,154 +456,106 @@ export default {
 }
 
 .event-regist-body > .regist-form {
-  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
 }
 
-.title {
+.title-wrap > .title {
   font-size: 2em;
   font-weight: bold;
   width: 100%;
-  margin: 2%;
+  margin: 1%;
+}
+.title-wrap > .sub {
+  font-size: 1em;
+  width: 100%;
+  margin: 1%;
+  font-weight: bold;
+}
+
+.btn-wrapper {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  height: 70px;
+}
+
+.btn {
+  width: 45%;
+  height: 60%;
+  background-color: var(--backgroundColor);
+  text-align: center;
+  padding-top: 15px;
+  border-radius: 15px;
+  font-weight: bold;
 }
 /* 각 컬럼 */
 .regist-form > .column {
-  float: left;
-  width: 50%;
-  padding-bottom: 6%;
+  width: 45%;
+  margin: 2.5%;
 }
 
-/* 컬럼의 레이블 */
-.regist-form > .column > label {
-  width: 60%;
-  display: block;
-  margin: 5% 1%;
-  font-size: 1.5em;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  color: var(--fontColor);
-}
-
-.regist-form > .column .form-input {
-  display: block;
-  margin: 10% 5%;
-  padding: 1% 3%;
-  color: var(--fontColor);
-  width: 50%;
+.column > .sub-column {
+  position: relative;
   background-color: var(--objectColor);
-  cursor: pointer;
-}
-
-.regist-form > .column > label > p {
-  display: inline;
-  font-size: 0.5em;
-  font-weight: normal;
-}
-
-.regist-form > .column > .date {
-  display: inline;
-  margin: 8% 5%;
-}
-
-.regist-form > .column > .date-text {
-  display: inline;
-}
-
-.regist-form > .column > .trash-scale {
-  background-color: none;
-  margin: 10% 5%;
-  width: 80%;
-}
-
-.regist-form > .column > .trash-scale > .trash-scale-wrapper {
   width: 100%;
-  display: flex;
+  padding: 5%;
+  border-radius: 15px;
+  margin-bottom: 10%;
 }
 
-.regist-form
-  > .column
-  > .trash-scale
-  > .trash-scale-wrapper
-  > .trash-scale-content {
-  margin: 0 2%;
+.sub-column >>> .content {
+  margin-top: 10%;
+  font-size: 1.3em;
+  height: 50px;
+  margin-bottom: 10%;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--backgroundColor);
+  border-radius: 10px;
+}
+
+.sub-column > .wrapper {
+  width: 100%;
+  height: 300px;
+  height: 300px;
+  overflow: scroll;
+}
+
+.sub-column >>> .content .icon {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+.sub-column >>> .content .text {
+  position: relative;
+  width: 70%;
+  height: 50px;
+  color: var(--fontColor);
+  font-weight: bold;
+  margin-left: 20px;
+}
+.sub-column > .content.trash-scale {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  padding-top: 10px;
+  justify-content: space-around;
+}
+
+.sub-column > .content.trash-scale > .img {
   width: 13%;
-  height: 13%;
+  height: 80%;
   opacity: 0.5;
   cursor: pointer;
 }
-.regist-form > .column > .trash-scale > .trash-scale-text {
+.sub-column > .text.trash-scale {
   width: 100%;
-  padding: 10% 0;
+  padding: 5% 0;
   text-align: center;
 }
 
-.regist-form > .column > .companions-wrapper {
-  width: 95%;
-  padding-top: 5%;
-  min-height: 450px;
-  max-height: 450px;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  background-color: var(--objectColor);
-  border-radius: 10px;
-}
-
-.regist-form > .column > .companions-wrapper > .companion-wrapper {
-  width: 25%;
-  margin: 6px 3%;
-}
-.regist-form > .column > .companions-wrapper .companion {
-  width: 100%;
-  height: 30px;
-  margin: 0;
-  background-color: var(--backgroundColor);
-  border-radius: 10px;
-  opacity: 0.5;
-  padding: 0 1%;
-}
-
-.regist-form > .column > .form-btn-wrapper {
-  display: block;
-  margin: 10% 0%;
-}
-.regist-form > .column > .form-btn-wrapper > .form-btn {
-  display: inline;
-  padding: 1em 1.5em;
-  margin: 2em 1em;
-  background-color: var(--objectColor);
-  font-size: 0.8em;
-  border-radius: 10px;
-}
-
-.regist-form
-  > .column
-  > .trash-scale
-  > .trash-scale-wrapper
-  > .trash-scale-content:first-child {
-  opacity: 1;
-}
-/* 사진등록 css start*/
-
-.regist-form > .column > textarea {
-  display: block;
-  font-size: 1em;
-  padding: 3% 3%;
-  background-color: var(--objectColor);
-  width: 95%;
-  min-height: 450px;
-  border-radius: 10px;
-}
-/* 사진등록 css end */
-
-.regist-form > .column > input:focus,
-.regist-form > .column > textarea:focus,
-.regist-form > .column > label:active + input,
-.regist-form > .column > label:active + textarea {
-  outline: none;
-  background-color: var(--objectColor);
-}
 .regist-form > .regist-btn {
   position: relative;
   height: 10%;
@@ -624,29 +580,38 @@ export default {
   display: flex;
 }
 
-@media only screen and (max-width: 992px) {
-  .regist-form > .column {
-    width: 100%;
-  }
-  .regist-form > .column > label {
-    width: 70%;
-  }
-  .regist-form > .column .form-input {
-    width: 70%;
-    margin-left: 10%;
-  }
-
-  .regist-form > .column > label > p {
-    width: 80%;
-    display: block;
-    margin: 5% 15%;
-    font-size: 0.5em;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-  }
+.sub-column > .textarea {
+  display: block;
+  font-size: 1em;
+  color: var(--fontColor);
+  padding: 3% 3%;
+  background-color: var(--backgroundColor);
+  width: 100%;
+  min-height: 450px;
 }
 
+.sub-column >>> .content .text:focus,
+.sub-column > .textarea:focus {
+  outline: none;
+  background-color: var(--backgroundColor);
+}
+
+@media only screen and (max-width: 992px) {
+  .regist-detail {
+    font-size: 0.7em;
+  }
+
+  .regist-form > .column {
+    width: 100%;
+    margin: 5% 0;
+  }
+  .photo-wrapper > .photo > .photo-regist {
+    width: 100%;
+  }
+  .photo-wrapper > .photo > .photo-prev {
+    width: 100%;
+  }
+}
 ::-webkit-input-placeholder {
   /* WebKit browsers */
   color: var(--fontColor);

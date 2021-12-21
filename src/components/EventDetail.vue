@@ -6,7 +6,11 @@
     </div>
     <div class="event-detail-body">
       <div class="photos-wrapper">
-        <div class="title">활동 사진</div>
+        <div class="title-wrap">
+          <div class="title">활동 사진</div>
+          <div class="sub">활동 사진</div>
+        </div>
+
         <div class="photos">
           <img
             class="detail-image"
@@ -19,10 +23,35 @@
       </div>
 
       <div class="detail-form">
-        <div class="column personal">
-          <div class="personal-wrapper">
-            <div class="title">위치와 날짜</div>
-            <div class="personal-info date">
+        <div class="column">
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">사용자 정보</div>
+              <div class="sub"></div>
+            </div>
+            <div class="content">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'user']"
+                size="lg"
+              />
+              <div class="text bold">{{ eventDetail.userInfo.name }}</div>
+            </div>
+            <div class="content">
+              <font-awesome-icon
+                class="icon"
+                :icon="['fas', 'envelope-square']"
+                size="lg"
+              />
+              <div class="text bold">{{ eventDetail.userInfo.email }}</div>
+            </div>
+          </div>
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">날씨와 위치</div>
+              <div class="sub"></div>
+            </div>
+            <div class="content date">
               <font-awesome-icon
                 class="icon"
                 :icon="['fas', 'calendar-week']"
@@ -32,7 +61,7 @@
                 {{ eventDetail.date.from }} 부터 {{ eventDetail.date.to }} 까지
               </div>
             </div>
-            <div class="personal-info location">
+            <div class="content location">
               <font-awesome-icon
                 class="icon"
                 :icon="['fas', 'globe-asia']"
@@ -41,8 +70,13 @@
               <div class="text">{{ eventDetail.address }}</div>
               <img class="map-img" :src="this.mapSnapshot" />
             </div>
-
-            <div class="personal-info companion">
+          </div>
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">함께한 사람</div>
+              <div class="sub"></div>
+            </div>
+            <div class="content companion">
               <font-awesome-icon
                 class="icon"
                 :icon="['fas', 'users']"
@@ -52,39 +86,50 @@
                 {{ eventDetail.companions.length }} 명의 사람과 함께 했습니다.
               </div>
             </div>
-            <div class="personal-info companion-list">
+            <div class="content companion-list">
               <div
                 class="companion"
                 v-for="(com, idx) in eventDetail.companions"
                 :key="idx"
               >
+                <font-awesome-icon
+                  class="icon"
+                  :icon="['fas', 'user-tag']"
+                  size="lg"
+                />
                 {{ com }}
               </div>
             </div>
           </div>
         </div>
         <div class="column">
-          <div class="trash-scale">
-            <div class="title">쓰레기 수거량</div>
-            <div class="trash-scale-wrapper">
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">쓰레기 수거함</div>
+              <div class="sub"></div>
+            </div>
+            <div class="content trash-scale">
               <img
-                class="trash-scale-content"
+                class="img trash-scale"
                 v-for="idx in eventDetail.scale"
                 :key="idx"
                 src="../assets/images/recycling-bag.png"
               />
             </div>
-            <div class="trash-scale-text" v-if="eventDetail.scale < 6">
+            <div class="text trash-scale" v-if="eventDetail.scale < 6">
               {{ 20 * eventDetail.scale }}kg 미만의 쓰레기를 수거했습니다.
             </div>
-            <div class="trash-scale-text" v-else>
+            <div class="text trash-scale" v-else>
               100kg 이상의 쓰레기를 수거했습니다.
             </div>
           </div>
-          <div class="trash-review">
-            <div class="title">청소 후기</div>
+          <div class="sub-column">
+            <div class="title-wrap">
+              <div class="title">청소 후기</div>
+              <div class="sub"></div>
+            </div>
             <textarea
-              class="form-textarea"
+              class="textarea"
               type="text"
               id="memo"
               name="memo"
@@ -109,11 +154,17 @@ import {
   faGlobeAsia,
   faCalendarWeek,
   faUsers,
+  faUserTag,
+  faEnvelopeSquare,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons';
 library.add(faEnvelopeOpenText);
 library.add(faGlobeAsia);
 library.add(faCalendarWeek);
 library.add(faUsers);
+library.add(faUserTag);
+library.add(faEnvelopeSquare);
+library.add(faUser);
 
 export default {
   props: {},
@@ -138,7 +189,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .event-detail {
   --backgroundColor: rgba(49, 48, 48, 1);
   --fontColor: rgb(246, 237, 237);
@@ -182,6 +233,18 @@ export default {
   padding-right: 6%;
   overflow: scroll;
 }
+
+.title-wrap > .title {
+  font-size: 2em;
+  font-weight: bold;
+  width: 100%;
+  margin: 1%;
+}
+.title-wrap > .sub {
+  font-size: 1em;
+  width: 100%;
+  margin: 1%;
+}
 .photos-wrapper {
   width: 100%;
   height: 80%;
@@ -208,56 +271,75 @@ export default {
   border-radius: 10px;
 }
 .event-detail > .event-detail-body > .detail-form {
-  position: relative;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
 }
 
 /* 각 컬럼 */
 .detail-form > .column {
-  float: left;
-  width: 50%;
-  padding-bottom: 6%;
-  margin-left: 5%;
-}
-
-.detail-form > .column.personal {
-  box-shadow: 0 1px 4px -1px var(--objectColor);
-  background-color: var(--objectColor);
   width: 45%;
-  margin-left: 0;
-  border-radius: 15px;
+  padding-bottom: 6%;
 }
-.detail-form > .column.personal .personal-wrapper {
-  margin: 5%;
+.column > .sub-column {
+  background-color: var(--objectColor);
+  width: 100%;
+  padding: 5%;
+  border-radius: 15px;
+  margin-bottom: 5%;
 }
 
-.column.personal > .personal-wrapper > .personal-info {
-  margin-top: 10%;
+.sub-column > .content {
+  /* margin-top: 5%;
   font-size: 1.3em;
   display: flex;
+  flex-wrap: wrap; */
+  margin-top: 10%;
+  font-size: 1.3em;
+  height: 50px;
+  margin-bottom: 10%;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--backgroundColor);
+  border-radius: 10px;
 }
 
-.column.personal > .personal-wrapper > .personal-info {
-  flex-wrap: wrap;
+.sub-column > .content.no-flex {
+  display: block;
+  margin-left: 5%;
+  margin-top: 5%;
 }
-.column.personal > .personal-wrapper > .personal-info > .map-img {
+.sub-column > .content > .map-img {
   margin-top: 5%;
   width: 100%;
   height: 20%;
   border-radius: 15px;
 }
-.cal {
-  color: black;
+
+.sub-column > .content > .icon {
+  margin: 10px 15px;
 }
-.personal-info.companion {
+.sub-column > .content > .text {
+  padding-top: 15px;
+}
+
+.sub-column > .content > .text.bold {
+  padding-top: 15px;
+  font-weight: bold;
+}
+.sub-column > .content.name {
+  font-size: 2em;
+}
+.sub-column > .content.companion {
   margin-bottom: 2%;
 }
-.personal-info.companion-list {
+.sub-column > .content.companion-list {
   margin-left: 2%;
   display: flex;
   flex-direction: column;
 }
 
-.personal-info.companion-list > .companion {
+.content.companion-list > .companion {
   width: 60%;
   height: 20%;
   margin: 3% 0;
@@ -267,61 +349,27 @@ export default {
   padding-left: 10%;
 }
 
-.column.personal > .personal-wrapper > .personal-info > .icon {
-  margin: 2% 3%;
-}
-.column.personal > .personal-wrapper > .personal-info > .text {
-  padding-top: 3%;
-}
-
-.column.personal > .personal-wrapper > .personal-info.name {
-  font-size: 2em;
-}
-
-.detail-form > .column > .trash-scale {
-  background-color: var(--objectColor);
+.sub-column > .content.trash-scale {
   width: 100%;
-  padding: 5%;
-  border-radius: 15px;
-  margin-bottom: 5%;
-}
-.title {
-  font-size: 2em;
-  font-weight: bold;
-  width: 100%;
-  margin: 2%;
-}
-.detail-form > .column > .trash-scale > .trash-scale-wrapper {
-  width: 100%;
+  height: 20px;
   margin: 5% 7% 0 0;
   display: flex;
 }
 
-.detail-form
-  > .column
-  > .trash-scale
-  > .trash-scale-wrapper
-  > .trash-scale-content {
+.sub-column > .content.trash-scale > .img {
   margin: 0 2%;
   width: 13%;
-  height: 13%;
+  height: 100%;
   opacity: 1;
   cursor: pointer;
 }
-.detail-form > .column > .trash-scale > .trash-scale-text {
+.sub-column > .text.trash-scale {
   width: 100%;
   padding: 5% 0;
   text-align: center;
 }
 
-.detail-form > .column > .trash-review {
-  background-color: var(--objectColor);
-  width: 100%;
-  padding: 5%;
-  border-radius: 15px;
-}
-
-.detail-form > .column > .trash-review > textarea {
+.sub-column > .textarea {
   display: block;
   font-size: 1em;
   color: var(--fontColor);
@@ -335,20 +383,11 @@ export default {
   .event-detail {
     font-size: 0.7em;
   }
-  .detail-form > .column,
-  .detail-form > .column.personal {
+  .detail-form > .column {
     width: 100%;
     margin: 5% 0;
   }
-
-  .photos-wrapper > .photos {
-    overflow: scroll;
-  }
-  .event-detail
-    > .event-detail-body
-    > .photos-wrapper
-    > .photos
-    > .detail-image {
+  .sub-column > .photos > .detail-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
