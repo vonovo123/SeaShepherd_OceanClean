@@ -162,9 +162,8 @@
             />
           </div>
         </div>
-        <div id="observe">observe</div>
+        <div id="observe">obs</div>
         <!--
-        <div class="regist-btn" @click="regist">등록</div>
         <div class="copyright">
           Icons made by
           <a href="https://www.freepik.com" title="Freepik">
@@ -177,6 +176,9 @@
         </div> -->
       </div>
     </div>
+
+    <div class="regist-btn" id="registBtn" @click="regist">등록</div>
+
     <!-- <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
     <CriticalErrorMessage
       v-show="isCriticError"
@@ -221,7 +223,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      authInfo: 'googleAuthStore/AuthInfo',
+      authInfo: 'authStore/AuthInfo',
     }),
     ...mapState([
       'isError',
@@ -236,14 +238,27 @@ export default {
     this.init();
     //observe test
     const $observe = document.querySelector('#observe');
-    const $root = document.querySelector('#registForm');
-    const cb = (target, intersectionRatio) => {
-      console.log(target);
-      console.log(intersectionRatio);
-      console.log('observe');
+    const $regBtn = document.querySelector('#registBtn');
+
+    const cb = entries => {
+      // 탐지요소를 지나쳤으면
+      if (entries[0].isIntersecting) {
+        console.log('observe');
+        gsap.to($regBtn, {
+          duration: 1,
+          y: 0,
+          opacity: 1,
+        });
+      } else {
+        gsap.to($regBtn, {
+          duration: 1,
+          y: 100,
+          opacity: 0,
+        });
+      }
     };
     let observer = new IntersectionObserver(cb);
-    observer.observe($observe, { rootMargin: '500px' });
+    observer.observe($observe);
   },
   methods: {
     ...mapActions({
@@ -251,7 +266,7 @@ export default {
     }),
     init() {
       this.event.userInfo.name = this.authInfo.fullName;
-      this.event.userInfo.email = this.authInfo.gMail;
+      this.event.userInfo.email = this.authInfo.mail;
       this.event.date.from = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
       )
@@ -302,7 +317,7 @@ export default {
         // $temp.innerHTML = `<input class="companion" type="text" id= 'companion-${this.companionIndex}'/>`;
         $temp.innerHTML = `
                 <i class="icon fas fa-user-tag fa-lg"></i>
-                  <input class="text" type="text" id= 'companion-${this.companionIndex} 'autocomplete="off"/>
+                  <input class="text companion" type="text" id= 'companion-${this.companionIndex} 'autocomplete="off"/>
               `;
         $companionWrapper.append($temp);
       }
@@ -371,23 +386,15 @@ export default {
 <style scoped>
 /* 1em : 16px */
 .event-regist {
-  --backgroundColor: rgba(49, 48, 48, 1);
-  --fontColor: rgb(246, 237, 237);
-  --objectColor: rgba(63, 59, 59, 0.959);
-  --objectHoverColor: rgb(20, 17, 17);
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
   position: absolute;
   background-color: var(--backgroundColor);
-  width: 100vw;
+  width: 100%;
   height: 101%;
   top: 100%;
   border: var(--backgroundColor), solid 2px;
   border-top-left-radius: 2em;
   border-top-right-radius: 2em;
-  font-size: 15px;
+  font-size: 1.5em;
   color: var(--fontColor);
   padding-bottom: 3%;
 }
@@ -395,8 +402,8 @@ export default {
 .event-regist > .event-regist-header {
   position: relative;
   width: 100%;
-  padding: 3% 0;
-  height: 5%;
+  padding-top: 20px;
+  height: 50px;
   text-align: center;
   font-weight: bold;
   cursor: pointer;
@@ -415,19 +422,33 @@ export default {
   overflow: scroll;
 }
 
-.photo-wrapper {
+.title-wrap {
+  margin-bottom: 3%;
+}
+.title-wrap > .title {
+  font-weight: bold;
+  width: 100%;
+  margin: 1%;
+}
+.title-wrap > .sub {
+  width: 100%;
+  margin: 1%;
+}
+
+.event-regist-body .photo-wrapper {
+  position: relative;
   width: 100%;
   height: 80%;
+  padding: 4%;
+  margin-top: 5%;
   margin-bottom: 5%;
-  padding: 2%;
-  margin-top: 3%;
   background-color: var(--objectColor);
   border-radius: 10px;
 }
 .photo-wrapper > .photo {
   position: relative;
   width: 100%;
-  height: 90%;
+  height: 80%;
   display: flex;
   margin: 0;
   padding: 1%;
@@ -455,25 +476,6 @@ export default {
   top: calc(40% - (75px / 2));
 }
 
-.event-regist-body > .regist-form {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-}
-
-.title-wrap > .title {
-  font-size: 2em;
-  font-weight: bold;
-  width: 100%;
-  margin: 1%;
-}
-.title-wrap > .sub {
-  font-size: 1em;
-  width: 100%;
-  margin: 1%;
-  font-weight: bold;
-}
-
 .btn-wrapper {
   display: flex;
   justify-content: space-around;
@@ -491,10 +493,15 @@ export default {
   border-radius: 15px;
   font-weight: bold;
 }
+
+.event-regist-body > .regist-form {
+  display: flex;
+  flex-wrap: wrap;
+}
 /* 각 컬럼 */
 .regist-form > .column {
-  width: 45%;
-  margin: 2.5%;
+  width: 50%;
+  padding: 3%;
 }
 
 .column > .sub-column {
@@ -507,10 +514,8 @@ export default {
 }
 
 .sub-column >>> .content {
-  margin-top: 10%;
-  font-size: 1.3em;
-  height: 50px;
-  margin-bottom: 10%;
+  margin-top: 5%;
+  margin-bottom: 5%;
   display: flex;
   flex-wrap: wrap;
   background-color: var(--backgroundColor);
@@ -519,7 +524,6 @@ export default {
 
 .sub-column > .wrapper {
   width: 100%;
-  height: 300px;
   height: 300px;
   overflow: scroll;
 }
@@ -538,14 +542,15 @@ export default {
 }
 .sub-column > .content.trash-scale {
   width: 100%;
-  height: 80px;
+  height: 120px;
   display: flex;
   padding-top: 10px;
+  padding-bottom: 10px;
   justify-content: space-around;
 }
 
 .sub-column > .content.trash-scale > .img {
-  width: 13%;
+  width: 16%;
   height: 80%;
   opacity: 0.5;
   cursor: pointer;
@@ -555,15 +560,21 @@ export default {
   padding: 5% 0;
   text-align: center;
 }
-
-.regist-form > .regist-btn {
+#observe {
   position: relative;
+  background-color: 'red';
+  height: 5%;
+  visibility: hidden;
+}
+.regist-btn {
+  z-index: 1;
+  position: absolute;
+  bottom: 0;
   height: 10%;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 5% 0;
   background-color: var(--objectColor);
 }
 
@@ -582,7 +593,6 @@ export default {
 
 .sub-column > .textarea {
   display: block;
-  font-size: 1em;
   color: var(--fontColor);
   padding: 3% 3%;
   background-color: var(--backgroundColor);
@@ -597,54 +607,20 @@ export default {
 }
 
 @media only screen and (max-width: 992px) {
-  .regist-detail {
-    font-size: 0.7em;
+  .event-regist {
+    font-size: 1em;
   }
 
   .regist-form > .column {
     width: 100%;
-    margin: 5% 0;
   }
   .photo-wrapper > .photo > .photo-regist {
     width: 100%;
   }
   .photo-wrapper > .photo > .photo-prev {
     width: 100%;
+    height: 100%;
+    border-radius: 20px !important;
   }
-}
-::-webkit-input-placeholder {
-  /* WebKit browsers */
-  color: var(--fontColor);
-}
-
-:-moz-placeholder {
-  /* Mozilla Firefox 4 to 18 */
-  color: var(--fontColor);
-}
-
-::-moz-placeholder {
-  /* Mozilla Firefox 19+ */
-  color: var(--fontColor);
-}
-
-:-ms-input-placeholder {
-  /* Internet Explorer 10+ */
-  color: var(--fontColor);
-}
-a:link {
-  text-decoration: none;
-  color: var(--fontColor);
-}
-
-a:visited {
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: none;
-}
-
-a:active {
-  text-decoration: none;
 }
 </style>

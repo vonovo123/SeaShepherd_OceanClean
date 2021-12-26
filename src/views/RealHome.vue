@@ -1,16 +1,16 @@
 <template>
-  <div
-    class="home-main"
-    @click="click"
-    v-touch="{
-      up: () => swipe('Up'),
-      down: () => swipe('Down'),
-    }"
-  >
+  <div class="home-main">
     <div class="home-header">
       <div class="home-header-title">SEASHEPHERD_KOREA</div>
     </div>
-    <div class="home-body">
+    <div
+      class="home-body"
+      @click="click"
+      v-touch="{
+        up: () => swipe('Up'),
+        down: () => swipe('Down'),
+      }"
+    >
       <div class="home-cover">
         <div v-show="viewIdx === 0" class="home-cover-content" id="content0">
           <div class="two">시 셰퍼드 컨저베이션 소사이어티는</div>
@@ -35,21 +35,16 @@
           </div>
         </div>
         <div v-show="viewIdx === 2" class="home-cover-content" id="content2">
-          <div class="two">환경을 위한 나의 노력을 모두에게 공유해주세요.</div>
+          <div class="two">환경을 위한 행동을 모두에게 공유해주세요.</div>
           <div class="button" @click="regist">해양청소 등록하기</div>
+          <div class="button" v-show="authInfo.isAuth" @click="logOut">
+            로그아웃
+          </div>
         </div>
       </div>
       <div class="home-content"></div>
-      <!-- <div class="home-auth">
-        <div class="home-auth-content">
-          <div class="content google">
-            <img src="../assets/images/gmail.png" alt="" />
-            <div>G-MAIL로 인증하기</div>
-          </div>
-          <div class="content user">직접입력하기</div>
-        </div>
-      </div> -->
     </div>
+    <auth v-show="showAuth"></auth>
   </div>
 </template>
 
@@ -59,17 +54,23 @@ import { GoogleMapsOverlay } from '@deck.gl/google-maps';
 import mapStyle from '../assets/style/map-style.js';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import AnimatedNumber from 'animated-number-vue';
+import Auth from '../components/Auth.vue';
+import {
+  authWithEmailLink,
+  checkEmailAuth,
+  signOutEmailAuth,
+} from '../util/firebase.js';
 import gsap from 'gsap';
 export default {
   name: 'ReadHome',
   components: {
     AnimatedNumber,
+    Auth,
   },
   computed: {
     ...mapGetters({
       eventMarkerData: 'cleanEventStore/EventMarkerData',
-      authInfo: 'googleAuthStore/AuthInfo',
-      apiAuthInfo: 'googleAuthStore/ApiAuthInfo',
+      authInfo: 'authStore/AuthInfo',
     }),
     ...mapState(['currentPosition']),
   },
@@ -80,22 +81,29 @@ export default {
       today: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
         .toISOString()
         .substring(0, 10),
-      isAuth: false,
+      showAuth: false,
+      interval: null,
+      isLoading: false,
     };
   },
   methods: {
     ...mapActions({
       setCurPosition: 'setCurPosition',
       getEventMarkers: 'cleanEventStore/getEventMarkers',
-      setAuthInfo: 'googleAuthStore/setAuthInfo',
       moveToMap: 'moveToMaps',
+      loadGoogleAuthClient: 'authStore/loadGoogleAuthClient',
+      googleSignOut: 'authStore/googleSignOut',
+      setAuthInfo: 'authStore/setAuthInfo',
     }),
     click(event) {
+      clearInterval(this.interval);
       if ([...event.target.classList].includes('button')) {
         return;
       }
-      console.log(this.viewIdx);
-      if (this.viewIdx < 1) {
+      if (!this.isLoading) {
+        return;
+      }
+      if (this.viewIdx < 2) {
         this.viewIdx++;
       } else {
         this.viewIdx = 0;
@@ -110,24 +118,11 @@ export default {
         y: 0,
         opacity: 1,
       });
-      if (this.viewIdx == 1) {
-        console.log('test');
-        setTimeout(() => {
-          this.viewIdx++;
-          const $homeCoverContent = document.querySelector(
-            `#content${this.viewIdx}`
-          );
-          $homeCoverContent.style.transfrom = 'translateY(-60px)';
-          $homeCoverContent.style.opacity = 0;
-          gsap.to($homeCoverContent, {
-            duration: 2,
-            y: 0,
-            opacity: 1,
-          });
-        }, 2500);
-      }
     },
     swipe(dir) {
+      if (!this.isLoading) {
+        return;
+      }
       if (dir === 'Up') {
         if (this.viewIdx < 2) {
           this.viewIdx++;
@@ -193,60 +188,39 @@ export default {
         }
       });
     },
-    handleClientLoad() {
-      gapi.load('client:auth2', this.initClient);
-    },
-    updateSigninStatus() {
-      console.log(this.isAuth);
-      const isAuth = gapi.auth2.getAuthInstance().isSignedIn.get();
-      this.isAuth = isAuth;
-      console.log(this.isAuth);
-      if (isAuth) {
-        gapi.client.people.people
-          .get({
-            resourceName: 'people/me',
-            personFields: 'names,emailAddresses',
-          })
-          .then(res => {
-            console.log(res.result);
-            this.setAuthInfo({
-              fullName: res.result.names[0].displayName,
-              gMail: res.result.emailAddresses[0].value,
-              isAuth: isAuth,
-            });
-          });
+    regist() {
+      if (this.authInfo.isAuth) {
+        this.moveToMap();
+      } else {
+        this.showAuth = true;
       }
     },
-    initClient() {
-      gapi.client.init(this.apiAuthInfo).then(
-        () => {
-          this.updateSigninStatus();
-          //인증상태 변화에 따라 updateSigninStatus 실행하도록
-          gapi.auth2
-            .getAuthInstance()
-            .isSignedIn.listen(this.updateSigninStatus);
-          //로그인여부 검사
-        },
-        function (error) {}
-      );
-    },
-    regist() {
-      //if (this.isAuth) {
-      this.moveToMap();
-      //}
+    async logOut() {
+      if (this.authInfo.type === 'gmail') {
+        await this.googleSignOut();
+      }
+      this.setAuthInfo({
+        fullName: '',
+        mail: '',
+        isAuth: false,
+        type: '',
+      });
     },
   },
   created() {},
   async mounted() {
+    this.isLoading = false;
     const $title = document.querySelector('.home-header-title');
     $title.style.transfrom = 'translateY(-60px)';
     $title.style.opacity = 0;
     gsap.to($title, {
-      duration: 2,
+      duration: 1,
       y: 0,
       opacity: 1,
     });
+    //현재위치
     await this.setCurPosition().catch(() => {});
+    //등록된 마커 불러오기
     await this.getEventMarkers();
     const $cover = document.querySelector('.home-cover');
     setTimeout(() => {
@@ -255,20 +229,63 @@ export default {
         backgroundColor: 'rgba(0, 0, 0, 0)',
       });
     }, 2000);
+    //맵생성
     const result = await this.initMap();
     const $homeCoverContent = document.querySelector('.home-cover-content');
     $homeCoverContent.style.transfrom = 'translateY(-60px)';
     $homeCoverContent.style.opacity = 0;
     gsap.to($homeCoverContent, {
-      duration: 3,
+      duration: 1,
       y: 0,
       opacity: 1,
     });
-
-    this.handleClientLoad();
-    // setTimeout(() => {
-    //   $cover.style.
-    // }, 2000);
+    this.interval = setInterval(() => {
+      console.log(`interval`);
+      if (this.viewIdx < 2) {
+        this.viewIdx++;
+        console.log(this.viewIdx);
+        const $homeCoverContent = document.querySelector(
+          `#content${this.viewIdx}`
+        );
+        $homeCoverContent.style.transfrom = 'translateY(-60px)';
+        $homeCoverContent.style.opacity = 0;
+        gsap.to($homeCoverContent, {
+          duration: 3,
+          y: 0,
+          opacity: 1,
+        });
+      } else {
+        clearInterval(this.interval);
+      }
+    }, 4000);
+    this.loadGoogleAuthClient();
+    const ret = await authWithEmailLink();
+    if (ret) {
+      const email = window.localStorage.getItem('emailForSignIn');
+      const name = window.localStorage.getItem('nameForSignIn');
+      await this.setAuthInfo({
+        fullName: name,
+        mail: email,
+        isAuth: true,
+        type: 'dir',
+      });
+      window.localStorage.removeItem('emailForSignIn');
+      window.localStorage.removeItem('nameForSignIn');
+      this.$store.dispatch('moveToMaps');
+    } else {
+      const curLogin = checkEmailAuth();
+      if (curLogin) {
+        console.log(curLogin.displayName);
+        await this.setAuthInfo({
+          fullName: curLogin.displayName,
+          mail: curLogin.email,
+          isAuth: true,
+          type: 'dir',
+        });
+      }
+      //signOutEmailAuth();
+    }
+    this.isLoading = true;
   },
 };
 </script>
@@ -372,55 +389,9 @@ export default {
   text-align: center;
   color: white;
   cursor: pointer;
+  margin-bottom: 20px;
 }
 .home-body > .home-cover > .home-cover-content > .button:hover {
   background-color: rgba(43, 39, 39, 0.5);
-}
-
-.home-body > .home-auth {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 3;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.home-body > .home-auth > .home-auth-content {
-  position: relative;
-  top: 20%;
-  width: 50vw;
-  height: 50%;
-  left: 50%;
-  margin-left: calc(50vw / -2);
-  background-color: white;
-  border-radius: 0.5em;
-  padding: 7% 3vw;
-}
-
-.home-body > .home-auth > .home-auth-content > .content {
-  margin-bottom: 15%;
-  padding: 3%;
-  background-color: rgb(43, 39, 39, 0.5);
-  border-radius: 10px;
-  color: white;
-}
-
-.home-body > .home-auth > .home-auth-content > .google {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 4vw;
-}
-
-.home-body > .home-auth > .home-auth-content img {
-  width: 5vw;
-  object-fit: cover;
-  margin-right: 3%;
-}
-
-.home-body > .home-auth > .home-auth-content > .user {
-  text-align: center;
-  font-size: 3vw;
 }
 </style>

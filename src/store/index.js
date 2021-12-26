@@ -1,14 +1,14 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import * as cleanEventStore from './modules/cleanEventStore.js';
-import * as googleAuthStore from './modules/googleAuthStore.js';
+import * as authStore from './modules/authStore.js';
 import router from '../router/index.js';
 import TypeError from '../util/TypeError.js';
 Vue.use(Vuex);
 export default new Vuex.Store({
   modules: {
     cleanEventStore,
-    googleAuthStore,
+    authStore,
   },
   state: {
     currentPosition: { lat: 0, lng: 0 },

@@ -41,6 +41,7 @@ export default {
       getCleanEvent: 'cleanEventStore/getCleanEvent',
       getEventMarkers: 'cleanEventStore/getEventMarkers',
       setMapSnapshot: 'cleanEventStore/setMapSnapshot',
+      googleSignOut: 'authStore/googleSignOut',
     }),
     //구글맵 생성
     initMap() {
@@ -57,14 +58,22 @@ export default {
       this.map.setCenter(this.currentPosition);
       //현재위치 마커 클릭 이벤트리스너 추가
       this.map.addListener('click', e => this.clickMapEvent(e));
-      //화면/마커 현재위치로 이동 버튼 추가
+      // 현재위치로 이동 버튼 추가
       const locationBtn = document.createElement('button');
       locationBtn.textContent = '현재위치로이동';
       locationBtn.classList.add('custom-map-control-button');
+      locationBtn.classList.add('curLoc');
       locationBtn.addEventListener('click', this.goToCurPosition);
       this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(
         locationBtn
       );
+
+      const logoutBtn = document.createElement('button');
+      logoutBtn.textContent = '나가기';
+      logoutBtn.classList.add('custom-map-control-button');
+      logoutBtn.classList.add('home');
+      logoutBtn.addEventListener('click', this.goToHome);
+      this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(logoutBtn);
     },
     //새로운 위치마커추가
     setCurMarker() {
@@ -185,6 +194,10 @@ export default {
       this.map.setZoom(16);
       this.setCurMarker();
     },
+    async goToHome() {
+      //this.googleSignOut();
+      this.$store.dispatch('moveToRealHome');
+    },
   },
   async mounted() {
     //지도생성
@@ -217,9 +230,6 @@ export default {
   width: 100%;
   font-size: 1em;
   height: 100%;
-  --inputColor: rgb(3, 3, 3);
-  --inputHoverColor: rgb(206, 246, 244);
-  --fontColor: rgb(55, 53, 47);
   position: relative;
   overflow: hidden;
   background-color: rgba(49, 48, 48, 1);
@@ -251,9 +261,15 @@ export default {
   font: 400 18px Roboto, Arial, sans-serif;
   overflow: hidden;
   height: 40px;
-  left: 50% !important;
-  margin-left: calc((8em) / -2);
   cursor: pointer;
+}
+
+.curloc {
+  left: 0 !important;
+}
+
+.home {
+  right: 0 !important;
 }
 .custom-map-control-button:hover {
   background: #ebebeb;
@@ -261,7 +277,9 @@ export default {
 .gm-ui-hover-effect {
   display: none !important;
 }
-
+.gmnoprint {
+  display: none;
+}
 /* The popup bubble styling. */
 .custom-marker-text {
   /* Position the bubble centred-above its parent. */
