@@ -1,4 +1,6 @@
 import { initializeApp } from 'firebase/app';
+
+//storage
 import {
   getStorage,
   ref,
@@ -19,6 +21,14 @@ import {
   setDoc,
 } from 'firebase/firestore';
 
+//auth
+import {
+  getAuth,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  signOut,
+} from 'firebase/auth';
 const firebaseConfig = {
   apiKey: 'AIzaSyA_VDwU58UN1eSHjLSsaKI-LbX8llEnIwQ',
   authDomain: 'seashepherd-oceanclean.firebaseapp.com',
@@ -33,11 +43,11 @@ const metadata = {
 const firebase = initializeApp(firebaseConfig);
 const storage = getStorage(firebase);
 const db = getFirestore(firebase);
+const auth = getAuth(firebase);
 //스토리지 파일 등록
 export const upLoadFile = async function (date, email, file) {
   // eslint-disable-next-line no-async-promise-executor
   try {
-    console.log('upload');
     const imageRef = ref(storage, `images/${date}/${email}/${file.name}`);
     const snapshot = await uploadBytesResumable(imageRef, file, metadata);
     const url = await getDownloadURL(snapshot.ref);
@@ -84,4 +94,37 @@ export const getData = async function (collectionName, id) {
   }
 };
 
+const actionCodeSettings = {
+  url: 'http://localhost:8080/realhome',
+  // This must be true.
+  handleCodeInApp: true,
+};
+export const sendEmailAuth = async function (email, name) {
+  sendSignInLinkToEmail(auth, email, actionCodeSettings);
+  window.localStorage.setItem('emailForSignIn', email);
+  window.localStorage.setItem('nameForSignIn', name);
+};
+
+export const authWithEmailLink = async function () {
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    console.log('true');
+    const name = window.localStorage.getItem('nameForSignIn');
+    const email = window.localStorage.getItem('emailForSignIn');
+    const result = await signInWithEmailLink(auth, email, window.location.href);
+    console.log(auth.currentUser);
+    auth.currentUser.displayName = name;
+    return true;
+  } else {
+    console.log(auth);
+    return false;
+  }
+};
+
+export const checkEmailAuth = function () {
+  return auth.currentUser;
+};
+
+export const signOutEmailAuth = function () {
+  signOut(auth);
+};
 export default firebase;
