@@ -4,22 +4,15 @@
     <div class="block" v-show="showBlock"></div>
     <event-detail @setIsAppear="setIsAppear"></event-detail>
     <event-regist @setIsAppear="setIsAppear"></event-regist>
-    <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
-    <CriticalErrorMessage
-      v-show="isCriticError"
-      :criticalErrorMessage="criticErrorMessage"
-    ></CriticalErrorMessage>
   </div>
 </template>
 
 <script>
-import ErrorMessage from '../../components/ErrorMessage.vue';
 import CurLocMaker from '../../util/CurLocMarker.js';
 import EventDetail from '../../components/EventDetail.vue';
 import EventRegist from '../../components/EventRegist.vue';
 import { mapGetters, mapActions, mapState } from 'vuex';
 import gsap from 'gsap';
-import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 export default {
   data() {
     return {
@@ -32,12 +25,13 @@ export default {
       showBlock: false,
     };
   },
-  components: { ErrorMessage, CriticalErrorMessage, EventDetail, EventRegist },
+  components: { EventDetail, EventRegist },
   methods: {
     //store Action
     ...mapActions({
       setCurPosition: 'setCurPosition',
       setCurAddress: 'setCurAddress',
+      setError: 'setError',
       getCleanEvent: 'cleanEventStore/getCleanEvent',
       getEventMarkers: 'cleanEventStore/getEventMarkers',
       setMapSnapshot: 'cleanEventStore/setMapSnapshot',
@@ -58,7 +52,7 @@ export default {
       this.map.setCenter(this.currentPosition);
       //현재위치 마커 클릭 이벤트리스너 추가
       this.map.addListener('click', e => this.clickMapEvent(e));
-      // 현재위치로 이동 버튼 추가
+      // 현재위치로 이동 버튼
       const locationBtn = document.createElement('button');
       locationBtn.textContent = '현재위치로이동';
       locationBtn.classList.add('custom-map-control-button');
@@ -67,7 +61,7 @@ export default {
       this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(
         locationBtn
       );
-
+      //나가기 버튼
       const logoutBtn = document.createElement('button');
       logoutBtn.textContent = '나가기';
       logoutBtn.classList.add('custom-map-control-button');
@@ -75,9 +69,9 @@ export default {
       logoutBtn.addEventListener('click', this.goToHome);
       this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(logoutBtn);
     },
-    //새로운 위치마커추가
+    //현재위치마커
     setCurMarker() {
-      //이벤트 리포트 컴포넌트 초기화
+      //기존 현재위치마커 삭제
       if (this.curMarker) {
         this.curMarker.setMap(null);
       }
@@ -102,18 +96,19 @@ export default {
         content
       );
       this.curMarker.setMap(this.map);
-      this.curMarker.addClickEvent(() => {
-        this.showBlock = true;
-        const $target = document.querySelector('.event-regist');
-        //$target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
-        console.log($target);
-        gsap.to($target, {
-          duration: 0.5,
-          top: '-1%',
-        });
+      this.curMarker.addClickEvent(this.fncClickCurMarker);
+    },
+    //현재위치마커 클릭시 이벤트
+    fncClickCurMarker() {
+      this.showBlock = true;
+      const $target = document.querySelector('.event-regist');
+      //$target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
+      console.log($target);
+      gsap.to($target, {
+        duration: 0.5,
+        top: '-1%',
       });
     },
-    //리포트 올라오면 지도 배경막도록
     setIsAppear(flag) {
       this.showBlock = flag;
     },
@@ -168,7 +163,10 @@ export default {
             const result = await this.getCleanEvent(e.id);
 
             if (!result) {
-              alert('데이터 없음');
+              this.setError({
+                message: '조회할 데이터가 없습니다.',
+                type: 'data',
+              });
               return;
             }
             this.snapShot(result.position);
@@ -209,12 +207,7 @@ export default {
     this.initMapDetail(); //지도에 바인딩
   },
   computed: {
-    ...mapState([
-      'isError',
-      'errorMessage',
-      'isCriticError',
-      'criticErrorMessage',
-    ]),
+    ...mapState([]),
     ...mapGetters({
       eventMarkerData: 'cleanEventStore/EventMarkerData',
       eventDetail: 'cleanEventStore/EventDetail',

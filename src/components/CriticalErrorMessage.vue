@@ -3,8 +3,8 @@
     class="criticalErrorMessage"
     @click="$store.dispatch('clickCriticError')"
   >
-    CRITICAL ERROR : {{ criticalErrorMessage }}<br />
-    페이지 클릭시 메인화면으로 돌아갑니다.
+    {{ criticalErrorMessage }}<br />
+    터치시 화면을 새로고침 합니다.
   </div>
 </template>
 
@@ -21,9 +21,8 @@ export default {
 
 <style>
 .criticalErrorMessage {
-  background-color: rgb(195, 78, 78);
-  opacity: 0.4;
-  color: white;
+  background-color: var(--objectColor);
+  color: var(--fontColor);
   font-weight: bold;
   position: fixed;
   z-index: 1001;
@@ -34,5 +33,6 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
 }
 </style>
