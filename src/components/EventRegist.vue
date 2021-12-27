@@ -163,37 +163,16 @@
           </div>
         </div>
         <div id="observe">obs</div>
-        <!--
-        <div class="copyright">
-          Icons made by
-          <a href="https://www.freepik.com" title="Freepik">
-            &nbsp; Freepik &nbsp;
-          </a>
-          from
-          <a href="https://www.flaticon.com/" title="Flaticon">
-            &nbsp; www.flaticon.com &nbsp;</a
-          >
-        </div> -->
       </div>
     </div>
-
     <div class="regist-btn" id="registBtn" @click="regist">등록</div>
-
-    <!-- <ErrorMessage v-show="isError" :errorMessage="errorMessage"></ErrorMessage>
-    <CriticalErrorMessage
-      v-show="isCriticError"
-      :criticalErrorMessage="criticErrorMessage"
-    ></CriticalErrorMessage> -->
   </div>
 </template>
 
 <script>
-// import ErrorMessage from '../../components/ErrorMessage.vue';
-// import CriticalErrorMessage from '../../components/CriticalErrorMessage.vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import Vue from 'vue';
 import Loading from 'vue-loading-overlay';
-// Import stylesheet
 import 'vue-loading-overlay/dist/vue-loading.css';
 import gsap from 'gsap';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -203,7 +182,7 @@ library.add(faCamera);
 Vue.use(Loading);
 
 export default {
-  // components: { ErrorMessage, CriticalErrorMessage },
+  components: {},
   data() {
     return {
       event: {
@@ -225,14 +204,7 @@ export default {
     ...mapGetters({
       authInfo: 'authStore/AuthInfo',
     }),
-    ...mapState([
-      'isError',
-      'errorMessage',
-      'isCriticError',
-      'criticErrorMessage',
-      'currentPosition',
-      'currentAddress',
-    ]),
+    ...mapState(['currentPosition', 'currentAddress']),
   },
   mounted() {
     this.init();

@@ -44,7 +44,7 @@
       </div>
       <div class="home-content"></div>
     </div>
-    <auth v-show="showAuth"></auth>
+    <auth v-show="showAuth" @setShowAuthFlag="setShowAuthFlag"></auth>
   </div>
 </template>
 
@@ -61,6 +61,7 @@ import {
   signOutEmailAuth,
 } from '../util/firebase.js';
 import gsap from 'gsap';
+
 export default {
   name: 'ReadHome',
   components: {
@@ -89,12 +90,16 @@ export default {
   methods: {
     ...mapActions({
       setCurPosition: 'setCurPosition',
+      setError: 'setError',
       getEventMarkers: 'cleanEventStore/getEventMarkers',
       moveToMap: 'moveToMaps',
       loadGoogleAuthClient: 'authStore/loadGoogleAuthClient',
       googleSignOut: 'authStore/googleSignOut',
       setAuthInfo: 'authStore/setAuthInfo',
     }),
+    setShowAuthFlag(flag) {
+      this.showAuth = flag;
+    },
     click(event) {
       clearInterval(this.interval);
       if ([...event.target.classList].includes('button')) {
@@ -198,6 +203,8 @@ export default {
     async logOut() {
       if (this.authInfo.type === 'gmail') {
         await this.googleSignOut();
+      } else {
+        signOutEmailAuth();
       }
       this.setAuthInfo({
         fullName: '',
@@ -209,19 +216,50 @@ export default {
   },
   created() {},
   async mounted() {
-    this.isLoading = false;
     const $title = document.querySelector('.home-header-title');
     $title.style.transfrom = 'translateY(-60px)';
     $title.style.opacity = 0;
     gsap.to($title, {
-      duration: 1,
+      duration: 2,
       y: 0,
       opacity: 1,
     });
+    let loader = this.$loading.show({
+      // Optional parameters
+      isFullPage: true,
+      canCancel: false,
+      onCancel: null,
+      color: '#ffffff',
+      backgroundColor: '#000000',
+      opacity: 0.5,
+    });
     //현재위치
-    await this.setCurPosition().catch(() => {});
-    //등록된 마커 불러오기
-    await this.getEventMarkers();
+    try {
+      await this.setCurPosition();
+      await this.getEventMarkers();
+    } catch (e) {
+      if (e === 'curPosition') {
+        this.setError({
+          message: '현재위치를 불러오는데 실패했습니다',
+          type: 'critical',
+        });
+      } else if (e === 'browserLocation') {
+        this.setError({
+          message: '브라우저 및 PC의 위치 엑세스를 허용해주세요.',
+          type: 'critical',
+        });
+      } else if (e === 'browserVersion') {
+        this.setError({
+          message:
+            '브라우저가 GPS정보를 제공하지 않습니다. 5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.',
+          type: 'critical',
+        });
+      }
+      return;
+    } finally {
+      loader.hide();
+    }
+
     const $cover = document.querySelector('.home-cover');
     setTimeout(() => {
       gsap.to($cover, {
@@ -229,6 +267,7 @@ export default {
         backgroundColor: 'rgba(0, 0, 0, 0)',
       });
     }, 2000);
+
     //맵생성
     const result = await this.initMap();
     const $homeCoverContent = document.querySelector('.home-cover-content');
@@ -239,18 +278,18 @@ export default {
       y: 0,
       opacity: 1,
     });
+
     this.interval = setInterval(() => {
       console.log(`interval`);
       if (this.viewIdx < 2) {
         this.viewIdx++;
-        console.log(this.viewIdx);
         const $homeCoverContent = document.querySelector(
           `#content${this.viewIdx}`
         );
         $homeCoverContent.style.transfrom = 'translateY(-60px)';
         $homeCoverContent.style.opacity = 0;
         gsap.to($homeCoverContent, {
-          duration: 3,
+          duration: 5,
           y: 0,
           opacity: 1,
         });
@@ -259,7 +298,7 @@ export default {
       }
     }, 4000);
     this.loadGoogleAuthClient();
-    const ret = await authWithEmailLink();
+    const ret = await aut`hWithEmailLink();
     if (ret) {
       const email = window.localStorage.getItem('emailForSignIn');
       const name = window.localStorage.getItem('nameForSignIn');
@@ -285,6 +324,7 @@ export default {
       }
       //signOutEmailAuth();
     }
+
     this.isLoading = true;
   },
 };

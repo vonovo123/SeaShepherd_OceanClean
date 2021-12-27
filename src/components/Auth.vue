@@ -2,6 +2,7 @@
   <div class="auth">
     <div class="auth-header"></div>
     <div class="auth-body">
+      <div class="close" @click="setAuthFlag($event)">닫기</div>
       <div class="auth-list">
         <div class="company google" @click="fncGMailAuth()">
           <img class="logo" src="../assets/images/gmail.png" alt="" />
@@ -11,26 +12,28 @@
     </div>
     <div class="auth-footer">
       <div class="auth-direct">
-        <div class="direct" @click="fncShowDirAuth()">
+        <div class="direct-title-wrapper" @click="fncShowDirAuth()">
           <div class="title">다른 이메일로 인증하기</div>
         </div>
-        <div class="direct-input">
-          <input
-            type="text"
-            class="input"
-            v-model="dirEmail"
-            placeholder="이메일"
-          />
+        <div class="direct-input-wrapper">
+          <div class="direct-input">
+            <input
+              type="text"
+              class="input"
+              v-model="dirEmail"
+              placeholder="이메일"
+            />
+          </div>
+          <div class="direct-input">
+            <input
+              type="text"
+              class="input"
+              v-model="dirName"
+              placeholder="이름"
+            />
+          </div>
+          <div class="direct-btn" @click="fncDirAuth()">인증</div>
         </div>
-        <div class="direct-input">
-          <input
-            type="text"
-            class="input"
-            v-model="dirName"
-            placeholder="이름"
-          />
-        </div>
-        <div class="direct-btn" @click="fncDirAuth()">인증</div>
       </div>
     </div>
   </div>
@@ -58,6 +61,10 @@ export default {
       googleSignIn: 'authStore/googleSignIn',
       googleSignOut: 'authStore/googleSignOut',
     }),
+    setAuthFlag(e) {
+      console.log(e.target);
+      this.$emit('setShowAuthFlag', false);
+    },
     async fncGMailAuth() {
       if (this.authInfo.isAuth) {
         this.$store.dispatch('moveToMaps');
@@ -82,29 +89,29 @@ export default {
     },
     fncShowDirAuth() {
       const $target = document.querySelector('.auth-footer');
-      const $input = document.querySelectorAll('.direct-input');
-      const $btn = document.querySelector('.direct-btn');
+      const $directInputWrapper = document.querySelector(
+        '.direct-input-wrapper'
+      );
       if (!this.dirFlag) {
         gsap.to($target, {
           duration: 0.2,
           height: '50%',
         });
-        gsap.to([$input, $btn], {
-          duration: 0.2,
-          opacity: 1,
+        gsap.to($directInputWrapper, {
+          duration: 0.1,
+          display: 'block',
         });
       } else {
         gsap.to($target, {
           duration: 0.2,
           height: '10%',
         });
-        gsap.to([$input, $btn], {
-          duration: 0.2,
-          opacity: 0,
+        gsap.to($directInputWrapper, {
+          duration: 0.1,
+          display: 'none',
         });
       }
       this.dirFlag = !this.dirFlag;
-      console.log(this.dirFlag);
     },
   },
   mounted() {},
@@ -137,7 +144,7 @@ export default {
   background-color: var(--backgroundColor);
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
-  padding-top: 5%;
+  padding-top: 30px;
   padding-bottom: 5%;
 }
 
@@ -146,6 +153,11 @@ export default {
   width: 100%;
   height: 100%;
   top: 15%;
+}
+.auth-body > .close {
+  position: absolute;
+  right: 30px;
+  font-size: 0.5em;
 }
 
 .auth-body .company {
@@ -187,7 +199,7 @@ export default {
   height: 100%;
 }
 
-.auth-footer > .auth-direct > .direct {
+.auth-footer > .auth-direct > .direct-title-wrapper {
   position: relative;
   width: 50%;
   height: 30px;
@@ -198,12 +210,15 @@ export default {
   align-items: center;
   justify-content: center;
 }
-
-.direct > .title {
+.direct-title-wrapper > .title {
   font-size: 0.5em;
 }
 
-.auth-footer > .auth-direct > .direct-input {
+.auth-footer > .auth-direct > .direct-input-wrapper {
+  display: none;
+}
+
+.auth-direct > .direct-input-wrapper > .direct-input {
   position: relative;
   width: 90%;
   height: 40px;
@@ -216,10 +231,9 @@ export default {
   background-color: var(--objectColor);
   border-radius: 15px;
   top: 10px;
-  opacity: 0;
 }
 
-.auth-direct > .direct-input > input {
+.direct-input > input {
   padding-left: 5%;
   width: 80%;
   height: 100%;
@@ -229,12 +243,13 @@ export default {
   font-size: 0.8em;
 }
 
-.auth-direct > .direct-input > input:focus {
+.direct-input > input:focus {
   outline: none;
 }
-.auth-direct > .direct-btn {
+.auth-direct > .direct-input-wrapper > .direct-btn {
   position: relative;
   margin-top: 50px;
+  padding: 5px;
   width: 80px;
   font-size: 0.8em;
   background-color: var(--objectColor);
@@ -242,7 +257,6 @@ export default {
   left: 50%;
   margin-left: calc(80px / -2);
   text-align: center;
-  opacity: 0;
 }
 
 @media only screen and (max-width: 414px) {

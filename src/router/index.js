@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
+import store from '@/store/index.js';
 Vue.use(VueRouter);
 
 const routes = [
@@ -13,16 +14,6 @@ const routes = [
     path: '/maps/main',
     name: 'maps/Main',
     component: () => import('../views/Maps/Main.vue'),
-  },
-  {
-    path: '/auth/main',
-    name: 'auth/Main',
-    component: () => import('../views/Auth/Main.vue'),
-  },
-  {
-    path: '/regist/main',
-    name: 'regist/Main',
-    component: () => import('../views/Regist/Main.vue'),
   },
   {
     path: '/realhome',
@@ -42,30 +33,15 @@ const router = new VueRouter({
   routes,
 });
 
-// router.beforeEach((to, from, next) => {
-//   if (to.name === '/error') {
-//     console.log(from);
-//     console.log(to);
-
-//     if (navigator.onLine) {
-//       next({ path: to.query.prev });
-//     } else {
-//       next({ params: { type: to.params } });
-//     }
-//   } else {
-//     next();
-//     // if (navigator.onLine) {
-//     //   next();
-//     // } else {
-//     //   next();
-//     //   console.log(to);
-//     //   const prev = !to.name ? 'Home' : to.name;
-//     //   console.log(prev);
-//     //   next({
-//     //     name: '/error',
-//     //     query: { type: 'NetworkError', prev: prev },
-//     //   });
-//     // }
-//   }
-// });
+router.beforeEach((to, from, next) => {
+  if (navigator.onLine) {
+    next();
+  } else {
+    console.log('offLine');
+    store.dispatch('setError', {
+      message: '인터넷 연결상태를 확인해주세요.',
+      type: 'critical',
+    });
+  }
+});
 export default router;

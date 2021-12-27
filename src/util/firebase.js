@@ -28,6 +28,7 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink,
   signOut,
+  updateProfile,
 } from 'firebase/auth';
 const firebaseConfig = {
   apiKey: 'AIzaSyA_VDwU58UN1eSHjLSsaKI-LbX8llEnIwQ',
@@ -95,7 +96,7 @@ export const getData = async function (collectionName, id) {
 };
 
 const actionCodeSettings = {
-  url: 'http://localhost:8080/realhome',
+  url: 'https://4f42-2001-2d8-e196-a7e0-214b-7ada-73cb-2011.ngrok.io/realhome',
   // This must be true.
   handleCodeInApp: true,
 };
@@ -111,11 +112,13 @@ export const authWithEmailLink = async function () {
     const name = window.localStorage.getItem('nameForSignIn');
     const email = window.localStorage.getItem('emailForSignIn');
     const result = await signInWithEmailLink(auth, email, window.location.href);
-    console.log(auth.currentUser);
-    auth.currentUser.displayName = name;
+    updateProfile(auth.currentUser, { displayName: name });
     return true;
   } else {
-    console.log(auth);
+    if (auth.currentUser) {
+      console.log(auth.currentUser.displayName); //displayName = '권현우';
+    }
+
     return false;
   }
 };
