@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
-
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
+const VUE_APP_FIREBASE = process.env.VUE_APP_FIREBASE;
 //storage
 import {
   getStorage,
@@ -31,7 +33,8 @@ import {
   updateProfile,
 } from 'firebase/auth';
 const firebaseConfig = {
-  apiKey: 'AIzaSyA_VDwU58UN1eSHjLSsaKI-LbX8llEnIwQ',
+  //apiKey: 'AIzaSyA_VDwU58UN1eSHjLSsaKI-LbX8llEnIwQ',
+  apiKey: VUE_APP_FIREBASE,
   authDomain: 'seashepherd-oceanclean.firebaseapp.com',
   databaseURL: 'https://seashepherd-oceanclean-default-rtdb.firebaseio.com',
   projectId: 'seashepherd-oceanclean',
@@ -96,7 +99,8 @@ export const getData = async function (collectionName, id) {
 };
 
 const actionCodeSettings = {
-  url: 'https://4f42-2001-2d8-e196-a7e0-214b-7ada-73cb-2011.ngrok.io/realhome',
+  //url: 'http://localhost:8080/realhome',
+  url: 'https://679d-223-62-216-243.ngrok.io/realhome',
   // This must be true.
   handleCodeInApp: true,
 };
@@ -105,20 +109,15 @@ export const sendEmailAuth = async function (email, name) {
   window.localStorage.setItem('emailForSignIn', email);
   window.localStorage.setItem('nameForSignIn', name);
 };
-
+//이메일 인증 aipkey를 가지고 첫화면에 접근했는지 판단
 export const authWithEmailLink = async function () {
   if (isSignInWithEmailLink(auth, window.location.href)) {
-    console.log('true');
     const name = window.localStorage.getItem('nameForSignIn');
     const email = window.localStorage.getItem('emailForSignIn');
-    const result = await signInWithEmailLink(auth, email, window.location.href);
+    await signInWithEmailLink(auth, email, window.location.href);
     updateProfile(auth.currentUser, { displayName: name });
     return true;
   } else {
-    if (auth.currentUser) {
-      console.log(auth.currentUser.displayName); //displayName = '권현우';
-    }
-
     return false;
   }
 };

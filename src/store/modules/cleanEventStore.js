@@ -35,15 +35,11 @@ export const getters = {
 export const actions = {
   //마커 데이터 조회
   getEventMarkers: async ({ commit }) => {
-    try {
-      const eventMarkers = await api.fetch('getEventMarkers', {
-        method: 'get',
-        table: 'markers',
-      });
-      commit(SET_EVENT_MARKERS, eventMarkers);
-    } catch (error) {
-      commit('SET_ERROR', error, { root: true });
-    }
+    const eventMarkers = await api.fetch('getEventMarkers', {
+      method: 'get',
+      table: 'markers',
+    });
+    commit(SET_EVENT_MARKERS, eventMarkers);
   },
   getCleanEvent: async ({ commit }, id) => {
     const event = await api.fetch('getCleanEvent', {
