@@ -1,6 +1,10 @@
 <template>
   <div class="home-main">
     <div class="home-header">
+      <!-- <div class="home-header-btn-wrapper">
+        <div class="button">등록하기</div>
+        <div class="button">로그아웃</div>
+      </div> -->
       <div class="home-header-title">SEASHEPHERD_KOREA</div>
     </div>
     <div
@@ -84,7 +88,6 @@ export default {
         .substring(0, 10),
       showAuth: false,
       interval: null,
-      isLoading: false,
     };
   },
   methods: {
@@ -105,9 +108,6 @@ export default {
       if ([...event.target.classList].includes('button')) {
         return;
       }
-      if (!this.isLoading) {
-        return;
-      }
       if (this.viewIdx < 2) {
         this.viewIdx++;
       } else {
@@ -125,9 +125,6 @@ export default {
       });
     },
     swipe(dir) {
-      if (!this.isLoading) {
-        return;
-      }
       if (dir === 'Up') {
         if (this.viewIdx < 2) {
           this.viewIdx++;
@@ -159,39 +156,41 @@ export default {
         .replace(/\B(?=(\d{3})+(?!\d))/g, ',')} 킬로그램`;
     },
     initMap() {
-      return new Promise((rs, rj) => {
-        try {
-          const mapOptions = {
-            center: this.currentPosition,
-            zoom: 6,
-            styles: mapStyle,
-          };
-          const mapDiv = document.querySelector('.home-content');
-          this.map = new google.maps.Map(mapDiv, mapOptions);
-          const layerOptions = {
-            id: 'scatterplot',
-            data: this.eventMarkerData,
-            getPosition: d => [
-              parseFloat(d.position.lng),
-              parseFloat(d.position.lat),
-            ],
-            getRadius: d => parseInt(d.scale),
-            stroked: true,
-            getFillColor: [255, 133, 27],
-            getLineColor: [255, 38, 27],
-            radiusMinPixels: 5,
-            radiusMaxPixels: 50,
-          };
-          const scatterplotLayer = new ScatterplotLayer(layerOptions);
-          const googleMapsOverlay = new GoogleMapsOverlay({
-            layers: [scatterplotLayer],
-          });
-          googleMapsOverlay.setMap(this.map);
-          rs('done');
-        } catch (e) {
-          rj(e);
-        }
-      });
+      //지도 설정
+      const mapOptions = {
+        center: this.currentPosition,
+        zoom: 6,
+        styles: mapStyle,
+      };
+      //지도 바인딩할 돔객체
+      const mapDiv = document.querySelector('.home-content');
+      //지도 생성
+      try {
+        this.map = new google.maps.Map(mapDiv, mapOptions);
+        //시각화 지도 생성
+        const layerOptions = {
+          id: 'scatterplot',
+          data: this.eventMarkerData,
+          getPosition: d => [
+            parseFloat(d.position.lng),
+            parseFloat(d.position.lat),
+          ],
+          getRadius: d => parseInt(d.scale),
+          stroked: true,
+          getFillColor: [255, 133, 27],
+          getLineColor: [255, 38, 27],
+          radiusMinPixels: 5,
+          radiusMaxPixels: 50,
+        };
+
+        const scatterplotLayer = new ScatterplotLayer(layerOptions);
+        const googleMapsOverlay = new GoogleMapsOverlay({
+          layers: [scatterplotLayer],
+        });
+        googleMapsOverlay.setMap(this.map);
+      } catch (e) {
+        throw new Error();
+      }
     },
     regist() {
       if (this.authInfo.isAuth) {
@@ -234,32 +233,55 @@ export default {
       opacity: 0.5,
     });
     //현재위치
+
     try {
-      await this.setCurPosition();
-      await this.getEventMarkers();
-    } catch (e) {
-      if (e === 'curPosition') {
-        this.setError({
-          message: '현재위치를 불러오는데 실패했습니다',
-          type: 'critical',
+      //직접입력한 이메일링크를 통해 들어온 상태인지 확인
+      const isDirAuth = await authWithEmailLink();
+      //링크를 통했으면
+      if (isDirAuth) {
+        const email = window.localStorage.getItem('emailForSignIn');
+        const name = window.localStorage.getItem('nameForSignIn');
+        await this.setAuthInfo({
+          fullName: name,
+          mail: email,
+          isAuth: true,
+          type: 'dir',
         });
-      } else if (e === 'browserLocation') {
-        this.setError({
-          message: '브라우저 및 PC의 위치 엑세스를 허용해주세요.',
-          type: 'critical',
-        });
-      } else if (e === 'browserVersion') {
-        this.setError({
-          message:
-            '브라우저가 GPS정보를 제공하지 않습니다. 5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.',
-          type: 'critical',
-        });
+        window.localStorage.removeItem('emailForSignIn');
+        window.localStorage.removeItem('nameForSignIn');
+        //사용자 정보 획득후 이벤트등록 화면으로 이동
+        this.$store.dispatch('moveToMaps');
+        return;
+        //그냥 들어온상태면
+      } else {
+        const curLogin = checkEmailAuth();
+        //직접인증된 상태인지 확인
+        if (curLogin) {
+          await this.setAuthInfo({
+            fullName: curLogin.displayName,
+            mail: curLogin.email,
+            isAuth: true,
+            type: 'dir',
+          });
+        }
       }
+      //현재위치 조회
+      await this.setCurPosition();
+      //마커데이터 조회
+      await this.getEventMarkers();
+      //지도정보 초기화
+      this.initMap();
+    } catch (e) {
+      const message = e.message;
+      this.setError({
+        message,
+        type: 'critical',
+      });
       return;
     } finally {
       loader.hide();
     }
-
+    //지도로드 후 화면에 보여주기 animation
     const $cover = document.querySelector('.home-cover');
     setTimeout(() => {
       gsap.to($cover, {
@@ -267,9 +289,7 @@ export default {
         backgroundColor: 'rgba(0, 0, 0, 0)',
       });
     }, 2000);
-
-    //맵생성
-    const result = await this.initMap();
+    // 텍스트 보여주기 animation
     const $homeCoverContent = document.querySelector('.home-cover-content');
     $homeCoverContent.style.transfrom = 'translateY(-60px)';
     $homeCoverContent.style.opacity = 0;
@@ -278,9 +298,8 @@ export default {
       y: 0,
       opacity: 1,
     });
-
+    //5초후 텍스트 변경
     this.interval = setInterval(() => {
-      console.log(`interval`);
       if (this.viewIdx < 2) {
         this.viewIdx++;
         const $homeCoverContent = document.querySelector(
@@ -297,35 +316,8 @@ export default {
         clearInterval(this.interval);
       }
     }, 4000);
+    //구글인증 초기화
     this.loadGoogleAuthClient();
-    const ret = await aut`hWithEmailLink();
-    if (ret) {
-      const email = window.localStorage.getItem('emailForSignIn');
-      const name = window.localStorage.getItem('nameForSignIn');
-      await this.setAuthInfo({
-        fullName: name,
-        mail: email,
-        isAuth: true,
-        type: 'dir',
-      });
-      window.localStorage.removeItem('emailForSignIn');
-      window.localStorage.removeItem('nameForSignIn');
-      this.$store.dispatch('moveToMaps');
-    } else {
-      const curLogin = checkEmailAuth();
-      if (curLogin) {
-        console.log(curLogin.displayName);
-        await this.setAuthInfo({
-          fullName: curLogin.displayName,
-          mail: curLogin.email,
-          isAuth: true,
-          type: 'dir',
-        });
-      }
-      //signOutEmailAuth();
-    }
-
-    this.isLoading = true;
   },
 };
 </script>
@@ -344,6 +336,8 @@ export default {
   height: 100%;
   overflow: hidden;
   background-color: black;
+  color: var(--fontColor);
+  font-size: 1.2em;
 }
 
 .home-main > .home-header {
@@ -354,13 +348,28 @@ export default {
   z-index: 2;
 }
 
+.home-main > .home-header > .home-header-btn-wrapper {
+  position: relative;
+  top: 20%;
+  left: 50%;
+  display: flex;
+  width: 50%;
+}
+.home-header-btn-wrapper > .button {
+  position: relative;
+  background-color: var(--objectColor);
+  width: 50%;
+  padding: 2%;
+  margin: 2%;
+  text-align: center;
+  border-radius: 10px;
+}
 .home-main > .home-header > .home-header-title {
-  color: white;
   position: relative;
   top: 70%;
   text-align: center;
-  font-size: 7vw;
   font-weight: bold;
+  font-size: 1.5em;
 }
 
 .home-main > .home-body {
@@ -368,7 +377,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: black;
+  background-color: rgba(0, 0, 0, 1);
 }
 .home-main > .home-body > .home-cover {
   position: absolute;
@@ -377,8 +386,6 @@ export default {
   background-color: rgba(0, 0, 0, 1);
   width: 100%;
   height: 100%;
-  color: white;
-  font-size: 4vw;
   z-index: 1;
 }
 
@@ -418,16 +425,14 @@ export default {
 }
 .home-body > .home-cover > .home-cover-content > .button {
   position: relative;
-  background-color: rgb(43, 39, 39);
-  width: 40%;
+  background-color: var(--objectColor);
+  width: 200px;
   border-radius: 0.5em;
   padding: 2% 2%;
   top: 60%;
   left: 50%;
-  font-size: 4vw;
-  margin-left: calc(36vw / -2);
+  margin-left: calc(200px / -2);
   text-align: center;
-  color: white;
   cursor: pointer;
   margin-bottom: 20px;
 }

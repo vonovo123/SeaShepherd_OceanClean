@@ -32,6 +32,7 @@
               placeholder="이름"
             />
           </div>
+          <div class="direct-text">{{ dirStatus }}</div>
           <div class="direct-btn" @click="fncDirAuth()">인증</div>
         </div>
       </div>
@@ -43,12 +44,14 @@
 import { mapState, mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
 import { sendEmailAuth } from '../util/firebase.js';
+import { emailRegExp } from '../util/regExp.js';
 export default {
   data() {
     return {
       dirFlag: false,
       dirName: '',
       dirEmail: '',
+      dirStatus: '',
     };
   },
   computed: {
@@ -60,32 +63,68 @@ export default {
       setAuthInfo: 'authStore/setAuthInfo',
       googleSignIn: 'authStore/googleSignIn',
       googleSignOut: 'authStore/googleSignOut',
+      setError: 'setError',
     }),
     setAuthFlag(e) {
-      console.log(e.target);
       this.$emit('setShowAuthFlag', false);
     },
+    //gmail로 인증 이벤트
     async fncGMailAuth() {
       if (this.authInfo.isAuth) {
         this.$store.dispatch('moveToMaps');
+        this.$emit('setShowAuthFlag', false);
       } else {
         try {
           await this.googleSignIn();
+          this.$emit('setShowAuthFlag', false);
           this.$store.dispatch('moveToMaps');
         } catch (e) {
-          alert(e);
+          if (e.error) {
+            //인증화면 닫은경우
+            if (e.error === 'popup_closed_by_user') {
+              this.setError({
+                message: '사용자에 의해 gmail 인증이 취소됐습니다.',
+                type: 'browser',
+              });
+            } else {
+              this.setError({
+                message: e.error,
+                type: 'browser',
+              });
+            }
+          } else {
+            this.setError({
+              message:
+                '사용자인증 중 알 수 없는 문제가 발생했습니다. 잠시후 다시 시도바랍니다.',
+              type: 'critical',
+            });
+          }
         }
       }
     },
+    //직접입력한 이메일로 인증
     async fncDirAuth() {
-      sendEmailAuth(this.dirEmail, this.dirName);
-      // await this.setAuthInfo({
-      //   fullName: this.dirName,
-      //   mail: this.dirEmail,
-      //   isAuth: true,
-      //   type: 'dir',
-      // });
-      // this.$store.dispatch('moveToMaps');
+      if (this.dirEmail === '') {
+        this.dirStatus = '이메일을 입력해주세요';
+        return;
+      }
+
+      if (this.dirName === '') {
+        this.dirStatus = '이름을 입력해주세요';
+        return;
+      }
+
+      if (emailRegExp.test(this.dirEmail)) {
+        sendEmailAuth(this.dirEmail, this.dirName);
+        this.dirStatus = '입력하신 이메일로 인증메일을 전송했습니다';
+        document.querySelector('.direct-btn').style.display = 'none';
+        setTimeout(() => {
+          document.querySelector('.direct-btn').style.display = 'block';
+          this.dirStatus = '';
+        }, 3000);
+      } else {
+        this.dirStatus = '이메일 형식을 다시 확인해주세요';
+      }
     },
     fncShowDirAuth() {
       const $target = document.querySelector('.auth-footer');
@@ -140,7 +179,7 @@ export default {
 .auth .auth-body {
   position: relative;
   width: 100%;
-  height: 40%;
+  height: 30%;
   background-color: var(--backgroundColor);
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
@@ -152,7 +191,7 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
-  top: 15%;
+  top: 30px;
 }
 .auth-body > .close {
   position: absolute;
@@ -231,6 +270,19 @@ export default {
   background-color: var(--objectColor);
   border-radius: 15px;
   top: 10px;
+}
+.auth-direct > .direct-input-wrapper > .direct-text {
+  position: relative;
+  width: 90%;
+  height: 20px;
+  left: 50%;
+  margin-left: calc(90% / -2);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5em;
+  top: 5px;
 }
 
 .direct-input > input {

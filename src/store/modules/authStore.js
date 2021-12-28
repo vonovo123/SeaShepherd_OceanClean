@@ -1,7 +1,10 @@
 export const namespaced = true;
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
+const VUE_APP_GOOGLE_MAP = process.env.VUE_APP_GOOGLE_MAP;
 export const state = {
   apiAuthInfo: {
-    apiKey: 'AIzaSyCXVH4IUV06E6o_wtJjllitCNf99XT2B8E',
+    apiKey: VUE_APP_GOOGLE_MAP,
     clientId:
       '819954997763-50ogor1sa12gthhqr0gc1to9th02orvk.apps.googleusercontent.com',
     discoveryDocs: [
@@ -30,12 +33,6 @@ export const getters = {
   },
 };
 export const actions = {
-  setAuthInfo: function ({ commit }, authInfo) {
-    return new Promise((resolve, reject) => {
-      commit('SET_AUTH_INFO', authInfo);
-      resolve();
-    });
-  },
   initGoogleAuthClient: async () => {
     await gapi.client.init(state.apiAuthInfo);
     await actions.updateGoogleSigninStatus();
@@ -43,14 +40,22 @@ export const actions = {
   loadGoogleAuthClient: function () {
     gapi.load('client:auth2', actions.initGoogleAuthClient);
   },
+  setAuthInfo: function ({ commit }, authInfo) {
+    return new Promise((resolve, reject) => {
+      commit('SET_AUTH_INFO', authInfo);
+      resolve();
+    });
+  },
   updateGoogleSigninStatus: async () => {
-    console.log('update');
+    //인증여부확인
     const isAuth = await gapi.auth2.getAuthInstance().isSignedIn.get();
+    //인증시 google계정에 등록된 사용자정보 가져오기
     if (isAuth) {
       const res = await gapi.client.people.people.get({
         resourceName: 'people/me',
         personFields: 'names,emailAddresses',
       });
+      //인증정보 갱신
       state.authInfo = {
         fullName: res.result.names[0].displayName,
         mail: res.result.emailAddresses[0].value,
@@ -59,12 +64,19 @@ export const actions = {
       };
     }
   },
+  //인증
   googleSignIn: async () => {
     await gapi.auth2.getAuthInstance().signIn();
     await actions.updateGoogleSigninStatus();
-    return 'signIn';
   },
+  //인증종료
   googleSignOut: async () => {
     await gapi.auth2.getAuthInstance().signOut();
+    state.authInfo = {
+      fullName: '',
+      mail: '',
+      isAuth: false,
+      type: '',
+    };
   },
 };

@@ -95,56 +95,41 @@ export default new Vuex.Store({
       commit('SET_ERROR', new TypeError(message, type));
     },
     //현재위치 지정
-    setCurPosition: ({ commit }, pos) => {
-      return new Promise((resolve, reject) => {
-        if (!pos) {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              position => {
-                if (position) {
-                  const pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                  };
-                  //현재위치
-                  commit('SET_CUR_POSITON', pos);
-                  //선택된 마커위치
-                  resolve();
-                } else {
-                  reject('curPosition');
-                }
-              },
-              e => {
-                reject('browserLocation');
-              }
-            );
-          } else {
-            reject('browserVersion');
+
+    setCurPosition: async ({ commit }, pos) => {
+      if (!pos) {
+        if (navigator.geolocation) {
+          try {
+            const getPosition = function () {
+              return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject);
+              });
+            };
+            const position = await getPosition();
+            if (!position) {
+              throw new Error('noAccess');
+            }
+            commit('SET_CUR_POSITON', {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          } catch (e) {
+            let message =
+              '브라우저가 GPS정보를 제공하지 않습니다. 5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.';
+            if (e.message === 'noAccess') {
+              message = '현재위치정보를 확인 할 수 없습니다.';
+            }
+            throw new Error(message);
           }
         } else {
-          commit('SET_CUR_POSITON', pos);
-          resolve();
+          throw new Error('브라우저 및 PC의 위치 엑세스를 허용해주세요.');
         }
-      });
+      } else {
+        commit('SET_CUR_POSITON', pos);
+      }
     },
     setCurAddress({ commit }, address) {
       commit('SET_CUR_ADDRESS', address);
-    },
-    setConnectionStatus: ({ commit }) => {
-      return new Promise((resolve, reject) => {
-        if (!navigator.onLine) {
-          commit(
-            'SET_ERROR',
-            new TypeError(
-              '에러: 인터넷에 연결되어있지 않습니다. 연결상태를 확인해주세요.',
-              'critical'
-            )
-          );
-          resolve('offLine');
-        } else {
-          resolve('onLine');
-        }
-      });
     },
   },
 });

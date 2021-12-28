@@ -13,6 +13,9 @@ import EventDetail from '../../components/EventDetail.vue';
 import EventRegist from '../../components/EventRegist.vue';
 import { mapGetters, mapActions, mapState } from 'vuex';
 import gsap from 'gsap';
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
+const VUE_APP_GOOGLE_MAP = process.env.VUE_APP_GOOGLE_MAP;
 export default {
   data() {
     return {
@@ -39,25 +42,34 @@ export default {
     }),
     //구글맵 생성
     initMap() {
-      this.map = new google.maps.Map(document.querySelector('.body'), {
-        center: this.currentPosition,
-        zoom: 16,
-      });
+      try {
+        this.map = new google.maps.Map(document.querySelector('.body'), {
+          center: this.currentPosition,
+          zoom: 16,
+        });
+        //mounted에서 최종예외처리
+      } catch (e) {
+        throw new Error(
+          '구글 지도 불러오기에 실패했습니다. 잠시후 다시 시도 바랍니다.'
+        );
+      }
     },
+    //지도위의 요소추가
     initMapDetail() {
       //현재위치마커 추가
+      //mounted에서 최종예외처리
       this.setCurMarker();
-      //이벤트 마커 추가
       this.setEventMarkers();
+      //이벤트 마커 추가
       this.map.setCenter(this.currentPosition);
       //현재위치 마커 클릭 이벤트리스너 추가
       this.map.addListener('click', e => this.clickMapEvent(e));
       // 현재위치로 이동 버튼
       const locationBtn = document.createElement('button');
-      locationBtn.textContent = '현재위치로이동';
+      locationBtn.textContent = '현재위치';
       locationBtn.classList.add('custom-map-control-button');
       locationBtn.classList.add('curLoc');
-      locationBtn.addEventListener('click', this.goToCurPosition);
+      locationBtn.addEventListener('click', this.clickCurPosition);
       this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(
         locationBtn
       );
@@ -70,40 +82,39 @@ export default {
       this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(logoutBtn);
     },
     //현재위치마커
-    setCurMarker() {
-      //기존 현재위치마커 삭제
-      if (this.curMarker) {
-        this.curMarker.setMap(null);
-      }
-      const content = document.createElement('div');
-      content.innerHTML = '여기로 </br> 등록하기';
-      content.classList.add('custom-marker-text');
-      const geocoder = new google.maps.Geocoder();
-      // eslint-disable-next-line vue/no-async-in-computed-properties
-      geocoder
-        .geocode({ location: this.currentPosition })
-        .then(response => {
-          this.setCurAddress(response.results[0].formatted_address);
-        })
-        .catch(e => {
-          //this.event.address = '주소가 정확하지않습니다.';
+    async setCurMarker() {
+      try {
+        const content = document.createElement('div');
+        content.innerHTML = '등록하기';
+        content.classList.add('custom-marker-text');
+        const geocoder = new google.maps.Geocoder();
+        const address = await geocoder.geocode({
+          location: this.currentPosition,
         });
-      this.curMarker = new CurLocMaker(
-        new google.maps.LatLng(
-          this.currentPosition.lat,
-          this.currentPosition.lng
-        ),
-        content
-      );
-      this.curMarker.setMap(this.map);
-      this.curMarker.addClickEvent(this.fncClickCurMarker);
+        this.setCurAddress(address.results[0].formatted_address);
+        //기존 현재위치마커 삭제
+        if (this.curMarker) {
+          this.curMarker.setMap(null);
+        }
+        this.curMarker = new CurLocMaker(
+          new google.maps.LatLng(
+            this.currentPosition.lat,
+            this.currentPosition.lng
+          ),
+          content
+        );
+        this.curMarker.setMap(this.map);
+        this.curMarker.addClickEvent(this.fncClickCurMarker);
+      } catch (e) {
+        throw new Error(
+          '현재위치 조회에 실패했습니다. 브라우저의 위치정보 wo공상태를 확인하세요.'
+        );
+      }
     },
     //현재위치마커 클릭시 이벤트
     fncClickCurMarker() {
       this.showBlock = true;
       const $target = document.querySelector('.event-regist');
-      //$target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
-      console.log($target);
       gsap.to($target, {
         duration: 0.5,
         top: '-1%',
@@ -112,12 +123,20 @@ export default {
     setIsAppear(flag) {
       this.showBlock = flag;
     },
-    //맵 클릭하는 위치로  현재위치 마커 변경
-    clickMapEvent(e) {
-      const lat = e.latLng.lat();
-      const lng = e.latLng.lng();
-      this.setCurPosition({ lat, lng }).then(() => {
-        this.setCurMarker();
+    //정화활동 이벤트 모두 추가
+    setEventMarkers() {
+      this.eventMarkers = this.eventMarkerData.map(e => {
+        const content = document.createElement('img');
+        content.classList.add('custom-marker-img');
+        content.src = require('@/assets/images/pngwing.png');
+        const marker = new CurLocMaker(
+          new google.maps.LatLng(e.position.lat, e.position.lng),
+          content
+        );
+        marker.setMap(this.map);
+        marker.addClickEvent(() => {
+          this.clickEventMarker(e);
+        });
       });
     },
     snapShot(position) {
@@ -131,80 +150,107 @@ export default {
 
       //Set the Google Map Zoom.
       staticMapUrl += '&zoom=16';
-
-      //Set the Google Map Type.
-      //staticMapUrl += '&maptype=' + mapOptions.mapTypeId;
-
-      //Loop and add Markers.
       staticMapUrl +=
         '&markers=color:black|' + position.lat + ',' + position.lng;
-      staticMapUrl += '&key=AIzaSyBa6g8Z_9Tm2vH7HG9j6YXgzJsUh3LgveI';
-      console.log(staticMapUrl);
+      staticMapUrl += `&key=${VUE_APP_GOOGLE_MAP}`;
       this.setMapSnapshot(staticMapUrl);
     },
-    //정화활동 이벤트 모두 추가
-    setEventMarkers() {
-      this.eventMarkers = this.eventMarkerData.map(e => {
-        const content = document.createElement('img');
-        content.classList.add('custom-marker-img');
-        content.src = require('@/assets/images/pngwing.png');
-        //content.innerHTML = '마커';
-        const marker = new CurLocMaker(
-          new google.maps.LatLng(e.position.lat, e.position.lng),
-          content
-        );
-        marker.setMap(this.map);
-        marker.addClickEvent(async () => {
-          //처음 조회하거나 다른 event를 조회하는 경우
-          if (
-            !this.eventDetail ||
-            (this.eventDetail && e.id != this.eventDetail.id)
-          ) {
-            const result = await this.getCleanEvent(e.id);
-
-            if (!result) {
-              this.setError({
-                message: '조회할 데이터가 없습니다.',
-                type: 'data',
-              });
-              return;
-            }
-            this.snapShot(result.position);
+    async clickEventMarker(event) {
+      //처음 조회하거나 다른 event를 조회하는 경우
+      if (
+        !this.eventDetail ||
+        (this.eventDetail && event.id != this.eventDetail.id)
+      ) {
+        try {
+          const result = await this.getCleanEvent(event.id);
+          if (!result) {
+            throw new Error('noData');
           }
-
-          //이미 조회한 데이터를 다시 조회하는 경우 화면만 올리기
+          this.snapShot(result.position);
           this.showBlock = true;
           const $target = document.querySelector('.event-detail');
-          // $target.childNodes[0].textContent = '눌러서 활동리포트 닫기';
           gsap.to($target, {
             duration: 0.5,
             top: '0',
-            // borderTopLeftRadius: '0',
-            // borderTopRightRadius: '0',
           });
-        });
-      });
+        } catch (e) {
+          if (e.message === 'noData') {
+            this.setError({
+              message: '조회할 데이터가 존재하지않습니다.',
+              type: 'browser',
+            });
+          } else {
+            const message = e.message;
+            this.setError({
+              message,
+              type: 'critical',
+            });
+          }
+        }
+      }
+
+      //이미 조회한 데이터를 다시 조회하는 경우 화면만 올리기
     },
-    //현재위치마커위치 현재위치로 이동
-    async goToCurPosition() {
-      await this.setCurPosition();
-      this.map.setCenter(this.currentPosition);
-      this.map.setZoom(16);
-      this.setCurMarker();
+    //현재위치로이동 버튼을 통해 현재위치마커를 현재위치로 이동
+    async clickCurPosition() {
+      try {
+        await this.setCurPosition();
+        await this.setCurMarker();
+        this.map.setCenter(this.currentPosition);
+        this.map.setZoom(16);
+      } catch (e) {
+        let message = e.message;
+        this.setError({
+          message,
+          type: 'critical',
+        });
+      }
+    },
+    //맵 클릭하는 위치로  현재위치 마커 변경
+    async clickMapEvent(e) {
+      try {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        await this.setCurPosition({ lat, lng });
+        await this.setCurMarker();
+      } catch (e) {
+        let message = e.message;
+        this.setError({
+          message,
+          type: 'critical',
+        });
+      }
     },
     async goToHome() {
-      //this.googleSignOut();
       this.$store.dispatch('moveToRealHome');
     },
   },
   async mounted() {
-    //지도생성
-    this.initMap();
-    //현재위치
-    await this.setCurPosition().catch(() => {});
-    //해양정화활동 이벤트 로드
-    await this.getEventMarkers();
-    this.initMapDetail(); //지도에 바인딩
+    let loader = this.$loading.show({
+      isFullPage: true,
+      canCancel: false,
+      onCancel: null,
+      color: '#ffffff',
+      backgroundColor: '#000000',
+      opacity: 0.5,
+    });
+    try {
+      //지도생성
+      this.initMap();
+      //현재위치
+      await this.setCurPosition();
+      //해양정화활동 이벤트 로드
+      await this.getEventMarkers();
+      this.initMapDetail(); //지도에 바인딩
+    } catch (e) {
+      let message = e.message;
+      this.setError({
+        message,
+        type: 'critical',
+      });
+    } finally {
+      loader.hide();
+    }
   },
   computed: {
     ...mapState([]),
