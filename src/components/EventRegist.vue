@@ -11,7 +11,7 @@
           <label
             class="photo-regist"
             for="photoFirst"
-            v-show="event.photos.length < 10"
+            v-show="event.photos && event.photos.length < 10"
           >
             <font-awesome-icon
               class="icon"
@@ -118,7 +118,7 @@
           <div class="sub-column">
             <div class="title-wrap">
               <div class="title">함께한 사람</div>
-              <div class="sub">EMAIL 주소를 적어주세요.</div>
+              <div class="sub">email 주소를 남겨주세요.</div>
             </div>
             <div class="btn-wrapper">
               <div class="btn" @click="addCompanion">➕ 추가</div>
@@ -131,33 +131,39 @@
           <div class="sub-column">
             <div class="title-wrap">
               <div class="title">쓰레기 수거량</div>
-              <div class="sub">대략적인 수거량을 선택해주세요.</div>
+              <div class="sub"></div>
             </div>
             <div class="content trash-scale">
               <img
                 class="img"
-                v-for="idx in 6"
+                v-for="idx in 5"
                 :key="idx"
-                @click="clickTrachCan(idx)"
+                @click="clickTrachCan($event, idx)"
                 src="../assets/images/recycling-bag.png"
               />
             </div>
-            <div class="text trash-scale" v-if="event.scale < 6">
-              {{ 20 * event.scale }}kg 미만의 쓰레기를 수거했습니다.
+            <div class="text trash-scale" v-if="event.scale === 0">
+              20킬로그램보다 적은 쓰레기를 수거했습니다
+            </div>
+            <div
+              class="text trash-scale"
+              v-else-if="event.scale < 5 && event.scale > 0"
+            >
+              {{ 20 + 20 * event.scale }}킬로그램보다 적은 쓰레기를 수거했습니다
             </div>
             <div class="text trash-scale" v-else>
-              100kg 이상의 쓰레기를 수거했습니다.
+              100킬로그램보다 많은 쓰레기를 수거했습니다.
             </div>
           </div>
           <div class="sub-column">
             <div class="title-wrap">
               <div class="title">청소 후기</div>
-              <div class="sub">청소 후기를 공유해주세요.</div>
+              <div class="sub"></div>
             </div>
             <textarea
               class="textarea"
               type="text"
-              placeholder="간단한 활동내역을 작성해주세요."
+              placeholder="청소 후기를 공유해주세요."
               v-model="event.memo"
             />
           </div>
@@ -195,7 +201,7 @@ export default {
         photoUrl: [],
         companions: [],
         position: this.currentPosition,
-        scale: 1,
+        scale: 0,
       },
       companionIndex: -1,
     };
@@ -211,11 +217,9 @@ export default {
     //observe test
     const $observe = document.querySelector('#observe');
     const $regBtn = document.querySelector('#registBtn');
-
+    //등록버튼 옵져빙
     const cb = entries => {
-      // 탐지요소를 지나쳤으면
       if (entries[0].isIntersecting) {
-        console.log('observe');
         gsap.to($regBtn, {
           duration: 1,
           y: 0,
@@ -235,10 +239,13 @@ export default {
   methods: {
     ...mapActions({
       setCleanEvent: 'cleanEventStore/setCleanEvent',
+      setError: 'setError',
     }),
     init() {
+      //이름 이메일
       this.event.userInfo.name = this.authInfo.fullName;
       this.event.userInfo.email = this.authInfo.mail;
+      //날짜
       this.event.date.from = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
       )
@@ -250,12 +257,32 @@ export default {
         .toISOString()
         .substring(0, 10);
     },
+    //등록후 화면 초기화
+    reinit() {
+      //데이터 초기화
+      this.event = {
+        id: '',
+        address: '',
+        userInfo: { name: '', email: '' },
+        date: { from: '', to: '' },
+        memo: '',
+        photos: [],
+        photoUrl: [],
+        companions: [],
+        position: this.currentPosition,
+        scale: 0,
+      };
+      this.companionIndex = -1;
+    },
     loadFile(e) {
       const $photo = document.querySelector('#photo');
       const files = [...e.target.files];
       if (files.length + this.event.photos.length > 10) {
-        alert('최대 10개의 사진을 공유할 수 있습니다.');
         e.target.value = '';
+        this.setError({
+          message: '사진은 최대 10장까지 업로드 가능합니다.',
+          type: 'browser',
+        });
         return;
       }
       files.forEach(file => {
@@ -263,7 +290,7 @@ export default {
         this.event.photos.push(file);
         const $img = document.createElement('img');
         $img.classList.add('photo-prev');
-        //등록화면에 임시로 보여주기용 src
+        //등록화면에 보여주기용 src
         $img.src = `${URL.createObjectURL(file)}`;
         $img.setAttribute('data-id', this.event.photos.length - 1);
         $photo.insertBefore($img, $photo.firstChild);
@@ -280,66 +307,111 @@ export default {
       e.target.value = '';
     },
     //같이간사람 추가하기
-    addCompanion(e) {
+    addCompanion() {
       this.companionIndex++;
-      if (this.companionIndex < 30) {
+      if (this.companionIndex <= 30) {
         const $companionWrapper = document.querySelector('.companions');
         const $temp = document.createElement('div');
         $temp.classList.add('content');
-        // $temp.innerHTML = `<input class="companion" type="text" id= 'companion-${this.companionIndex}'/>`;
         $temp.innerHTML = `
                 <i class="icon fas fa-user-tag fa-lg"></i>
                   <input class="text companion" type="text" id= 'companion-${this.companionIndex} 'autocomplete="off"/>
               `;
         $companionWrapper.append($temp);
+      } else {
+        this.setError({
+          message: '같이간 사람은 최대 30명까지 등록 가능합니다.',
+          type: 'browser',
+        });
       }
     },
-    removeCompanion(e) {
-      const $companionWrapper = document.querySelector('companions');
-
+    //같이간사람 빼기
+    removeCompanion() {
+      const $companionWrapper = document.querySelector('.companions');
       if (this.companionIndex >= 0) {
         this.companionIndex--;
         $companionWrapper.removeChild($companionWrapper.lastChild);
       }
     },
-    clickTrachCan: function (index) {
-      //target.style.opacity = 1;
+    //수거한 쓰레기량 선택
+    clickTrachCan: function (event, index) {
       const trashs = document.querySelectorAll('.trash-scale .img');
-      this.event.scale = index;
-      trashs.forEach((trash, idx) => {
-        if (idx < index) {
-          trash.style.opacity = 1;
-        } else {
-          trash.style.opacity = 0.5;
-        }
-      });
+      if ([...event.target.classList].includes('check')) {
+        this.event.scale = index - 1;
+        trashs.forEach((trash, idx) => {
+          if (idx >= index - 1) {
+            trash.style.opacity = 0.5;
+            trash.classList.remove('check');
+          }
+        });
+      } else {
+        this.event.scale = index;
+        trashs.forEach((trash, idx) => {
+          if (idx < index) {
+            trash.style.opacity = 1;
+            trash.classList.add('check');
+          } else {
+            trash.style.opacity = 0.5;
+            trash.classList.remove('check');
+          }
+        });
+      }
     },
     async regist() {
+      const $regBtn = document.querySelector('#registBtn');
+      gsap.to($regBtn, {
+        duration: 1,
+        y: 100,
+        opacity: 0,
+      });
       let loader = this.$loading.show({
         // Optional parameters
         isFullPage: true,
         canCancel: false,
         onCancel: null,
+        color: '#ffffff',
+        backgroundColor: '#000000',
+        opacity: 0.5,
       });
-      this.event.id = `${
-        this.event.date.from.split('-').join('') +
-        this.event.userInfo.email.slice()
-      }`;
+      this.event.id = `${Date.now() + this.event.userInfo.email.slice()}`;
       this.event.address = this.currentAddress;
       this.event.position = this.currentPosition;
       const companionArray = [...document.querySelectorAll('.companion')];
       companionArray.forEach(com => {
         this.event.companions.push(com.value);
       });
-      await this.setCleanEvent(this.event);
-      loader.hide();
-      this.$store.dispatch('moveToMaps');
+      try {
+        const { photoUrl } = await this.setCleanEvent(this.event);
+        $regBtn.innerText = '등록 성공';
+        gsap.to($regBtn, {
+          duration: 1,
+          y: 0,
+          opacity: 1,
+        });
+        setTimeout(() => {
+          this.hideEventRegist(null);
+          const param = { ...this.event, photoUrl };
+          this.$emit('successUpload', param);
+        }, 2000);
+      } catch (e) {
+        this.setError(e);
+      } finally {
+        loader.hide();
+      }
     },
     hideEventRegist(e) {
-      if (
-        [...e.target.classList].includes('event-regist') ||
-        [...e.target.classList].includes('event-regist-header')
-      ) {
+      let flag = false;
+      if (e) {
+        if (
+          [...e.target.classList].includes('event-regist') ||
+          [...e.target.classList].includes('event-regist-header')
+        ) {
+          flag = true;
+        }
+      } else {
+        flag = true;
+      }
+      if (flag) {
         const $target = document.querySelector('.event-regist');
         gsap.to($target, {
           duration: 0.5,
@@ -459,11 +531,12 @@ export default {
 .btn {
   width: 45%;
   height: 60%;
+  display: flex;
   background-color: var(--backgroundColor);
-  text-align: center;
-  padding-top: 15px;
   border-radius: 15px;
   font-weight: bold;
+  justify-content: center;
+  align-items: center;
 }
 
 .event-regist-body > .regist-form {
@@ -516,14 +589,15 @@ export default {
   width: 100%;
   height: 120px;
   display: flex;
-  padding-top: 10px;
-  padding-bottom: 10px;
   justify-content: space-around;
+  background-color: var(--objectColor);
 }
-
+.content.trash-scale:first-child {
+  opacity: 1;
+}
 .sub-column > .content.trash-scale > .img {
-  width: 16%;
-  height: 80%;
+  width: 20%;
+  height: 100%;
   opacity: 0.5;
   cursor: pointer;
 }

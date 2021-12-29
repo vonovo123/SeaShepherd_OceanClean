@@ -48,10 +48,16 @@ export const actions = {
       id: id,
     });
     if (!event) {
-      return false;
+      throw new Error('noData');
     }
     commit(SET_EVENT_DETAIL, event);
     return event;
+  },
+  setEventDetail({ commit }, event) {
+    return new Promise((resolve, reject) => {
+      commit(SET_EVENT_DETAIL, event);
+      resolve();
+    });
   },
   setMapSnapshot: ({ commit }, src) => {
     commit('SET_MAP_SNAPSHOT', src);
@@ -61,27 +67,8 @@ export const actions = {
     const files = [...eventObj.photos];
     delete eventObj.photos;
     try {
-      //이벤트 등록
-      await api.fetch('setCleanEvent', {
-        method: 'post',
-        table: 'events',
-        id: eventObj.id,
-        obj: eventObj,
-      });
-      // //마커등록
-      await api.fetch('setEventMarker', {
-        method: 'post',
-        table: 'markers',
-        id: eventObj.id,
-        obj: {
-          id: eventObj.id,
-          position: eventObj.position,
-          scale: eventObj.scale,
-        },
-      });
-      // //스토리지에 파일 업로드
+      //스토리지에 파일 선업로드
       const promises = [];
-
       files.forEach(file => {
         if (file) {
           promises.push(
@@ -89,7 +76,6 @@ export const actions = {
           );
         }
       });
-
       // //병렬처리
       const photoUrlArray = await Promise.all(promises);
       //storage url get
@@ -101,47 +87,38 @@ export const actions = {
           'storageUpload'
         );
       }
-      //이미지 url 업로드
-      await api.fetch('updateEventDetail', {
-        method: 'patch',
-        table: 'events',
-        id: eventObj.id,
-        obj: { photoUrl: photoUrl },
-      });
-      //에러시롤백
-    } catch (error) {
-      console.log(`files`, files);
-      if (error.type !== 'critical') {
-        if (error.name === 'patch' || error.name === 'storageUpload') {
-          //스토리지에 이미지 업로드 실패 또는 db에 url 업데이트에 실패했으면 전체 롤백
-          await api.fetch('deleteEventDetail', {
-            method: 'delete',
-            table: 'events',
+      await api.transactionFetchData(
+        {
+          method: 'post',
+          table: 'events',
+          id: eventObj.id,
+          obj: { ...eventObj, photoUrl },
+        },
+        {
+          method: 'post',
+          table: 'markers',
+          id: eventObj.id,
+          obj: {
             id: eventObj.id,
-          });
-          await api.fetch('deleteEventMarker', {
-            method: 'delete',
-            table: 'markers',
-            id: eventObj.id,
-          });
-          const promises = [];
-          files.forEach((file, idx) => {
-            if (photoUrl[idx] !== 'error') {
-              if (file) {
-                promises.push(
-                  desertFile(
-                    eventObj.date.from,
-                    eventObj.userInfo.email,
-                    file.name
-                  )
-                );
-              }
-            }
-          });
-          await Promise.all(promises);
+            position: eventObj.position,
+            scale: eventObj.scale,
+          },
         }
-      }
-      commit('SET_ERROR', error, { root: true });
+      );
+      return { photoUrl };
+    } catch (error) {
+      //이벤트 등록 에러시 이미지업로드 롤백
+      const promises = [];
+      files.forEach((file, idx) => {
+        if (photoUrl[idx] !== 'error') {
+          if (file) {
+            promises.push(
+              desertFile(eventObj.date.from, eventObj.userInfo.email, file.name)
+            );
+          }
+        }
+      });
+      await Promise.all(promises);
     }
   },
 };

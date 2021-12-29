@@ -1,8 +1,7 @@
 <template>
   <div class="event-detail" @click="hideEventDetail" v-if="eventDetail">
     <div class="event-detail-header">
-      {{ eventDetail.userInfo.name }} ({{ eventDetail.userInfo.email }}) 님의
-      청소리포트
+      {{ eventDetail.userInfo.name }} 님의 청소리포트
     </div>
     <div class="event-detail-body">
       <div class="photos-wrapper">
@@ -108,7 +107,14 @@
               <div class="title">쓰레기 수거함</div>
               <div class="sub"></div>
             </div>
-            <div class="content trash-scale">
+            <div class="content trash-scale" v-if="eventDetail.scale === 0">
+              <img
+                class="img trash-scale"
+                src="../assets/images/recycling-bag.png"
+                style="opacity: 0.5"
+              />
+            </div>
+            <div class="content trash-scale" v-else>
               <img
                 class="img trash-scale"
                 v-for="idx in eventDetail.scale"
@@ -116,11 +122,14 @@
                 src="../assets/images/recycling-bag.png"
               />
             </div>
-            <div class="text trash-scale" v-if="eventDetail.scale < 6">
-              {{ 20 * eventDetail.scale }}kg 미만의 쓰레기를 수거했습니다.
+            <div class="text trash-scale" v-if="eventDetail.scale === 0">
+              20킬로그램보다 적은 양의 쓰레기를 수거했습니다.
             </div>
-            <div class="text trash-scale" v-else>
-              100kg 이상의 쓰레기를 수거했습니다.
+            <div
+              class="text trash-scale"
+              v-else-if="eventDetail.scale > 0 && eventDetail.scale < 6"
+            >
+              {{ 20 * eventDetail.scale }}킬로그램의 쓰레기를 수거했습니다.
             </div>
           </div>
           <div class="sub-column">
@@ -174,9 +183,8 @@ export default {
       gsap.to($target, {
         duration: 0.5,
         top: '100%',
-        // borderTopLeftRadius: '2vh',
-        // borderTopRightRadius: '2vh',
       });
+      document.querySelector('.event-detail-body').scrollTop = 0;
       this.$emit('setIsAppear', false);
     },
   },
@@ -345,11 +353,12 @@ export default {
   padding-top: 10px;
   padding-bottom: 10px;
   justify-content: space-around;
+  background-color: var(--objectColor);
 }
 
 .sub-column > .content.trash-scale > .img {
-  width: 16%;
-  height: 80%;
+  width: 20%;
+  height: 100%;
   opacity: 1;
   cursor: pointer;
 }
