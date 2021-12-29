@@ -21,6 +21,7 @@ import {
   updateDoc,
   deleteDoc,
   setDoc,
+  writeBatch,
 } from 'firebase/firestore';
 
 //auth
@@ -33,7 +34,6 @@ import {
   updateProfile,
 } from 'firebase/auth';
 const firebaseConfig = {
-  //apiKey: 'AIzaSyA_VDwU58UN1eSHjLSsaKI-LbX8llEnIwQ',
   apiKey: VUE_APP_FIREBASE,
   authDomain: 'seashepherd-oceanclean.firebaseapp.com',
   databaseURL: 'https://seashepherd-oceanclean-default-rtdb.firebaseio.com',
@@ -62,7 +62,6 @@ export const upLoadFile = async function (date, email, file) {
 };
 //스토리지 파일 삭제
 export const desertFile = function (date, email, fileName) {
-  console.log(`remove`);
   const desertRef = ref(storage, `images/${date}/${email}/${fileName}`);
   deleteObject(desertRef).then(() => {});
 };
@@ -76,31 +75,44 @@ export const patchData = async function (collectionName, id, obj) {
   await updateDoc(ref, obj);
 };
 export const postData = async function (collectionName, id, obj) {
-  console.log(`${collectionName} ${id}, ${obj}`);
   const ref = doc(db, collectionName, id);
-  console.log(ref);
-  //  await setDoc(ref, { test: '1', game: '2' });
   return await setDoc(ref, obj);
 };
 export const getData = async function (collectionName, id) {
   if (id) {
-    console.log(id);
-    console.log(collectionName);
     const ref = doc(db, collectionName, id);
     const snap = await getDoc(ref);
     return snap.data();
   } else {
-    console.log(collectionName);
     const snaps = await getDocs(collection(db, collectionName));
     const dataArray = snaps.docs.map(snap => snap.data());
-    console.log(dataArray);
     return dataArray;
   }
 };
 
+export const batch = async function (...params) {
+  console.log(`batch: ${JSON.stringify(params)}`);
+  const batch = writeBatch(db);
+  let ref = null;
+  params.forEach(({ method, table, id, obj }) => {
+    //쓰기
+    ref = doc(db, table, id);
+    if (method === 'post') {
+      batch.set(ref, obj);
+      //수정
+    } else if (method === 'patch') {
+      batch.update(ref, obj);
+      //삭제
+    } else if (method === 'delete') {
+      batch.delete(ref, obj);
+    }
+  });
+  await batch.commit();
+};
+
 const actionCodeSettings = {
-  //url: 'http://localhost:8080/realhome',
-  url: 'https://679d-223-62-216-243.ngrok.io/realhome',
+  url: 'http://localhost:8080/realhome',
+  //url: 'https://679d-223-62-216-243.ngrok.io/realhome',
   // This must be true.
   handleCodeInApp: true,
 };

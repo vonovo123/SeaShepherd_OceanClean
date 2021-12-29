@@ -17,7 +17,13 @@ import TypeError from '../util/TypeError.js';
 //     return `API request error : ${statusErrorMessages[i]} with status code ${status} from ${name}`;
 //   }
 // };
-import { getData, postData, patchData, deleteData } from '../util/firebase.js';
+import {
+  getData,
+  postData,
+  patchData,
+  deleteData,
+  batch,
+} from '../util/firebase.js';
 const fetchData = async (name, { method, table, id, obj }) => {
   try {
     //조회
@@ -42,5 +48,16 @@ const fetchData = async (name, { method, table, id, obj }) => {
   }
 };
 
+export const transactionFetchData = async (...params) => {
+  try {
+    await batch(...params);
+  } catch (e) {
+    throw new TypeError(
+      '서버에러입니다. 잠시후 다시 시도해주세요.',
+      'critical',
+      'firebase'
+    );
+  }
+};
+
 export default fetchData;
-//module.exports = fetchData;

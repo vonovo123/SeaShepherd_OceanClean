@@ -3,7 +3,11 @@
     <div class="body"></div>
     <div class="block" v-show="showBlock"></div>
     <event-detail @setIsAppear="setIsAppear"></event-detail>
-    <event-regist @setIsAppear="setIsAppear"></event-regist>
+    <event-regist
+      @setIsAppear="setIsAppear"
+      @successUpload="successUpload"
+      v-if="render"
+    ></event-regist>
   </div>
 </template>
 
@@ -26,6 +30,7 @@ export default {
       eventMarkers: [],
       //리포트 올라왔을때 지도 블락
       showBlock: false,
+      render: true,
     };
   },
   components: { EventDetail, EventRegist },
@@ -38,6 +43,7 @@ export default {
       getCleanEvent: 'cleanEventStore/getCleanEvent',
       getEventMarkers: 'cleanEventStore/getEventMarkers',
       setMapSnapshot: 'cleanEventStore/setMapSnapshot',
+      setEventDetail: 'cleanEventStore/setEventDetail',
       googleSignOut: 'authStore/googleSignOut',
     }),
     //구글맵 생성
@@ -107,7 +113,7 @@ export default {
         this.curMarker.addClickEvent(this.fncClickCurMarker);
       } catch (e) {
         throw new Error(
-          '현재위치 조회에 실패했습니다. 브라우저의 위치정보 wo공상태를 확인하세요.'
+          '현재위치 조회에 실패했습니다. 브라우저의 위치정보 제공상태를 확인하세요.'
         );
       }
     },
@@ -122,6 +128,29 @@ export default {
     },
     setIsAppear(flag) {
       this.showBlock = flag;
+    },
+    //등록완료 후 emit 이벤트
+    successUpload(event) {
+      this.render = false;
+      this.setEventMarker(event);
+      this.$nextTick(() => {
+        this.render = true;
+      });
+    },
+    //등록완료후 하나만 추가
+    setEventMarker(e) {
+      const content = document.createElement('img');
+      content.classList.add('custom-marker-img');
+      content.src = require('@/assets/images/pngwing.png');
+      const marker = new CurLocMaker(
+        new google.maps.LatLng(e.position.lat, e.position.lng),
+        content
+      );
+      marker.setMap(this.map);
+      marker.addClickEvent(() => {
+        this.clickEventMarker(e);
+      });
+      this.clickEventMarker(e, 'dir');
     },
     //정화활동 이벤트 모두 추가
     setEventMarkers() {
@@ -155,38 +184,49 @@ export default {
       staticMapUrl += `&key=${VUE_APP_GOOGLE_MAP}`;
       this.setMapSnapshot(staticMapUrl);
     },
-    async clickEventMarker(event) {
+    async clickEventMarker(event, type) {
       //처음 조회하거나 다른 event를 조회하는 경우
-      if (
-        !this.eventDetail ||
-        (this.eventDetail && event.id != this.eventDetail.id)
-      ) {
-        try {
-          const result = await this.getCleanEvent(event.id);
-          if (!result) {
-            throw new Error('noData');
-          }
-          this.snapShot(result.position);
-          this.showBlock = true;
-          const $target = document.querySelector('.event-detail');
-          gsap.to($target, {
-            duration: 0.5,
-            top: '0',
-          });
-        } catch (e) {
-          if (e.message === 'noData') {
-            this.setError({
-              message: '조회할 데이터가 존재하지않습니다.',
-              type: 'browser',
+      let result = null;
+      if (!type) {
+        if (
+          !this.eventDetail ||
+          (this.eventDetail && event.id != this.eventDetail.id)
+        ) {
+          try {
+            result = await this.getCleanEvent(event.id);
+
+            this.snapShot(result.position);
+            this.showBlock = true;
+            const $target = document.querySelector('.event-detail');
+            gsap.to($target, {
+              duration: 0.5,
+              top: '0',
             });
-          } else {
-            const message = e.message;
-            this.setError({
-              message,
-              type: 'critical',
-            });
+          } catch (e) {
+            if (e.message === 'noData') {
+              this.setError({
+                message: '조회할 데이터가 존재하지않습니다.',
+                type: 'browser',
+              });
+            } else {
+              const message = e.message;
+              this.setError({
+                message,
+                type: 'critical',
+              });
+            }
           }
         }
+      } else {
+        await this.setEventDetail(event);
+        result = event;
+        this.snapShot(result.position);
+        this.showBlock = true;
+        const $target = document.querySelector('.event-detail');
+        gsap.to($target, {
+          duration: 0.5,
+          top: '0',
+        });
       }
 
       //이미 조회한 데이터를 다시 조회하는 경우 화면만 올리기
