@@ -25,9 +25,14 @@ export default {
     };
   },
   components: { ErrorMessage, CriticalErrorMessage },
-  methods: {},
-  mounted() {
-    console.log('onLine', navigator.onLine);
+  methods: {
+    ...mapActions({
+      loadGoogleAuthClient: 'authStore/loadGoogleAuthClient',
+      loadDirAuthClient: 'authStore/loadDirAuthClient',
+    }),
+  },
+  async created() {
+    //google api set
   },
   computed: {
     ...mapGetters({

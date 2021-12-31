@@ -70,6 +70,19 @@ export default {
     },
     //gmail로 인증 이벤트
     async fncGMailAuth() {
+      if (
+        navigator.userAgent.match(
+          /inapp|NAVER|KAKAOTALK|Snapchat|Line|WirtschaftsWoche|Thunderbird|Instagram|everytimeApp|WhatsApp|Electron|wadiz|AliApp|zumapp|iPhone(.*)Whale|Android(.*)Whale|kakaostory|band|twitter|DaumApps|DaumDevice\/mobile|FB_IAB|FB4A|FBAN|FBIOS|FBSS|SamsungBrowser\/[^1]/i
+        )
+      ) {
+        this.setError({
+          message:
+            '카카오/삼성/네이버등의 인앱브라우저의 경우 구글인증이 불가합니다. 크롬/사파리 브라우저로 접속 하시거나 다른 이메일로 인증하기를 이용해주세요.',
+          type: 'browser',
+        });
+        return;
+      }
+
       if (this.authInfo.isAuth) {
         this.$store.dispatch('moveToMaps');
         this.$emit('setShowAuthFlag', false);
@@ -79,6 +92,7 @@ export default {
           this.$emit('setShowAuthFlag', false);
           this.$store.dispatch('moveToMaps');
         } catch (e) {
+          console.log(e);
           if (e.error) {
             //인증화면 닫은경우
             if (e.error === 'popup_closed_by_user') {
@@ -162,9 +176,12 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
+  min-height: 700px;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
-  padding: 5% 15%;
+  padding-left: 15%;
+  padding-right: 15%;
+  padding-top: 50px;
   font-size: 2em;
   color: var(--fontColor);
   font-weight: bold;
@@ -201,10 +218,13 @@ export default {
 
 .auth-body .company {
   position: relative;
-  width: 90%;
+  width: 80%;
   background-color: var(--objectColor);
   left: 50%;
-  margin-left: calc(90% / -2);
+  margin-left: calc(80% / -2);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-top: 20px;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -300,7 +320,6 @@ export default {
 }
 .auth-direct > .direct-input-wrapper > .direct-btn {
   position: relative;
-  margin-top: 50px;
   padding: 5px;
   width: 80px;
   font-size: 0.8em;

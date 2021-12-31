@@ -32,6 +32,7 @@ import {
   signInWithEmailLink,
   signOut,
   updateProfile,
+  onAuthStateChanged,
 } from 'firebase/auth';
 const firebaseConfig = {
   apiKey: VUE_APP_FIREBASE,
@@ -111,31 +112,48 @@ export const batch = async function (...params) {
 };
 
 const actionCodeSettings = {
-  url: 'http://localhost:8080/realhome',
+  url: 'https://5685-2001-2d8-e931-4df4-c01e-bedf-2efb-2dd7.ngrok.io',
   //url: 'https://679d-223-62-216-243.ngrok.io/realhome',
   // This must be true.
   handleCodeInApp: true,
 };
 export const sendEmailAuth = async function (email, name) {
-  sendSignInLinkToEmail(auth, email, actionCodeSettings);
-  window.localStorage.setItem('emailForSignIn', email);
-  window.localStorage.setItem('nameForSignIn', name);
+  try {
+    sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    window.localStorage.setItem('emailForSignIn', email);
+    window.localStorage.setItem('nameForSignIn', name);
+  } catch (e) {
+    throw new Error(
+      '인증 이메일 발신에 실패했습니다. 잠시후 다시 시도해주세요.'
+    );
+  }
 };
 //이메일 인증 aipkey를 가지고 첫화면에 접근했는지 판단
 export const authWithEmailLink = async function () {
-  if (isSignInWithEmailLink(auth, window.location.href)) {
-    const name = window.localStorage.getItem('nameForSignIn');
-    const email = window.localStorage.getItem('emailForSignIn');
-    await signInWithEmailLink(auth, email, window.location.href);
-    updateProfile(auth.currentUser, { displayName: name });
-    return true;
-  } else {
-    return false;
+  try {
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      const name = window.localStorage.getItem('nameForSignIn');
+      const email = window.localStorage.getItem('emailForSignIn');
+      await signInWithEmailLink(auth, email, window.location.href);
+      updateProfile(auth.currentUser, { displayName: name });
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    console.log(e);
+    throw new Error(
+      '이메일 인증에 실패했습니다.<br/>잠시후 다시 시도해주세요.'
+    );
   }
 };
 
 export const checkEmailAuth = function () {
-  return auth.currentUser;
+  return new Promise((resolve, reject) => {
+    onAuthStateChanged(auth, user => {
+      resolve(user);
+    });
+  });
 };
 
 export const signOutEmailAuth = function () {

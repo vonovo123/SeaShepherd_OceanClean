@@ -67,7 +67,7 @@
           </div>
           <div class="sub-column">
             <div class="title-wrap">
-              <div class="title">날짜와 위치</div>
+              <div class="title">위치와 날짜</div>
             </div>
             <div class="content">
               <font-awesome-icon
@@ -77,11 +77,13 @@
               />
               <input
                 type="text"
-                class="text"
+                class="text address"
                 v-model="currentAddress"
                 autocomplete="off"
+                readonly
               />
             </div>
+            <img class="map-img" :src="this.mapSnapshot" />
             <div class="title-wrap">
               <div class="sub">시작일</div>
             </div>
@@ -143,17 +145,15 @@
               />
             </div>
             <div class="text trash-scale" v-if="event.scale === 0">
-              20킬로그램보다 적은 쓰레기를 수거했습니다
+              20킬로그램 이하
             </div>
             <div
               class="text trash-scale"
               v-else-if="event.scale < 5 && event.scale > 0"
             >
-              {{ 20 + 20 * event.scale }}킬로그램보다 적은 쓰레기를 수거했습니다
+              {{ 20 + 20 * event.scale }}킬로그램 이하
             </div>
-            <div class="text trash-scale" v-else>
-              100킬로그램보다 많은 쓰레기를 수거했습니다.
-            </div>
+            <div class="text trash-scale" v-else>100킬로그램 이상</div>
           </div>
           <div class="sub-column">
             <div class="title-wrap">
@@ -194,7 +194,7 @@ export default {
       event: {
         id: '',
         address: '',
-        userInfo: { name: '', email: '' },
+        userInfo: { name: this.authInfo, email: '' },
         date: { from: '', to: '' },
         memo: '',
         photos: [],
@@ -209,8 +209,13 @@ export default {
   computed: {
     ...mapGetters({
       authInfo: 'authStore/AuthInfo',
+      mapSnapshot: 'cleanEventStore/MapSnapShot',
     }),
     ...mapState(['currentPosition', 'currentAddress']),
+  },
+  updated() {
+    this.event.userInfo.name = this.authInfo.fullName;
+    this.event.userInfo.email = this.authInfo.mail;
   },
   mounted() {
     this.init();
@@ -245,6 +250,7 @@ export default {
       //이름 이메일
       this.event.userInfo.name = this.authInfo.fullName;
       this.event.userInfo.email = this.authInfo.mail;
+      console.log(`regist`, JSON.stringify(this.authInfo));
       //날짜
       this.event.date.from = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
@@ -473,6 +479,7 @@ export default {
   font-weight: bold;
   width: 100%;
   margin: 1%;
+  padding-bottom: 5px;
 }
 .title-wrap > .sub {
   width: 100%;
@@ -567,6 +574,13 @@ export default {
   border-radius: 10px;
 }
 
+.sub-column > .map-img {
+  margin-top: 5%;
+  width: 100%;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
 .sub-column > .wrapper {
   width: 100%;
   height: 300px;
@@ -579,7 +593,7 @@ export default {
 }
 .sub-column >>> .content .text {
   position: relative;
-  width: 70%;
+  width: 80%;
   height: 50px;
   color: var(--fontColor);
   font-weight: bold;
@@ -656,7 +670,9 @@ export default {
   .event-regist {
     font-size: 1em;
   }
-
+  .sub-column > .content > .text.address {
+    font-size: 0.8em;
+  }
   .regist-form > .column {
     width: 100%;
   }

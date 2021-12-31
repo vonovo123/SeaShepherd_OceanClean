@@ -45,6 +45,8 @@ export default {
       setMapSnapshot: 'cleanEventStore/setMapSnapshot',
       setEventDetail: 'cleanEventStore/setEventDetail',
       googleSignOut: 'authStore/googleSignOut',
+      loadGoogleAuthClient: 'authStore/loadGoogleAuthClient',
+      loadDirAuthClient: 'authStore/loadDirAuthClient',
     }),
     //구글맵 생성
     initMap() {
@@ -120,6 +122,7 @@ export default {
     //현재위치마커 클릭시 이벤트
     fncClickCurMarker() {
       this.showBlock = true;
+      this.snapShot(this.currentPosition);
       const $target = document.querySelector('.event-regist');
       gsap.to($target, {
         duration: 0.5,
@@ -194,7 +197,6 @@ export default {
         ) {
           try {
             result = await this.getCleanEvent(event.id);
-
             this.snapShot(result.position);
             this.showBlock = true;
             const $target = document.querySelector('.event-detail');
@@ -216,6 +218,14 @@ export default {
               });
             }
           }
+        } else {
+          this.snapShot(this.eventDetail.position);
+          this.showBlock = true;
+          const $target = document.querySelector('.event-detail');
+          gsap.to($target, {
+            duration: 0.5,
+            top: '0',
+          });
         }
       } else {
         await this.setEventDetail(event);
@@ -276,6 +286,8 @@ export default {
     });
     try {
       //지도생성
+      await this.loadGoogleAuthClient();
+      await this.loadDirAuthClient();
       this.initMap();
       //현재위치
       await this.setCurPosition();
@@ -283,6 +295,7 @@ export default {
       await this.getEventMarkers();
       this.initMapDetail(); //지도에 바인딩
     } catch (e) {
+      console.log(e);
       let message = e.message;
       this.setError({
         message,
