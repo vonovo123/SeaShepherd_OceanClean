@@ -67,8 +67,8 @@
                 size="lg"
               />
               <div class="text address">{{ eventDetail.address }}</div>
-              <img class="map-img" :src="this.mapSnapshot" />
             </div>
+            <img class="map-img" :src="this.mapSnapshot" />
           </div>
           <div class="sub-column">
             <div class="title-wrap">
@@ -315,7 +315,7 @@ export default {
   overflow: scroll;
 }
 
-.sub-column > .content > .map-img {
+.sub-column > .map-img {
   margin-top: 5%;
   width: 100%;
   border-radius: 15px;

@@ -1,25 +1,20 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
 import store from '@/store/index.js';
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home,
+    name: 'realhome',
+    component: () => import('../views/RealHome.vue'),
   },
   {
     path: '/maps/main',
     name: 'maps/Main',
     component: () => import('../views/Maps/Main.vue'),
   },
-  {
-    path: '/realhome',
-    name: 'realhome',
-    component: () => import('../views/RealHome.vue'),
-  },
+
   {
     path: '/error',
     name: '/error',

@@ -89,7 +89,8 @@ export default new Vuex.Store({
     clickCriticError: ({ commit }) => {
       //에러 초기화
       commit('INIT_ERROR');
-      location.reload();
+      //location.reload();
+      moveToRealHome();
     },
     setError: ({ commit }, { message, type }) => {
       commit('SET_ERROR', new TypeError(message, type));

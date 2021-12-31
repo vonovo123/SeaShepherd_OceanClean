@@ -7,14 +7,7 @@
       </div> -->
       <div class="home-header-title">SEASHEPHERD_KOREA</div>
     </div>
-    <div
-      class="home-body"
-      @click="click"
-      v-touch="{
-        up: () => swipe('Up'),
-        down: () => swipe('Down'),
-      }"
-    >
+    <div class="home-body" @click="click">
       <div class="home-cover">
         <div v-show="viewIdx === 0" class="home-cover-content" id="content0">
           <div class="two">시 셰퍼드 컨저베이션 소사이어티는</div>
@@ -59,11 +52,7 @@ import mapStyle from '../assets/style/map-style.js';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import AnimatedNumber from 'animated-number-vue';
 import Auth from '../components/Auth.vue';
-import {
-  authWithEmailLink,
-  checkEmailAuth,
-  signOutEmailAuth,
-} from '../util/firebase.js';
+import { authWithEmailLink, signOutEmailAuth } from '../util/firebase.js';
 import gsap from 'gsap';
 
 export default {
@@ -96,9 +85,11 @@ export default {
       setError: 'setError',
       getEventMarkers: 'cleanEventStore/getEventMarkers',
       moveToMap: 'moveToMaps',
-      loadGoogleAuthClient: 'authStore/loadGoogleAuthClient',
       googleSignOut: 'authStore/googleSignOut',
       setAuthInfo: 'authStore/setAuthInfo',
+      checkDirAuthLink: 'authStore/checkDirAuthLink',
+      loadGoogleAuthClient: 'authStore/loadGoogleAuthClient',
+      loadDirAuthClient: 'authStore/loadDirAuthClient',
     }),
     setShowAuthFlag(flag) {
       this.showAuth = flag;
@@ -236,7 +227,7 @@ export default {
 
     try {
       //직접입력한 이메일링크를 통해 들어온 상태인지 확인
-      const isDirAuth = await authWithEmailLink();
+      const isDirAuth = await this.checkDirAuthLink();
       //링크를 통했으면
       if (isDirAuth) {
         const email = window.localStorage.getItem('emailForSignIn');
@@ -254,16 +245,13 @@ export default {
         return;
         //그냥 들어온상태면
       } else {
-        const curLogin = checkEmailAuth();
-        //직접인증된 상태인지 확인
-        if (curLogin) {
-          await this.setAuthInfo({
-            fullName: curLogin.displayName,
-            mail: curLogin.email,
-            isAuth: true,
-            type: 'dir',
-          });
-        }
+        await this.loadGoogleAuthClient();
+        await this.loadDirAuthClient();
+        //console.log(`google`, await this.loadGoogleAuthClient());
+        //this.loadGoogleAuthClient();
+        // if (isGoogleAuth) {
+        //   this.updateGoogleAuthStatus();
+        // }
       }
       //현재위치 조회
       await this.setCurPosition();
@@ -272,6 +260,7 @@ export default {
       //지도정보 초기화
       this.initMap();
     } catch (e) {
+      console.log(e);
       const message = e.message;
       this.setError({
         message,
@@ -316,8 +305,6 @@ export default {
         clearInterval(this.interval);
       }
     }, 4000);
-    //구글인증 초기화
-    this.loadGoogleAuthClient();
   },
 };
 </script>
@@ -333,6 +320,7 @@ export default {
 .home-main {
   /* 1em : 16px */
   width: 100%;
+  min-height: 700px;
   height: 100%;
   overflow: hidden;
   background-color: black;
@@ -341,7 +329,7 @@ export default {
 }
 
 .home-main > .home-header {
-  position: fixed;
+  position: absolute;
   top: 0;
   height: 30%;
   width: 100%;
@@ -377,6 +365,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
+  min-height: 500px;
   background-color: rgba(0, 0, 0, 1);
 }
 .home-main > .home-body > .home-cover {
@@ -426,12 +415,12 @@ export default {
 .home-body > .home-cover > .home-cover-content > .button {
   position: relative;
   background-color: var(--objectColor);
-  width: 200px;
+  width: 250px;
   border-radius: 0.5em;
   padding: 2% 2%;
   top: 60%;
   left: 50%;
-  margin-left: calc(200px / -2);
+  margin-left: calc(250px / -2);
   text-align: center;
   cursor: pointer;
   margin-bottom: 20px;
