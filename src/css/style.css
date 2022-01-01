@@ -5,6 +5,7 @@
 }
 html {
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 body {
   font-family: 'Roboto', 'Noto Sans KR' , cursive;
