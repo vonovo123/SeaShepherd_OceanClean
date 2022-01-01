@@ -1,36 +1,42 @@
-export default class CurLocMaker extends google.maps.OverlayView {
+export default class ImageMarker extends google.maps.OverlayView {
   position;
   containerDiv;
-  content;
-  constructor(position, content) {
+  constructor(position, image) {
     super();
     this.position = position;
     const bubbleAnchor = document.createElement('div');
-    bubbleAnchor.classList.add('custom-marker-anchor');
-    bubbleAnchor.appendChild(content);
+    bubbleAnchor.classList.add('popup-bubble-anchor');
+    const img = document.createElement('img');
+    img.src = image;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.position = 'relative';
+    bubbleAnchor.appendChild(img);
     this.containerDiv = document.createElement('div');
-    this.containerDiv.classList.add('custom-marker-container');
+    this.containerDiv.classList.add('popup-container');
     this.containerDiv.appendChild(bubbleAnchor);
-    this.content = content;
-    CurLocMaker.preventMapHitsAndGesturesFrom(this.containerDiv);
+    ImageMarker.preventMapHitsAndGesturesFrom(this.containerDiv);
   }
   addClickEvent(cb) {
-    this.content.addEventListener('click', e => {
+    this.containerDiv.addEventListener('click', () => {
       cb();
     });
   }
   onAdd() {
     this.getPanes().floatPane.appendChild(this.containerDiv);
   }
+  /** Called when the popup is removed from the map. */
   onRemove() {
     if (this.containerDiv.parentElement) {
       this.containerDiv.parentElement.removeChild(this.containerDiv);
     }
   }
+  /** Called each frame when the popup needs to draw itself. */
   draw() {
     const divPosition = this.getProjection().fromLatLngToDivPixel(
       this.position
     );
+    // Hide the popup when it is far out of view.
     const display =
       Math.abs(divPosition.x) < 4000 && Math.abs(divPosition.y) < 4000
         ? 'block'

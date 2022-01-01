@@ -1,15 +1,8 @@
-const fetchData = require('./fetchData.js');
-
+import fetchData from './fetchData.js';
+import { transactionFetchData } from './fetchData.js';
 const api = {
-  /**
-   * dbParam : {
-   *  method : '',
-   *  table : '',
-   *  id : ''
-   *  obj : ''
-   * }
-   */
   fetch: (name, param) => fetchData(name, param),
+  transactionFetchData: (...params) => transactionFetchData(...params),
 };
 
-module.exports = api;
+export default api;
