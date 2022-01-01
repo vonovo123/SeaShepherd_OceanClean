@@ -1,11 +1,11 @@
 <template>
   <div class="event-regist" @click="hideEventRegist">
-    <div class="event-regist-header">청소리포트 등록하기</div>
+    <div class="event-regist-header">등록화면 닫기</div>
     <div class="event-regist-body" id="registBody">
       <div class="photo-wrapper">
         <div class="title-wrap">
           <div class="title">활동 사진</div>
-          <div class="sub">최대 10장까지 가능합니다.</div>
+          <div class="sub">최대 10장까지 가능합니다</div>
         </div>
         <div class="photo" id="photo">
           <label
@@ -49,6 +49,7 @@
                 class="text"
                 v-model="event.userInfo.name"
                 autocomplete="off"
+                readonly
               />
             </div>
             <div class="content">
@@ -62,6 +63,7 @@
                 class="text"
                 v-model="event.userInfo.email"
                 autocomplete="off"
+                readonly
               />
             </div>
           </div>
@@ -120,11 +122,23 @@
           <div class="sub-column">
             <div class="title-wrap">
               <div class="title">함께한 사람</div>
-              <div class="sub">email 주소를 남겨주세요.</div>
+              <div class="sub">email 주소를 남겨주세요</div>
             </div>
             <div class="btn-wrapper">
-              <div class="btn" @click="addCompanion">➕ 추가</div>
-              <div class="btn" @click="removeCompanion">➖ 제거</div>
+              <div class="btn" @click="addCompanion">
+                <font-awesome-icon
+                  class="icon"
+                  :icon="['fas', 'plus']"
+                  size="lg"
+                />
+              </div>
+              <div class="btn" @click="removeCompanion">
+                <font-awesome-icon
+                  class="icon"
+                  :icon="['fas', 'minus']"
+                  size="lg"
+                />
+              </div>
             </div>
             <div class="wrapper companions"></div>
           </div>
@@ -135,7 +149,7 @@
               <div class="title">쓰레기 수거량</div>
               <div class="sub"></div>
             </div>
-            <div class="content trash-scale">
+            <div class="content regist-trash-scale">
               <img
                 class="img"
                 v-for="idx in 5"
@@ -144,16 +158,18 @@
                 src="../assets/images/recycling-bag.png"
               />
             </div>
-            <div class="text trash-scale" v-if="event.scale === 0">
-              20킬로그램 이하
+            <div class="text regist-trash-scale" v-if="event.scale === 0">
+              20KG 이하를 수거했습니다
             </div>
             <div
-              class="text trash-scale"
+              class="text regist-trash-scale"
               v-else-if="event.scale < 5 && event.scale > 0"
             >
-              {{ 20 + 20 * event.scale }}킬로그램 이하
+              {{ 20 + 20 * event.scale }}KG 이하를 수거했습니다
             </div>
-            <div class="text trash-scale" v-else>100킬로그램 이상</div>
+            <div class="text regist-trash-scale" v-else>
+              100KG 이상을 수거했습니다
+            </div>
           </div>
           <div class="sub-column">
             <div class="title-wrap">
@@ -163,7 +179,7 @@
             <textarea
               class="textarea"
               type="text"
-              placeholder="청소 후기를 공유해주세요."
+              placeholder="청소 후기를 공유해주세요"
               v-model="event.memo"
             />
           </div>
@@ -182,8 +198,29 @@ import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import gsap from 'gsap';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCamera } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCamera,
+  faEnvelopeOpenText,
+  faGlobeAsia,
+  faCalendarWeek,
+  faUsers,
+  faUserTag,
+  faEnvelopeSquare,
+  faUser,
+  faPlus,
+  faMinus,
+} from '@fortawesome/free-solid-svg-icons';
 library.add(faCamera);
+library.add(faEnvelopeOpenText);
+library.add(faGlobeAsia);
+library.add(faCalendarWeek);
+library.add(faUsers);
+library.add(faUserTag);
+library.add(faEnvelopeSquare);
+library.add(faUser);
+library.add(faPlus);
+library.add(faMinus);
+
 // Init plugin
 Vue.use(Loading);
 
@@ -250,7 +287,6 @@ export default {
       //이름 이메일
       this.event.userInfo.name = this.authInfo.fullName;
       this.event.userInfo.email = this.authInfo.mail;
-      console.log(`regist`, JSON.stringify(this.authInfo));
       //날짜
       this.event.date.from = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
@@ -341,7 +377,11 @@ export default {
     },
     //수거한 쓰레기량 선택
     clickTrachCan: function (event, index) {
-      const trashs = document.querySelectorAll('.trash-scale .img');
+      console.log(index);
+      console.log([...event.target.classList].includes('check'));
+
+      const trashs = document.querySelectorAll('.regist-trash-scale .img');
+      console.log(trashs);
       if ([...event.target.classList].includes('check')) {
         this.event.scale = index - 1;
         trashs.forEach((trash, idx) => {
@@ -499,7 +539,7 @@ export default {
 .photo-wrapper > .photo {
   position: relative;
   width: 100%;
-  height: 80%;
+  height: 90%;
   display: flex;
   margin: 0;
   padding: 1%;
@@ -517,7 +557,7 @@ export default {
 .photo-wrapper > .photo > .photo-regist {
   width: 50%;
   min-width: 50%;
-  background-color: var(--objectColor);
+  background-color: var(--backgroundColor);
   display: flex;
   justify-content: center;
 }
@@ -545,7 +585,6 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
 .event-regist-body > .regist-form {
   display: flex;
   flex-wrap: wrap;
@@ -565,15 +604,6 @@ export default {
   margin-bottom: 10%;
 }
 
-.sub-column >>> .content {
-  margin-top: 5%;
-  margin-bottom: 5%;
-  display: flex;
-  flex-wrap: wrap;
-  background-color: var(--backgroundColor);
-  border-radius: 10px;
-}
-
 .sub-column > .map-img {
   margin-top: 5%;
   width: 100%;
@@ -587,35 +617,40 @@ export default {
   overflow: scroll;
 }
 
-.sub-column >>> .content .icon {
-  margin-left: 20px;
-  margin-top: 10px;
+.sub-column >>> .content {
+  margin-top: 5%;
+  margin-bottom: 5%;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--backgroundColor);
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
 }
+
 .sub-column >>> .content .text {
   position: relative;
-  width: 80%;
+  width: 70%;
   height: 50px;
   color: var(--fontColor);
   font-weight: bold;
-  margin-left: 20px;
+  margin-left: 10px;
 }
-.sub-column > .content.trash-scale {
+.sub-column > .content.regist-trash-scale {
   width: 100%;
   height: 120px;
   display: flex;
   justify-content: space-around;
   background-color: var(--objectColor);
 }
-.content.trash-scale:first-child {
-  opacity: 1;
-}
-.sub-column > .content.trash-scale > .img {
+.sub-column > .content.regist-trash-scale > .img {
   width: 20%;
   height: 100%;
+  padding: 1px;
   opacity: 0.5;
   cursor: pointer;
 }
-.sub-column > .text.trash-scale {
+.sub-column > .text.regist-trash-scale {
   width: 100%;
   padding: 5% 0;
   text-align: center;
@@ -636,6 +671,8 @@ export default {
   align-items: center;
   justify-content: center;
   background-color: var(--objectColor);
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
 .copyright {
@@ -654,10 +691,11 @@ export default {
 .sub-column > .textarea {
   display: block;
   color: var(--fontColor);
-  padding: 3% 3%;
+  padding: 5% 5%;
   background-color: var(--backgroundColor);
   width: 100%;
   min-height: 450px;
+  border-radius: 15px;
 }
 
 .sub-column >>> .content .text:focus,

@@ -58,7 +58,7 @@ export default {
         //mounted에서 최종예외처리
       } catch (e) {
         throw new Error(
-          '구글 지도 불러오기에 실패했습니다. 잠시후 다시 시도 바랍니다.'
+          '구글 지도 불러오기에 실패했습니다.</br>잠시후 다시 시도 바랍니다.'
         );
       }
     },
@@ -115,7 +115,7 @@ export default {
         this.curMarker.addClickEvent(this.fncClickCurMarker);
       } catch (e) {
         throw new Error(
-          '현재위치 조회에 실패했습니다. 브라우저의 위치정보 제공상태를 확인하세요.'
+          '현재위치 조회에 실패했습니다.<br/>브라우저의 위치정보 제공상태를 확인하세요.'
         );
       }
     },

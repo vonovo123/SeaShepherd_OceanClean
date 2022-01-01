@@ -124,7 +124,7 @@ export const sendEmailAuth = async function (email, name) {
     window.localStorage.setItem('nameForSignIn', name);
   } catch (e) {
     throw new Error(
-      '인증 이메일 발신에 실패했습니다. 잠시후 다시 시도해주세요.'
+      '인증 이메일 발신에 실패했습니다.<br/>잠시후 다시 시도해주세요.'
     );
   }
 };

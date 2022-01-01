@@ -57,7 +57,8 @@
                 size="lg"
               />
               <div class="text">
-                {{ eventDetail.date.from }} 부터 {{ eventDetail.date.to }} 까지
+                {{ eventDetail.date.from }} 부터 <br />
+                {{ eventDetail.date.to }} 까지
               </div>
             </div>
             <div class="content location">
@@ -82,7 +83,7 @@
                 size="lg"
               />
               <div class="text">
-                {{ eventDetail.companions.length }} 명의 사람과 함께 했습니다.
+                {{ eventDetail.companions.length }} 명과 함께 했습니다
               </div>
             </div>
             <div class="wrapper">
@@ -104,32 +105,35 @@
         <div class="column">
           <div class="sub-column">
             <div class="title-wrap">
-              <div class="title">쓰레기 수거함</div>
+              <div class="title">쓰레기 수거량</div>
               <div class="sub"></div>
             </div>
-            <div class="content trash-scale" v-if="eventDetail.scale === 0">
+            <div
+              class="content detail-trash-scale"
+              v-if="eventDetail.scale === 0"
+            >
               <img
-                class="img trash-scale"
+                class="img detail-trash-scale"
                 src="../assets/images/recycling-bag.png"
                 style="opacity: 0.5"
               />
             </div>
-            <div class="content trash-scale" v-else>
+            <div class="content detail-trash-scale" v-else>
               <img
-                class="img trash-scale"
+                class="img detail-trash-scale"
                 v-for="idx in eventDetail.scale"
                 :key="idx"
                 src="../assets/images/recycling-bag.png"
               />
             </div>
-            <div class="text trash-scale" v-if="eventDetail.scale === 0">
-              20킬로그램보다 적은 양의 쓰레기를 수거했습니다.
+            <div class="text detail-trash-scale" v-if="eventDetail.scale === 0">
+              20KG 이하를 수거했습니다
             </div>
             <div
-              class="text trash-scale"
+              class="text detail-trash-scale"
               v-else-if="eventDetail.scale > 0 && eventDetail.scale < 6"
             >
-              {{ 20 * eventDetail.scale }}킬로그램의 쓰레기를 수거했습니다.
+              {{ 20 * eventDetail.scale }}KG 이상을 수거했습니다
             </div>
           </div>
           <div class="sub-column">
@@ -142,7 +146,7 @@
               type="text"
               id="memo"
               name="memo"
-              placeholder="간단한 활동내역을 작성해주세요."
+              placeholder="간단한 활동내역을 작성해주세요"
               :value="eventDetail.memo"
               readonly
             />
@@ -307,6 +311,10 @@ export default {
   flex-wrap: wrap;
   background-color: var(--backgroundColor);
   border-radius: 10px;
+  margin-left: 10px;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .sub-column > .wrapper {
@@ -328,14 +336,12 @@ export default {
 }
 
 .sub-column .content .icon {
-  margin: 10px 13px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 .sub-column .content .text {
-  padding-top: 15px;
-}
-.sub-column .content > .text.bold {
-  padding-top: 15px;
   font-weight: bold;
+  width: 70%;
 }
 .sub-column > .content.companion-title {
   margin-bottom: 2%;
@@ -346,35 +352,38 @@ export default {
   overflow: scroll;
 }
 
-.sub-column > .content.trash-scale {
+.sub-column > .content.detail-trash-scale {
   width: 100%;
   height: 120px;
   display: flex;
   padding-top: 10px;
   padding-bottom: 10px;
-  justify-content: space-around;
   background-color: var(--objectColor);
+  margin-left: 0;
 }
 
-.sub-column > .content.trash-scale > .img {
+.sub-column > .content.detail-trash-scale > .img {
   width: 20%;
   height: 100%;
+  padding: 1px;
   opacity: 1;
   cursor: pointer;
 }
-.sub-column > .text.trash-scale {
+.sub-column > .text.detail-trash-scale {
   width: 100%;
   padding: 5% 0;
   text-align: center;
+  font-weight: bold;
 }
 
 .sub-column > .textarea {
   display: block;
   color: var(--fontColor);
-  padding: 3% 3%;
+  padding: 5% 5%;
   background-color: var(--objectColor);
   width: 100%;
   min-height: 450px;
+  border-radius: 15px;
 }
 
 @media only screen and (max-width: 414px) {
