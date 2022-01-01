@@ -15,6 +15,7 @@
 
 
 body {
+  overscroll-behavior-y: none;
   color: black;
   -webkit-user-select: none;
   -moz-user-select: none;
