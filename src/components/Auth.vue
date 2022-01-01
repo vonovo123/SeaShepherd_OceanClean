@@ -335,7 +335,16 @@ export default {
     font-size: 1.5em;
   }
   .company > .title {
-    font-size: 0.8em;
+    font-size: 0.4em;
+  }
+  .direct-title-wrapper > .title {
+    font-size: 0.4em;
+  }
+  .direct-input > input {
+    font-size: 0.4em;
+  }
+  .auth-direct > .direct-input-wrapper > .direct-btn {
+    font-size: 0.4em;
   }
   .company > .logo {
     width: 1em;
