@@ -11,7 +11,7 @@
 import router from '../router/index.js';
 export default {
   data() {
-    return { editedMessage: '변경전' };
+    return {};
   },
   props: {
     criticalErrorMessage: String,

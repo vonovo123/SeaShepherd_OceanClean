@@ -1,6 +1,6 @@
 <template>
   <div class="errorMessage">
-    <div>{{ errorMessage }}</div>
+    <div class="customMessage"></div>
   </div>
 </template>
 
@@ -11,6 +11,12 @@ export default {
   },
   props: {
     errorMessage: String,
+  },
+  watch: {
+    errorMessage: function () {
+      const $message = `<div>${this.errorMessage}</div>`;
+      document.querySelector('.customMessage').innerHTML = $message;
+    },
   },
 };
 </script>

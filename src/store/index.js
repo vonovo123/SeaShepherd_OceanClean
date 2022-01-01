@@ -116,7 +116,7 @@ export default new Vuex.Store({
             });
           } catch (e) {
             let message =
-              '브라우저가 GPS정보를 제공하지 않습니다. 5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.';
+              '브라우저가 GPS정보를 제공하지 않습니다.<br/>5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.';
             if (e.message === 'noAccess') {
               message = '현재위치정보를 확인 할 수 없습니다.';
             }
