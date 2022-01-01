@@ -112,7 +112,7 @@ export const batch = async function (...params) {
 };
 
 const actionCodeSettings = {
-  url: 'https://5685-2001-2d8-e931-4df4-c01e-bedf-2efb-2dd7.ngrok.io',
+  url: 'https://vonovo123.github.io/SeaShepherd_OceanClean',
   //url: 'https://679d-223-62-216-243.ngrok.io/realhome',
   // This must be true.
   handleCodeInApp: true,

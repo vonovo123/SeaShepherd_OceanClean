@@ -1,5 +1,5 @@
 module.exports = {
   transpileDependencies: ['vuetify'],
-  publicPath: '/<repository_name>',
+  publicPath: '/SeaShepherd_OceanClean/',
   outputDir: 'docs',
 };
