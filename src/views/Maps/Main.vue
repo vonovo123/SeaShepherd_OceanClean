@@ -354,6 +354,7 @@ export default {
   overflow: hidden;
   height: 40px;
   cursor: pointer;
+  width: 90px;
 }
 
 .curloc {
