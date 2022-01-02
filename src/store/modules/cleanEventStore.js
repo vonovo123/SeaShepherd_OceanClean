@@ -82,8 +82,8 @@ export const actions = {
       photoUrl = [...photoUrlArray];
       if (photoUrl.includes('error')) {
         throw new TypeError(
-          '파일업로드에 실패했습니다.',
-          'api',
+          '파일업로드에 실패했습니다. <br/> 잠시후 다시 시도바랍니다.',
+          'critical',
           'storageUpload'
         );
       }
