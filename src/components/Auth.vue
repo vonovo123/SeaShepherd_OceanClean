@@ -47,6 +47,8 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
+import { ScrollToPlugin } from 'gsap/all';
+gsap.registerPlugin(ScrollToPlugin);
 import { sendEmailAuth } from '../util/firebase.js';
 import { emailRegExp } from '../util/regExp.js';
 export default {
@@ -71,17 +73,17 @@ export default {
     }),
     fncFocus() {
       const $element = document.querySelector('.direct-input-wrapper');
+      console.log($element);
       gsap.to(window, {
         duration: 1,
-        y: 0,
         scrollTo: $element,
       });
     },
     fncBlur() {
-      const $element = document.querySelector('.google');
+      console.log(`blur`);
+      const $element = document.querySelector('.auth-header');
       gsap.to(window, {
         duration: 1,
-        y: 0,
         scrollTo: $element,
       });
     },
