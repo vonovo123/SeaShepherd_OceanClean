@@ -53,7 +53,7 @@ export const transactionFetchData = async (...params) => {
     await batch(...params);
   } catch (e) {
     throw new TypeError(
-      '서버에러입니다. 잠시후 다시 시도해주세요.',
+      '서버에러입니다<br/>잠시후 다시 시도해주세요.',
       'critical',
       'firebase'
     );

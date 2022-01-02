@@ -28,7 +28,6 @@ export default new Vuex.Store({
       state.currentAddress = address;
     },
     SET_ERROR(state, error) {
-      console.log(JSON.stringify(error));
       state.error = {
         flag: true,
         type: error.type,
@@ -41,7 +40,7 @@ export default new Vuex.Store({
             type: '',
             message: '',
           };
-        }, 5000);
+        }, 3000);
       }
     },
     //에러상태 초기화
@@ -93,7 +92,10 @@ export default new Vuex.Store({
       moveToRealHome();
     },
     setError: ({ commit }, { message, type }) => {
-      commit('SET_ERROR', new TypeError(message, type));
+      console.log(message);
+      console.log(type);
+      let name = 'test';
+      commit('SET_ERROR', new TypeError(message, type, name));
     },
     //현재위치 지정
 
