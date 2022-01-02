@@ -117,6 +117,7 @@ export default new Vuex.Store({
               lng: position.coords.longitude,
             });
           } catch (e) {
+            console.log(e.message);
             let message =
               '브라우저가 GPS정보를 제공하지 않습니다.<br/>5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.';
             if (e.message === 'noAccess') {
