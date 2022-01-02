@@ -1,14 +1,14 @@
 <template>
-  <div
-    class="criticalErrorMessage"
-    @click="$store.dispatch('clickCriticError')"
-  >
-    CRITICAL ERROR : {{ criticalErrorMessage }}<br />
-    페이지 클릭시 메인화면으로 돌아갑니다.
+  <div class="criticalErrorMessage" @click="goHome">
+    <div class="customMessageWrapper">
+      <div class="customMessage"></div>
+      <div>터치시 처음화면으로 돌아갑니다.</div>
+    </div>
   </div>
 </template>
 
 <script>
+import router from '../router/index.js';
 export default {
   data() {
     return {};
@@ -16,14 +16,27 @@ export default {
   props: {
     criticalErrorMessage: String,
   },
+  watch: {
+    criticalErrorMessage: function () {
+      const $message = `<div>${this.criticalErrorMessage}</div>`;
+      document.querySelector('.customMessage').innerHTML = $message;
+    },
+  },
+  methods: {
+    goHome: () => {
+      router.push({
+        name: 'realhome',
+      });
+      router.go();
+    },
+  },
 };
 </script>
 
 <style>
 .criticalErrorMessage {
-  background-color: rgb(195, 78, 78);
-  opacity: 0.4;
-  color: white;
+  background-color: var(--objectColor);
+  color: var(--fontColor);
   font-weight: bold;
   position: fixed;
   z-index: 1001;
@@ -31,8 +44,13 @@ export default {
   bottom: 0;
   right: 0;
   left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
+}
+.customMessageWrapper {
+  position: relative;
+  top: 40%;
+}
+.customMessage {
+  margin-bottom: 20px;
 }
 </style>

@@ -3,8 +3,13 @@ import App from './App.vue';
 import store from './store';
 import router from './router';
 import vuetify from './plugins/vuetify';
-Vue.config.productionTip = false;
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 
+Vue.config.productionTip = false;
+Vue.use(Loading);
 new Vue({
   store,
   router,
