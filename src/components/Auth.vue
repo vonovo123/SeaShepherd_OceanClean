@@ -23,6 +23,7 @@
               v-model="dirEmail"
               placeholder="이메일"
               @focus="fncFocus"
+              @blur="fncBlur"
             />
           </div>
           <div class="direct-input">
@@ -32,6 +33,7 @@
               v-model="dirName"
               placeholder="이름"
               @focus="fncFocus"
+              @blur="fncBlur"
             />
           </div>
           <div class="direct-text">{{ dirStatus }}</div>
@@ -68,8 +70,20 @@ export default {
       setError: 'setError',
     }),
     fncFocus() {
-      console.log(`focus`);
-      document.querySelector('.direct-input-wrapper').scrollIntoView(true);
+      const $element = document.querySelector('.direct-input-wrapper');
+      gsap.to(window, {
+        duration: 1,
+        y: 0,
+        scrollTo: $element,
+      });
+    },
+    fncBlur() {
+      const $element = document.querySelector('.google');
+      gsap.to(window, {
+        duration: 1,
+        y: 0,
+        scrollTo: $element,
+      });
     },
     setAuthFlag(e) {
       this.$emit('setShowAuthFlag', false);
