@@ -22,6 +22,7 @@
               class="input"
               v-model="dirEmail"
               placeholder="이메일"
+              @focus="fncFocus"
             />
           </div>
           <div class="direct-input">
@@ -30,6 +31,7 @@
               class="input"
               v-model="dirName"
               placeholder="이름"
+              @focus="fncFocus"
             />
           </div>
           <div class="direct-text">{{ dirStatus }}</div>
@@ -65,6 +67,10 @@ export default {
       googleSignOut: 'authStore/googleSignOut',
       setError: 'setError',
     }),
+    fncFocus() {
+      console.log(`focus`);
+      document.querySelector('.direct-input-wrapper').scrollIntoView(true);
+    },
     setAuthFlag(e) {
       this.$emit('setShowAuthFlag', false);
     },
@@ -344,6 +350,9 @@ export default {
     font-size: 0.4em;
   }
   .auth-direct > .direct-input-wrapper > .direct-btn {
+    font-size: 0.4em;
+  }
+  .auth-direct > .direct-input-wrapper > .direct-text {
     font-size: 0.4em;
   }
   .company > .logo {

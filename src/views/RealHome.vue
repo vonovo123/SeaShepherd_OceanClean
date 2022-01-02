@@ -316,7 +316,6 @@ export default {
 .gm-control-active {
   display: none !important;
 }
-/* 구글맵 기본요소 안보이기 end*/
 .home-main {
   /* 1em : 16px */
   width: 100%;
