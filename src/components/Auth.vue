@@ -23,6 +23,7 @@
               v-model="dirEmail"
               placeholder="이메일"
               @focus="fncFocus"
+              @blur="fncBlur"
             />
           </div>
           <div class="direct-input">
@@ -32,6 +33,7 @@
               v-model="dirName"
               placeholder="이름"
               @focus="fncFocus"
+              @blur="fncBlur"
             />
           </div>
           <div class="direct-text">{{ dirStatus }}</div>
@@ -45,6 +47,8 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
+import { ScrollToPlugin } from 'gsap/all';
+gsap.registerPlugin(ScrollToPlugin);
 import { sendEmailAuth } from '../util/firebase.js';
 import { emailRegExp } from '../util/regExp.js';
 export default {
@@ -68,8 +72,20 @@ export default {
       setError: 'setError',
     }),
     fncFocus() {
-      console.log(`focus`);
-      document.querySelector('.direct-input-wrapper').scrollIntoView(true);
+      const $element = document.querySelector('.direct-input-wrapper');
+      console.log($element);
+      gsap.to(window, {
+        duration: 1,
+        scrollTo: $element,
+      });
+    },
+    fncBlur() {
+      console.log(`blur`);
+      const $element = document.querySelector('.auth-header');
+      gsap.to(window, {
+        duration: 1,
+        scrollTo: $element,
+      });
     },
     setAuthFlag(e) {
       this.$emit('setShowAuthFlag', false);
