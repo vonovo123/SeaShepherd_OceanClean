@@ -319,7 +319,7 @@ export default {
 .home-main {
   /* 1em : 16px */
   width: 100%;
-  min-height: 700px;
+  min-height: 1000px;
   height: 100%;
   overflow: hidden;
   background-color: black;
