@@ -12,7 +12,7 @@ export default new Vuex.Store({
   },
   state: {
     currentPosition: { lat: 0, lng: 0 },
-    currentAddress: '주소가 정확히지 않습니다.',
+    currentAddress: '주소가 정확하지 않습니다.',
     error: {
       flag: false,
       type: '',
