@@ -12,7 +12,7 @@ export default new Vuex.Store({
   },
   state: {
     currentPosition: { lat: 0, lng: 0 },
-    currentAddress: '주소가 정확히지 않습니다.',
+    currentAddress: '주소가 정확하지 않습니다.',
     error: {
       flag: false,
       type: '',
@@ -28,7 +28,6 @@ export default new Vuex.Store({
       state.currentAddress = address;
     },
     SET_ERROR(state, error) {
-      console.log(JSON.stringify(error));
       state.error = {
         flag: true,
         type: error.type,
@@ -41,7 +40,7 @@ export default new Vuex.Store({
             type: '',
             message: '',
           };
-        }, 5000);
+        }, 3000);
       }
     },
     //에러상태 초기화
@@ -93,7 +92,10 @@ export default new Vuex.Store({
       moveToRealHome();
     },
     setError: ({ commit }, { message, type }) => {
-      commit('SET_ERROR', new TypeError(message, type));
+      console.log(message);
+      console.log(type);
+      let name = 'test';
+      commit('SET_ERROR', new TypeError(message, type, name));
     },
     //현재위치 지정
 
@@ -115,8 +117,9 @@ export default new Vuex.Store({
               lng: position.coords.longitude,
             });
           } catch (e) {
+            console.log(e.message);
             let message =
-              '브라우저가 GPS정보를 제공하지 않습니다. 5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.';
+              '브라우저가 GPS정보를 제공하지 않습니다.<br/>5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.';
             if (e.message === 'noAccess') {
               message = '현재위치정보를 확인 할 수 없습니다.';
             }

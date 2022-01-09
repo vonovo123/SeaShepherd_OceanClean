@@ -1,6 +1,6 @@
 <template>
   <div class="errorMessage">
-    <div>{{ errorMessage }}</div>
+    <div class="customMessage" v-html="errorMessageHTML"></div>
   </div>
 </template>
 
@@ -11,6 +11,12 @@ export default {
   },
   props: {
     errorMessage: String,
+  },
+  computed: {
+    errorMessageHTML: function () {
+      const errorMessageHTML = `<div>${this.errorMessage}</div>`;
+      return errorMessageHTML;
+    },
   },
 };
 </script>
@@ -24,7 +30,9 @@ export default {
   z-index: 1001;
   left: 50%;
   padding: 3%;
-  top: 200px;
-  transform: translate(-50%, -50%);
+  top: 20%;
+  width: 300px;
+  margin-left: calc(300px / -2);
+  text-align: center;
 }
 </style>

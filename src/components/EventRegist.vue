@@ -1,11 +1,11 @@
 <template>
   <div class="event-regist" @click="hideEventRegist">
-    <div class="event-regist-header">청소리포트 등록하기</div>
+    <div class="event-regist-header">등록화면 닫기</div>
     <div class="event-regist-body" id="registBody">
       <div class="photo-wrapper">
-        <div class="title-wrap">
+        <div class="title-wrap photo-title">
           <div class="title">활동 사진</div>
-          <div class="sub">최대 10장까지 가능합니다.</div>
+          <div class="sub">최대 10장까지 가능합니다</div>
         </div>
         <div class="photo" id="photo">
           <label
@@ -38,7 +38,7 @@
             <div class="title-wrap">
               <div class="title">사용자 정보</div>
             </div>
-            <div class="content">
+            <div class="content" id="name">
               <font-awesome-icon
                 class="icon"
                 :icon="['fas', 'user']"
@@ -49,9 +49,11 @@
                 class="text"
                 v-model="event.userInfo.name"
                 autocomplete="off"
+                id="name"
+                readonly
               />
             </div>
-            <div class="content">
+            <div class="content" id="email">
               <font-awesome-icon
                 class="icon"
                 :icon="['fas', 'envelope-square']"
@@ -62,6 +64,7 @@
                 class="text"
                 v-model="event.userInfo.email"
                 autocomplete="off"
+                readonly
               />
             </div>
           </div>
@@ -117,14 +120,26 @@
               />
             </div>
           </div>
-          <div class="sub-column">
+          <div class="sub-column companions-column">
             <div class="title-wrap">
               <div class="title">함께한 사람</div>
-              <div class="sub">email 주소를 남겨주세요.</div>
+              <div class="sub">email 주소를 남겨주세요</div>
             </div>
             <div class="btn-wrapper">
-              <div class="btn" @click="addCompanion">➕ 추가</div>
-              <div class="btn" @click="removeCompanion">➖ 제거</div>
+              <div class="btn" @click="addCompanion">
+                <font-awesome-icon
+                  class="icon"
+                  :icon="['fas', 'plus']"
+                  size="lg"
+                />
+              </div>
+              <div class="btn" @click="removeCompanion">
+                <font-awesome-icon
+                  class="icon"
+                  :icon="['fas', 'minus']"
+                  size="lg"
+                />
+              </div>
             </div>
             <div class="wrapper companions"></div>
           </div>
@@ -135,7 +150,7 @@
               <div class="title">쓰레기 수거량</div>
               <div class="sub"></div>
             </div>
-            <div class="content trash-scale">
+            <div class="content regist-trash-scale">
               <img
                 class="img"
                 v-for="idx in 5"
@@ -144,16 +159,18 @@
                 src="../assets/images/recycling-bag.png"
               />
             </div>
-            <div class="text trash-scale" v-if="event.scale === 0">
-              20킬로그램 이하
+            <div class="text regist-trash-scale" v-if="event.scale === 0">
+              20KG 이하를 수거했습니다
             </div>
             <div
-              class="text trash-scale"
+              class="text regist-trash-scale"
               v-else-if="event.scale < 5 && event.scale > 0"
             >
-              {{ 20 + 20 * event.scale }}킬로그램 이하
+              {{ 20 + 20 * event.scale }}KG 이하를 수거했습니다
             </div>
-            <div class="text trash-scale" v-else>100킬로그램 이상</div>
+            <div class="text regist-trash-scale" v-else>
+              100KG 이상을 수거했습니다
+            </div>
           </div>
           <div class="sub-column">
             <div class="title-wrap">
@@ -163,7 +180,7 @@
             <textarea
               class="textarea"
               type="text"
-              placeholder="청소 후기를 공유해주세요."
+              placeholder="청소 후기를 공유해주세요"
               v-model="event.memo"
             />
           </div>
@@ -182,11 +199,32 @@ import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import gsap from 'gsap';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCamera } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCamera,
+  faEnvelopeOpenText,
+  faGlobeAsia,
+  faCalendarWeek,
+  faUsers,
+  faUserTag,
+  faEnvelopeSquare,
+  faUser,
+  faPlus,
+  faMinus,
+} from '@fortawesome/free-solid-svg-icons';
 library.add(faCamera);
+library.add(faEnvelopeOpenText);
+library.add(faGlobeAsia);
+library.add(faCalendarWeek);
+library.add(faUsers);
+library.add(faUserTag);
+library.add(faEnvelopeSquare);
+library.add(faUser);
+library.add(faPlus);
+library.add(faMinus);
+
 // Init plugin
 Vue.use(Loading);
-
+import TypeError from '../util/TypeError.js';
 export default {
   components: {},
   data() {
@@ -194,7 +232,7 @@ export default {
       event: {
         id: '',
         address: '',
-        userInfo: { name: this.authInfo, email: '' },
+        userInfo: { name: '', email: '' },
         date: { from: '', to: '' },
         memo: '',
         photos: [],
@@ -250,7 +288,6 @@ export default {
       //이름 이메일
       this.event.userInfo.name = this.authInfo.fullName;
       this.event.userInfo.email = this.authInfo.mail;
-      console.log(`regist`, JSON.stringify(this.authInfo));
       //날짜
       this.event.date.from = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
@@ -280,6 +317,7 @@ export default {
       };
       this.companionIndex = -1;
     },
+    //이미지 로드
     loadFile(e) {
       const $photo = document.querySelector('#photo');
       const files = [...e.target.files];
@@ -302,7 +340,6 @@ export default {
         $photo.insertBefore($img, $photo.firstChild);
         $img.addEventListener('click', el => {
           const start = Number(el.target.dataset.id);
-          console.log(start);
           el.target.remove();
           for (let i = start + 1; i < this.event.photos.length; i++) {
             this.event.photos[i - 1] = this.event.photos[i];
@@ -319,6 +356,8 @@ export default {
         const $companionWrapper = document.querySelector('.companions');
         const $temp = document.createElement('div');
         $temp.classList.add('content');
+        $temp.classList.add('companion-content');
+        $temp.dataset.id = this.companionIndex;
         $temp.innerHTML = `
                 <i class="icon fas fa-user-tag fa-lg"></i>
                   <input class="text companion" type="text" id= 'companion-${this.companionIndex} 'autocomplete="off"/>
@@ -341,7 +380,7 @@ export default {
     },
     //수거한 쓰레기량 선택
     clickTrachCan: function (event, index) {
-      const trashs = document.querySelectorAll('.trash-scale .img');
+      const trashs = document.querySelectorAll('.regist-trash-scale .img');
       if ([...event.target.classList].includes('check')) {
         this.event.scale = index - 1;
         trashs.forEach((trash, idx) => {
@@ -363,13 +402,59 @@ export default {
         });
       }
     },
+    setErrorInput($view, $element, message) {
+      $view.scrollIntoView(true);
+      $element.style.border = '3px solid #fff2cc';
+      setTimeout(() => {
+        $element.style.border = 'none';
+      }, 3000);
+      throw new TypeError(message, 'critical');
+    },
+    //등록
     async regist() {
-      const $regBtn = document.querySelector('#registBtn');
-      gsap.to($regBtn, {
-        duration: 1,
-        y: 100,
-        opacity: 0,
-      });
+      try {
+        const companions = [...document.querySelectorAll('.companion-content')];
+        for (let i = 0; i < companions.length; i++) {
+          if (!companions[i].childNodes[4].value) {
+            companions[i].scrollIntoView(true);
+            companions[i].style.border = '3px solid #fff2cc';
+            setTimeout(() => {
+              companions[i].style.border = 'none';
+            }, 3000);
+            throw new TypeError(
+              '추가하려는 함께한 사람의 <br/> 이메일을 입력해주세요.',
+              'browser'
+            );
+          }
+        }
+        if (!this.event.userInfo) {
+          throw new TypeError(
+            '사용자정보가 존재하지 않습니다. <br/> 잠시후 다시 시도 바랍니다.',
+            'critical'
+          );
+        } else {
+          let $view = document.getElementById('registForm');
+          let $element = null;
+          let message = null;
+          if (!this.event.userInfo.name) {
+            $element = document.querySelector('#name');
+            message = '이름 필수입력정보 입니다. <br/> 다시 인증해주세요.';
+            this.setErrorInput($view, $element, message);
+          }
+          if (!this.event.userInfo.email) {
+            $element = document.querySelector('#email');
+            message = '이메일은 필수입력정보 입니다. <br/> 다시 인증해주세요.';
+            this.setErrorInput($view, $element, message);
+          }
+        }
+      } catch (e) {
+        this.setError({
+          message: e.message,
+          type: e.type,
+        });
+        return;
+      }
+
       let loader = this.$loading.show({
         // Optional parameters
         isFullPage: true,
@@ -379,14 +464,22 @@ export default {
         backgroundColor: '#000000',
         opacity: 0.5,
       });
-      this.event.id = `${Date.now() + this.event.userInfo.email.slice()}`;
-      this.event.address = this.currentAddress;
-      this.event.position = this.currentPosition;
-      const companionArray = [...document.querySelectorAll('.companion')];
-      companionArray.forEach(com => {
-        this.event.companions.push(com.value);
-      });
       try {
+        const $regBtn = document.querySelector('#registBtn');
+        gsap.to($regBtn, {
+          duration: 1,
+          y: 100,
+          opacity: 0,
+        });
+
+        this.event.id = `${Date.now() + this.event.userInfo.email.slice()}`;
+        this.event.address = this.currentAddress;
+        this.event.position = this.currentPosition;
+        const companionArray = [...document.querySelectorAll('.companion')];
+        companionArray.forEach(com => {
+          this.event.companions.push(com.value);
+        });
+
         const { photoUrl } = await this.setCleanEvent(this.event);
         $regBtn.innerText = '등록 성공';
         gsap.to($regBtn, {
@@ -400,7 +493,10 @@ export default {
           this.$emit('successUpload', param);
         }, 2000);
       } catch (e) {
-        this.setError(e);
+        this.setError({
+          message: e.message,
+          type: e.type,
+        });
       } finally {
         loader.hide();
       }
@@ -475,6 +571,10 @@ export default {
 .title-wrap {
   margin-bottom: 3%;
 }
+
+.title-wrap.photo-title {
+  margin-bottom: 1%;
+}
 .title-wrap > .title {
   font-weight: bold;
   width: 100%;
@@ -489,7 +589,7 @@ export default {
 .event-regist-body .photo-wrapper {
   position: relative;
   width: 100%;
-  height: 80%;
+  height: 600px;
   padding: 4%;
   margin-top: 5%;
   margin-bottom: 5%;
@@ -499,7 +599,7 @@ export default {
 .photo-wrapper > .photo {
   position: relative;
   width: 100%;
-  height: 80%;
+  height: 90%;
   display: flex;
   margin: 0;
   padding: 1%;
@@ -517,9 +617,10 @@ export default {
 .photo-wrapper > .photo > .photo-regist {
   width: 50%;
   min-width: 50%;
-  background-color: var(--objectColor);
+  background-color: var(--backgroundColor);
   display: flex;
   justify-content: center;
+  border-radius: 15px;
 }
 
 .photo-wrapper > .photo > .photo-regist > .icon {
@@ -545,7 +646,6 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
 .event-regist-body > .regist-form {
   display: flex;
   flex-wrap: wrap;
@@ -565,15 +665,6 @@ export default {
   margin-bottom: 10%;
 }
 
-.sub-column >>> .content {
-  margin-top: 5%;
-  margin-bottom: 5%;
-  display: flex;
-  flex-wrap: wrap;
-  background-color: var(--backgroundColor);
-  border-radius: 10px;
-}
-
 .sub-column > .map-img {
   margin-top: 5%;
   width: 100%;
@@ -587,35 +678,40 @@ export default {
   overflow: scroll;
 }
 
-.sub-column >>> .content .icon {
-  margin-left: 20px;
-  margin-top: 10px;
+.sub-column >>> .content {
+  margin-top: 5%;
+  margin-bottom: 5%;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--backgroundColor);
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
 }
+
 .sub-column >>> .content .text {
   position: relative;
-  width: 80%;
+  width: 70%;
   height: 50px;
   color: var(--fontColor);
   font-weight: bold;
-  margin-left: 20px;
+  margin-left: 10px;
 }
-.sub-column > .content.trash-scale {
+.sub-column > .content.regist-trash-scale {
   width: 100%;
   height: 120px;
   display: flex;
   justify-content: space-around;
   background-color: var(--objectColor);
 }
-.content.trash-scale:first-child {
-  opacity: 1;
-}
-.sub-column > .content.trash-scale > .img {
+.sub-column > .content.regist-trash-scale > .img {
   width: 20%;
   height: 100%;
+  padding: 1px;
   opacity: 0.5;
   cursor: pointer;
 }
-.sub-column > .text.trash-scale {
+.sub-column > .text.regist-trash-scale {
   width: 100%;
   padding: 5% 0;
   text-align: center;
@@ -636,6 +732,8 @@ export default {
   align-items: center;
   justify-content: center;
   background-color: var(--objectColor);
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
 .copyright {
@@ -654,10 +752,11 @@ export default {
 .sub-column > .textarea {
   display: block;
   color: var(--fontColor);
-  padding: 3% 3%;
+  padding: 5% 5%;
   background-color: var(--backgroundColor);
   width: 100%;
   min-height: 450px;
+  border-radius: 15px;
 }
 
 .sub-column >>> .content .text:focus,

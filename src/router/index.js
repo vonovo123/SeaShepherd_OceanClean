@@ -32,6 +32,7 @@ router.beforeEach((to, from, next) => {
   if (navigator.onLine) {
     next();
   } else {
+    console.log('internetDisconnet');
     store.dispatch('setError', {
       message: '인터넷 연결상태를 확인해주세요.',
       type: 'critical',

@@ -31,9 +31,7 @@ export default {
       loadDirAuthClient: 'authStore/loadDirAuthClient',
     }),
   },
-  async created() {
-    //google api set
-  },
+  mounted() {},
   computed: {
     ...mapGetters({
       error: 'getError',

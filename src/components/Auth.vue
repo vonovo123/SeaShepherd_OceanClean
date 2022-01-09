@@ -22,6 +22,8 @@
               class="input"
               v-model="dirEmail"
               placeholder="이메일"
+              @focus="fncFocus"
+              @blur="fncBlur"
             />
           </div>
           <div class="direct-input">
@@ -30,6 +32,8 @@
               class="input"
               v-model="dirName"
               placeholder="이름"
+              @focus="fncFocus"
+              @blur="fncBlur"
             />
           </div>
           <div class="direct-text">{{ dirStatus }}</div>
@@ -43,6 +47,8 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
+import { ScrollToPlugin } from 'gsap/all';
+gsap.registerPlugin(ScrollToPlugin);
 import { sendEmailAuth } from '../util/firebase.js';
 import { emailRegExp } from '../util/regExp.js';
 export default {
@@ -65,6 +71,22 @@ export default {
       googleSignOut: 'authStore/googleSignOut',
       setError: 'setError',
     }),
+    fncFocus() {
+      const $element = document.querySelector('.direct-input-wrapper');
+      console.log($element);
+      gsap.to(window, {
+        duration: 1,
+        scrollTo: $element,
+      });
+    },
+    fncBlur() {
+      console.log(`blur`);
+      const $element = document.querySelector('.auth-header');
+      gsap.to(window, {
+        duration: 1,
+        scrollTo: $element,
+      });
+    },
     setAuthFlag(e) {
       this.$emit('setShowAuthFlag', false);
     },
@@ -77,7 +99,7 @@ export default {
       ) {
         this.setError({
           message:
-            '카카오/삼성/네이버등의 인앱브라우저의 경우 구글인증이 불가합니다. 크롬/사파리 브라우저로 접속 하시거나 다른 이메일로 인증하기를 이용해주세요.',
+            '카카오/삼성/네이버등의 인앱브라우저의 경우 구글인증이 불가합니다. <br/> 크롬/사파리 브라우저로 접속 하시거나 </br> 다른 이메일로 인증하기를 이용해주세요.',
           type: 'browser',
         });
         return;
@@ -335,7 +357,19 @@ export default {
     font-size: 1.5em;
   }
   .company > .title {
-    font-size: 0.8em;
+    font-size: 0.4em;
+  }
+  .direct-title-wrapper > .title {
+    font-size: 0.4em;
+  }
+  .direct-input > input {
+    font-size: 0.4em;
+  }
+  .auth-direct > .direct-input-wrapper > .direct-btn {
+    font-size: 0.4em;
+  }
+  .auth-direct > .direct-input-wrapper > .direct-text {
+    font-size: 0.4em;
   }
   .company > .logo {
     width: 1em;

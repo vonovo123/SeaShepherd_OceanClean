@@ -316,11 +316,10 @@ export default {
 .gm-control-active {
   display: none !important;
 }
-/* 구글맵 기본요소 안보이기 end*/
 .home-main {
   /* 1em : 16px */
   width: 100%;
-  min-height: 700px;
+  min-height: 1000px;
   height: 100%;
   overflow: hidden;
   background-color: black;

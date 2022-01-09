@@ -1,7 +1,10 @@
 <template>
   <div class="criticalErrorMessage" @click="goHome">
-    <div class="customMessageWrapper">
-      <div class="customMessage"></div>
+    <div class="customCriticalMessageWrapper">
+      <div
+        class="customCriticalMessage"
+        v-html="criticalErrorMessageHTML"
+      ></div>
       <div>터치시 처음화면으로 돌아갑니다.</div>
     </div>
   </div>
@@ -11,15 +14,15 @@
 import router from '../router/index.js';
 export default {
   data() {
-    return { editedMessage: '변경전' };
+    return {};
   },
   props: {
     criticalErrorMessage: String,
   },
-  watch: {
-    criticalErrorMessage: function () {
-      const $message = `<div>${this.criticalErrorMessage}</div>`;
-      document.querySelector('.customMessage').innerHTML = $message;
+  computed: {
+    criticalErrorMessageHTML: function () {
+      const criticalErrorMessageHTML = `<div>${this.criticalErrorMessage}</div>`;
+      return criticalErrorMessageHTML;
     },
   },
   methods: {
@@ -27,7 +30,10 @@ export default {
       router.push({
         name: 'realhome',
       });
-      router.go();
+
+      setTimeout(() => {
+        router.go();
+      }, 1000);
     },
   },
 };
@@ -46,11 +52,11 @@ export default {
   left: 0;
   text-align: center;
 }
-.customMessageWrapper {
+.customCriticalMessageWrapper {
   position: relative;
   top: 40%;
 }
-.customMessage {
+.customCriticalMessage {
   margin-bottom: 20px;
 }
 </style>
