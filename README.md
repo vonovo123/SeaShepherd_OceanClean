@@ -17,9 +17,9 @@
 </div>
 
 ## 컴포넌트별 상세 구성
-- [랜딩](./devNote/랜딩페이지.md)
-- [인증](./devNote/인증.md)
-- [지도](./devNote/지도.md)
-- [등록](./devNote/등록.md)
-- [상세](./devNote/상세.md)
-- [에러](./devNote/에러.md)
+- [랜딩](./devNote/LANDING.md)
+- [인증](./devNote/AUTH.md)
+- [지도](./devNote/MAP.md)
+- [등록](./devNote/REGIST.md)
+- [상세](./devNote/DETAIL.md)
+- [에러](./devNote/ERROR.md)
