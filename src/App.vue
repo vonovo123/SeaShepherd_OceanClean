@@ -17,7 +17,7 @@
 <script>
 import ErrorMessage from './components/ErrorMessage.vue';
 import CriticalErrorMessage from './components/CriticalErrorMessage.vue';
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 export default {
   data() {
     return {

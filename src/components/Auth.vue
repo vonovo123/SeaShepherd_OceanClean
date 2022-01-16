@@ -104,17 +104,20 @@ export default {
         });
         return;
       }
-
+      //이미 인증돼있는 상태면 통과
       if (this.authInfo.isAuth) {
-        this.$store.dispatch('moveToMaps');
         this.$emit('setShowAuthFlag', false);
+        this.$store.dispatch('moveToMaps');
       } else {
         try {
+          //gmail 인증
           await this.googleSignIn();
+          //인증화면 닫기
           this.$emit('setShowAuthFlag', false);
+          //지도로 이동
           this.$store.dispatch('moveToMaps');
         } catch (e) {
-          console.log(e);
+          //구글인증 에러상황 처리
           if (e.error) {
             //인증화면 닫은경우
             if (e.error === 'popup_closed_by_user') {
@@ -149,10 +152,12 @@ export default {
         this.dirStatus = '이름을 입력해주세요';
         return;
       }
-
+      //이메일 정규식 통과하면
       if (emailRegExp.test(this.dirEmail)) {
+        //입력한 이메일로 인증메일 전송
         sendEmailAuth(this.dirEmail, this.dirName);
         this.dirStatus = '입력하신 이메일로 인증메일을 전송했습니다';
+        //중복입력 방지
         document.querySelector('.direct-btn').style.display = 'none';
         setTimeout(() => {
           document.querySelector('.direct-btn').style.display = 'block';

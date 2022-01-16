@@ -67,7 +67,7 @@ export const actions = {
     const files = [...eventObj.photos];
     delete eventObj.photos;
     try {
-      //스토리지에 파일 선업로드
+      //이미지 url 생성을 취한 스토리지에 파일 선업로드
       const promises = [];
       files.forEach(file => {
         if (file) {

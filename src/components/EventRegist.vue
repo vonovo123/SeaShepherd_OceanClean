@@ -413,6 +413,7 @@ export default {
     //등록
     async regist() {
       try {
+        //함께 간 동료 event 객체에 추가
         const companions = [...document.querySelectorAll('.companion-content')];
         for (let i = 0; i < companions.length; i++) {
           if (!companions[i].childNodes[4].value) {
@@ -427,6 +428,7 @@ export default {
             );
           }
         }
+        //사용자정보 로드 실패시 방어로직
         if (!this.event.userInfo) {
           throw new TypeError(
             '사용자정보가 존재하지 않습니다. <br/> 잠시후 다시 시도 바랍니다.',
@@ -454,7 +456,7 @@ export default {
         });
         return;
       }
-
+      //로딩 on
       let loader = this.$loading.show({
         // Optional parameters
         isFullPage: true,
@@ -465,21 +467,25 @@ export default {
         opacity: 0.5,
       });
       try {
+        //이중등록 방지를 위한 버튼 에니메이션
         const $regBtn = document.querySelector('#registBtn');
         gsap.to($regBtn, {
           duration: 1,
           y: 100,
           opacity: 0,
         });
-
+        //uuid 생성
         this.event.id = `${Date.now() + this.event.userInfo.email.slice()}`;
+        // 위치정보
         this.event.address = this.currentAddress;
+        // 좌표
         this.event.position = this.currentPosition;
+        //함께한 동료 event에 추가
         const companionArray = [...document.querySelectorAll('.companion')];
         companionArray.forEach(com => {
           this.event.companions.push(com.value);
         });
-
+        //등록
         const { photoUrl } = await this.setCleanEvent(this.event);
         $regBtn.innerText = '등록 성공';
         gsap.to($regBtn, {
@@ -524,7 +530,6 @@ export default {
         this.$emit('setIsAppear', false);
       }
     },
-    observeBottomOf() {},
   },
 };
 </script>
