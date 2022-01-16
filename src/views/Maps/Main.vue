@@ -67,8 +67,8 @@ export default {
       //현재위치마커 추가
       //mounted에서 최종예외처리
       this.setCurMarker();
-      this.setEventMarkers();
       //이벤트 마커 추가
+      this.setEventMarkers();
       this.map.setCenter(this.currentPosition);
       //현재위치 마커 클릭 이벤트리스너 추가
       this.map.addListener('click', e => this.clickMapEvent(e));
@@ -96,14 +96,18 @@ export default {
         content.innerHTML = '등록하기';
         content.classList.add('custom-marker-text');
         const geocoder = new google.maps.Geocoder();
+        //geoCoder를 활용한 문자열 주소 생성
         const address = await geocoder.geocode({
           location: this.currentPosition,
         });
+        //문자열 주소 store에 저장
         this.setCurAddress(address.results[0].formatted_address);
+
         //기존 현재위치마커 삭제
         if (this.curMarker) {
           this.curMarker.setMap(null);
         }
+        //현재위치 마커 등록
         this.curMarker = new CurLocMaker(
           new google.maps.LatLng(
             this.currentPosition.lat,
@@ -219,6 +223,7 @@ export default {
             }
           }
         } else {
+          //현재위치정보 snapShot 생성
           this.snapShot(this.eventDetail.position);
           this.showBlock = true;
           const $target = document.querySelector('.event-detail');
@@ -228,10 +233,13 @@ export default {
           });
         }
       } else {
+        //이벤트 상세정보 조회
         await this.setEventDetail(event);
         result = event;
+        //위치정보 snapshot 생성
         this.snapShot(result.position);
         this.showBlock = true;
+        //상세정보 컴포넌트 show
         const $target = document.querySelector('.event-detail');
         gsap.to($target, {
           duration: 0.5,
@@ -244,7 +252,9 @@ export default {
     //현재위치로이동 버튼을 통해 현재위치마커를 현재위치로 이동
     async clickCurPosition() {
       try {
+        //클릭 지점 위치 저장
         await this.setCurPosition();
+        // 현재위치 변경
         await this.setCurMarker();
         this.map.setCenter(this.currentPosition);
         this.map.setZoom(16);

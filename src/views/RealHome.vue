@@ -159,29 +159,35 @@ export default {
       try {
         this.map = new google.maps.Map(mapDiv, mapOptions);
         //시각화 지도 생성
-        const layerOptions = {
-          id: 'scatterplot',
-          data: this.eventMarkerData,
-          getPosition: d => [
-            parseFloat(d.position.lng),
-            parseFloat(d.position.lat),
-          ],
-          getRadius: d => parseInt(d.scale),
-          stroked: true,
-          getFillColor: [255, 133, 27],
-          getLineColor: [255, 38, 27],
-          radiusMinPixels: 5,
-          radiusMaxPixels: 50,
-        };
-
-        const scatterplotLayer = new ScatterplotLayer(layerOptions);
-        const googleMapsOverlay = new GoogleMapsOverlay({
-          layers: [scatterplotLayer],
-        });
-        googleMapsOverlay.setMap(this.map);
+        this.setGoogleMapsOverlay();
       } catch (e) {
-        throw new Error();
+        throw new Error('시각화지도 생성에 실패했습니다. 다시 시도바랍니다.');
       }
+    },
+    //시각화 지도 생성
+    setGoogleMapsOverlay() {
+      //ScatterplotLayer 레이어 옵션
+      const layerOptions = {
+        id: 'scatterplot',
+        data: this.eventMarkerData,
+        getPosition: d => [
+          parseFloat(d.position.lng),
+          parseFloat(d.position.lat),
+        ],
+        getRadius: d => parseInt(d.scale),
+        stroked: true,
+        getFillColor: [255, 133, 27],
+        getLineColor: [255, 38, 27],
+        radiusMinPixels: 5,
+        radiusMaxPixels: 50,
+      };
+      //ScatterplotLayer 생성
+      const scatterplotLayer = new ScatterplotLayer(layerOptions);
+      //googleMap Layer로 지정
+      const googleMapsOverlay = new GoogleMapsOverlay({
+        layers: [scatterplotLayer],
+      });
+      googleMapsOverlay.setMap(this.map);
     },
     regist() {
       if (this.authInfo.isAuth) {
@@ -245,13 +251,10 @@ export default {
         return;
         //그냥 들어온상태면
       } else {
+        //구글 인증 api load
         await this.loadGoogleAuthClient();
+        //직접 인증 api load
         await this.loadDirAuthClient();
-        //console.log(`google`, await this.loadGoogleAuthClient());
-        //this.loadGoogleAuthClient();
-        // if (isGoogleAuth) {
-        //   this.updateGoogleAuthStatus();
-        // }
       }
       //현재위치 조회
       await this.setCurPosition();
@@ -260,7 +263,6 @@ export default {
       //지도정보 초기화
       this.initMap();
     } catch (e) {
-      console.log(e);
       const message = e.message;
       this.setError({
         message,

@@ -33,6 +33,7 @@ export default new Vuex.Store({
         type: error.type,
         message: error.message,
       };
+      //critlcal error가 아닌경우 3초 후 화면에서 제거
       if (error.type !== 'critical') {
         setTimeout(() => {
           state.error = {
@@ -98,7 +99,6 @@ export default new Vuex.Store({
       commit('SET_ERROR', new TypeError(message, type, name));
     },
     //현재위치 지정
-
     setCurPosition: async ({ commit }, pos) => {
       if (!pos) {
         if (navigator.geolocation) {
@@ -122,6 +122,9 @@ export default new Vuex.Store({
               '브라우저가 GPS정보를 제공하지 않습니다.<br/>5.0버전 이상의 Chrome/Safari 브라우저로 이용바랍니다.';
             if (e.message === 'noAccess') {
               message = '현재위치정보를 확인 할 수 없습니다.';
+            }
+            if (e.message === `User denied Geolocation`) {
+              message = '브라우저 및 PC의 위치 엑세스를 허용해주세요.';
             }
             throw new Error(message);
           }

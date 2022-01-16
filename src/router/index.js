@@ -14,12 +14,6 @@ const routes = [
     name: 'maps/Main',
     component: () => import('../views/Maps/Main.vue'),
   },
-
-  {
-    path: '/error',
-    name: '/error',
-    component: () => import('../views/Error/ErrorPage.vue'),
-  },
 ];
 
 const router = new VueRouter({
