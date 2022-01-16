@@ -17,7 +17,7 @@
 </div>
 
 ## 컴포넌트별 상세 구성
-- [랜딩](https://github.com/vonovo123/SeaShepherd_OceanClean/blob/main/devNote/랜딩페이지.md)
+- [랜딩](https://github.com/vonovo123/SeaShepherd_OceanClean/blob/main/devNote/%EB%93%B1%EB%A1%9D.md)
 - [인증](./devNote/인증.md)
 - [지도](./devNote/지도.md)
 - [등록](./devNote/등록.md)
