@@ -1,18 +1,36 @@
-import Vue from 'vue';
-import App from './App.vue';
-import store from './store';
-import router from './router';
-import vuetify from './plugins/vuetify';
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';
-Vue.component('font-awesome-icon', FontAwesomeIcon);
+import {
+  faCamera,
+  faGlobeAsia,
+  faCalendarWeek,
+  faUsers,
+  faUserTag,
+  faEnvelopeSquare,
+  faUser,
+  faPlus,
+  faMinus,
+} from '@fortawesome/free-solid-svg-icons';
+import App from './App.vue';
+import router from './router';
+import './styles/main.css';
 
-Vue.config.productionTip = false;
-Vue.use(Loading);
-new Vue({
-  store,
-  router,
-  vuetify,
-  render: h => h(App),
-}).$mount('#app');
+library.add(
+  faCamera,
+  faGlobeAsia,
+  faCalendarWeek,
+  faUsers,
+  faUserTag,
+  faEnvelopeSquare,
+  faUser,
+  faPlus,
+  faMinus
+);
+
+const app = createApp(App);
+app.use(createPinia());
+app.use(router);
+app.component('font-awesome-icon', FontAwesomeIcon);
+app.mount('#app');

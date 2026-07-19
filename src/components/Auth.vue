@@ -1,384 +1,298 @@
+<script setup>
+import { ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { useAppStore } from '@/stores/app';
+import { sendEmailAuth } from '@/util/firebase.js';
+import { emailRegExp } from '@/util/regExp.js';
+import gmailLogo from '@/assets/images/gmail.png';
+
+const emit = defineEmits(['setShowAuthFlag']);
+
+const authStore = useAuthStore();
+const appStore = useAppStore();
+
+const dirOpen = ref(false);
+const dirName = ref('');
+const dirEmail = ref('');
+const dirStatus = ref('');
+const sending = ref(false);
+
+function close() {
+  emit('setShowAuthFlag', false);
+}
+
+async function fncGMailAuth() {
+  if (
+    navigator.userAgent.match(
+      /inapp|NAVER|KAKAOTALK|Snapchat|Line|WirtschaftsWoche|Thunderbird|Instagram|everytimeApp|WhatsApp|Electron|wadiz|AliApp|zumapp|iPhone(.*)Whale|Android(.*)Whale|kakaostory|band|twitter|DaumApps|DaumDevice\/mobile|FB_IAB|FB4A|FBAN|FBIOS|FBSS|SamsungBrowser\/[^1]/i
+    )
+  ) {
+    appStore.setError({
+      message:
+        '카카오/삼성/네이버등의 인앱브라우저의 경우 구글인증이 불가합니다. <br/> 크롬/사파리 브라우저로 접속 하시거나 </br> 다른 이메일로 인증하기를 이용해주세요.',
+      type: 'browser',
+    });
+    return;
+  }
+
+  if (authStore.authInfo.isAuth) {
+    emit('setShowAuthFlag', false);
+    appStore.moveToMaps();
+    return;
+  }
+
+  try {
+    await authStore.googleSignIn();
+    emit('setShowAuthFlag', false);
+    appStore.moveToMaps();
+  } catch (e) {
+    if (e?.code === 'auth/popup-closed-by-user') {
+      appStore.setError({
+        message: '사용자에 의해 gmail 인증이 취소됐습니다.',
+        type: 'browser',
+      });
+      return;
+    }
+
+    appStore.setError({
+      message:
+        e?.message ||
+        '사용자인증 중 알 수 없는 문제가 발생했습니다. 잠시후 다시 시도바랍니다.',
+      type: 'critical',
+    });
+  }
+}
+
+async function fncDirAuth() {
+  if (!dirEmail.value) {
+    dirStatus.value = '이메일을 입력해주세요';
+    return;
+  }
+  if (!dirName.value) {
+    dirStatus.value = '이름을 입력해주세요';
+    return;
+  }
+  if (!emailRegExp.test(dirEmail.value)) {
+    dirStatus.value = '이메일 형식을 다시 확인해주세요';
+    return;
+  }
+
+  try {
+    sending.value = true;
+    await sendEmailAuth(dirEmail.value, dirName.value);
+    dirStatus.value = '입력하신 이메일로 인증메일을 전송했습니다';
+    setTimeout(() => {
+      sending.value = false;
+      dirStatus.value = '';
+    }, 3000);
+  } catch (e) {
+    sending.value = false;
+    appStore.setError({
+      message: e.message,
+      type: 'browser',
+    });
+  }
+}
+
+function toggleDirAuth() {
+  dirOpen.value = !dirOpen.value;
+}
+</script>
+
 <template>
-  <div class="auth">
-    <div class="auth-header"></div>
-    <div class="auth-body">
-      <div class="close" @click="setAuthFlag($event)">닫기</div>
-      <div class="auth-list">
-        <div class="company google" @click="fncGMailAuth()">
-          <img class="logo" src="../assets/images/gmail.png" alt="" />
-          <div class="title">G-Mail로 인증하기</div>
-        </div>
+  <div class="auth-backdrop" @click.self="close">
+    <div class="auth-sheet">
+      <button class="auth-sheet__close" type="button" @click="close">닫기</button>
+
+      <div class="auth-sheet__brand">
+        <p class="eyebrow">Join the cleanup</p>
+        <h2>인증하고 활동을 기록하세요</h2>
+        <p class="lead">해양정화 활동을 지도에 남기려면 로그인이 필요합니다.</p>
       </div>
-    </div>
-    <div class="auth-footer">
-      <div class="auth-direct">
-        <div class="direct-title-wrapper" @click="fncShowDirAuth()">
-          <div class="title">다른 이메일로 인증하기</div>
-        </div>
-        <div class="direct-input-wrapper">
-          <div class="direct-input">
-            <input
-              type="text"
-              class="input"
-              v-model="dirEmail"
-              placeholder="이메일"
-              @focus="fncFocus"
-              @blur="fncBlur"
-            />
-          </div>
-          <div class="direct-input">
-            <input
-              type="text"
-              class="input"
-              v-model="dirName"
-              placeholder="이름"
-              @focus="fncFocus"
-              @blur="fncBlur"
-            />
-          </div>
-          <div class="direct-text">{{ dirStatus }}</div>
-          <div class="direct-btn" @click="fncDirAuth()">인증</div>
+
+      <button class="auth-google" type="button" @click="fncGMailAuth">
+        <img :src="gmailLogo" alt="" />
+        <span>Gmail로 인증하기</span>
+      </button>
+
+      <div class="auth-sheet__footer">
+        <button class="auth-toggle" type="button" @click="toggleDirAuth">
+          다른 이메일로 인증하기
+        </button>
+
+        <div v-show="dirOpen" class="auth-direct">
+          <input
+            v-model="dirEmail"
+            type="email"
+            class="auth-input"
+            placeholder="이메일"
+            autocomplete="email"
+          />
+          <input
+            v-model="dirName"
+            type="text"
+            class="auth-input"
+            placeholder="이름"
+            autocomplete="name"
+          />
+          <p v-if="dirStatus" class="auth-status">{{ dirStatus }}</p>
+          <button
+            class="auth-submit"
+            type="button"
+            :disabled="sending"
+            @click="fncDirAuth"
+          >
+            {{ sending ? '전송 중…' : '인증 메일 보내기' }}
+          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters, mapActions } from 'vuex';
-import gsap from 'gsap';
-import { ScrollToPlugin } from 'gsap/all';
-gsap.registerPlugin(ScrollToPlugin);
-import { sendEmailAuth } from '../util/firebase.js';
-import { emailRegExp } from '../util/regExp.js';
-export default {
-  data() {
-    return {
-      dirFlag: false,
-      dirName: '',
-      dirEmail: '',
-      dirStatus: '',
-    };
-  },
-  computed: {
-    ...mapState(['authStore']),
-    ...mapGetters({ authInfo: 'authStore/AuthInfo' }),
-  },
-  methods: {
-    ...mapActions({
-      setAuthInfo: 'authStore/setAuthInfo',
-      googleSignIn: 'authStore/googleSignIn',
-      googleSignOut: 'authStore/googleSignOut',
-      setError: 'setError',
-    }),
-    fncFocus() {
-      const $element = document.querySelector('.direct-input-wrapper');
-      console.log($element);
-      gsap.to(window, {
-        duration: 1,
-        scrollTo: $element,
-      });
-    },
-    fncBlur() {
-      console.log(`blur`);
-      const $element = document.querySelector('.auth-header');
-      gsap.to(window, {
-        duration: 1,
-        scrollTo: $element,
-      });
-    },
-    setAuthFlag(e) {
-      this.$emit('setShowAuthFlag', false);
-    },
-    //gmail로 인증 이벤트
-    async fncGMailAuth() {
-      if (
-        navigator.userAgent.match(
-          /inapp|NAVER|KAKAOTALK|Snapchat|Line|WirtschaftsWoche|Thunderbird|Instagram|everytimeApp|WhatsApp|Electron|wadiz|AliApp|zumapp|iPhone(.*)Whale|Android(.*)Whale|kakaostory|band|twitter|DaumApps|DaumDevice\/mobile|FB_IAB|FB4A|FBAN|FBIOS|FBSS|SamsungBrowser\/[^1]/i
-        )
-      ) {
-        this.setError({
-          message:
-            '카카오/삼성/네이버등의 인앱브라우저의 경우 구글인증이 불가합니다. <br/> 크롬/사파리 브라우저로 접속 하시거나 </br> 다른 이메일로 인증하기를 이용해주세요.',
-          type: 'browser',
-        });
-        return;
-      }
-      //이미 인증돼있는 상태면 통과
-      if (this.authInfo.isAuth) {
-        this.$emit('setShowAuthFlag', false);
-        this.$store.dispatch('moveToMaps');
-      } else {
-        try {
-          //gmail 인증
-          await this.googleSignIn();
-          //인증화면 닫기
-          this.$emit('setShowAuthFlag', false);
-          //지도로 이동
-          this.$store.dispatch('moveToMaps');
-        } catch (e) {
-          //구글인증 에러상황 처리
-          if (e.error) {
-            //인증화면 닫은경우
-            if (e.error === 'popup_closed_by_user') {
-              this.setError({
-                message: '사용자에 의해 gmail 인증이 취소됐습니다.',
-                type: 'browser',
-              });
-            } else {
-              this.setError({
-                message: e.error,
-                type: 'browser',
-              });
-            }
-          } else {
-            this.setError({
-              message:
-                '사용자인증 중 알 수 없는 문제가 발생했습니다. 잠시후 다시 시도바랍니다.',
-              type: 'critical',
-            });
-          }
-        }
-      }
-    },
-    //직접입력한 이메일로 인증
-    async fncDirAuth() {
-      if (this.dirEmail === '') {
-        this.dirStatus = '이메일을 입력해주세요';
-        return;
-      }
-
-      if (this.dirName === '') {
-        this.dirStatus = '이름을 입력해주세요';
-        return;
-      }
-      //이메일 정규식 통과하면
-      if (emailRegExp.test(this.dirEmail)) {
-        //입력한 이메일로 인증메일 전송
-        sendEmailAuth(this.dirEmail, this.dirName);
-        this.dirStatus = '입력하신 이메일로 인증메일을 전송했습니다';
-        //중복입력 방지
-        document.querySelector('.direct-btn').style.display = 'none';
-        setTimeout(() => {
-          document.querySelector('.direct-btn').style.display = 'block';
-          this.dirStatus = '';
-        }, 3000);
-      } else {
-        this.dirStatus = '이메일 형식을 다시 확인해주세요';
-      }
-    },
-    fncShowDirAuth() {
-      const $target = document.querySelector('.auth-footer');
-      const $directInputWrapper = document.querySelector(
-        '.direct-input-wrapper'
-      );
-      if (!this.dirFlag) {
-        gsap.to($target, {
-          duration: 0.2,
-          height: '50%',
-        });
-        gsap.to($directInputWrapper, {
-          duration: 0.1,
-          display: 'block',
-        });
-      } else {
-        gsap.to($target, {
-          duration: 0.2,
-          height: '10%',
-        });
-        gsap.to($directInputWrapper, {
-          duration: 0.1,
-          display: 'none',
-        });
-      }
-      this.dirFlag = !this.dirFlag;
-    },
-  },
-  mounted() {},
-};
-</script>
-
 <style scoped>
-.auth {
+.auth-backdrop {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  min-height: 700px;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
   z-index: 100;
-  padding-left: 15%;
-  padding-right: 15%;
-  padding-top: 50px;
-  font-size: 2em;
-  color: var(--fontColor);
-  font-weight: bold;
+  display: grid;
+  place-items: end center;
+  padding: 1rem;
+  background: rgba(4, 16, 24, 0.62);
+  backdrop-filter: blur(6px);
 }
 
-.auth .auth-header {
+.auth-sheet {
+  width: min(460px, 100%);
+  margin-bottom: 4vh;
+  padding: 1.5rem 1.35rem 1.35rem;
+  border-radius: 24px 24px 18px 18px;
+  background:
+    linear-gradient(180deg, rgba(18, 58, 82, 0.95), rgba(6, 22, 34, 0.98));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   position: relative;
-  width: 100%;
-  height: 10%;
 }
 
-.auth .auth-body {
-  position: relative;
-  width: 100%;
-  height: 30%;
-  background-color: var(--backgroundColor);
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  padding-top: 30px;
-  padding-bottom: 5%;
-}
-
-.auth-body > .auth-list {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  top: 30px;
-}
-.auth-body > .close {
+.auth-sheet__close {
   position: absolute;
-  right: 30px;
-  font-size: 0.5em;
+  top: 1rem;
+  right: 1rem;
+  border: 0;
+  background: transparent;
+  color: var(--foam-muted);
+  cursor: pointer;
 }
 
-.auth-body .company {
-  position: relative;
-  width: 80%;
-  background-color: var(--objectColor);
-  left: 50%;
-  margin-left: calc(80% / -2);
-  padding-top: 10px;
-  padding-bottom: 10px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 15px;
-}
-.company > .title {
-  position: relative;
-  font-size: 0.8em;
+.auth-sheet__brand {
+  margin-bottom: 1.5rem;
+  padding-right: 2.5rem;
 }
 
-.company > .logo {
-  position: relative;
-  width: 1.5em;
-  height: 1.5em;
-  margin-right: 2%;
+.eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--warm);
+  font-family: var(--font-display);
 }
 
-.auth .auth-footer {
-  position: relative;
+.auth-sheet__brand h2 {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
+  line-height: 1.2;
+}
+
+.lead {
+  margin: 0;
+  color: var(--foam-muted);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.auth-google {
   width: 100%;
-  height: 10%;
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
-  background-color: var(--backgroundColor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(238, 245, 248, 0.06);
+  color: var(--foam);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.auth-footer > .auth-direct {
-  position: relative;
+.auth-google:hover {
+  background: rgba(238, 245, 248, 0.12);
+  transform: translateY(-1px);
+}
+
+.auth-google img {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.auth-sheet__footer {
+  margin-top: 1.25rem;
+}
+
+.auth-toggle {
+  display: block;
   width: 100%;
-  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--foam-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
-.auth-footer > .auth-direct > .direct-title-wrapper {
-  position: relative;
-  width: 50%;
-  height: 30px;
-  left: 50%;
-  margin-left: calc(50% / -2);
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.direct-title-wrapper > .title {
-  font-size: 0.5em;
+.auth-direct {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
-.auth-footer > .auth-direct > .direct-input-wrapper {
-  display: none;
-}
-
-.auth-direct > .direct-input-wrapper > .direct-input {
-  position: relative;
-  width: 90%;
-  height: 40px;
-  left: 50%;
-  margin-left: calc(90% / -2);
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--objectColor);
-  border-radius: 15px;
-  top: 10px;
-}
-.auth-direct > .direct-input-wrapper > .direct-text {
-  position: relative;
-  width: 90%;
-  height: 20px;
-  left: 50%;
-  margin-left: calc(90% / -2);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.5em;
-  top: 5px;
-}
-
-.direct-input > input {
-  padding-left: 5%;
-  width: 80%;
-  height: 100%;
-  background-color: var(--objectColor);
-  color: var(--fontColor);
-  font-weight: lighter;
-  font-size: 0.8em;
-}
-
-.direct-input > input:focus {
+.auth-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(4, 16, 24, 0.55);
+  color: var(--foam);
+  padding: 0.9rem 1rem;
   outline: none;
 }
-.auth-direct > .direct-input-wrapper > .direct-btn {
-  position: relative;
-  padding: 5px;
-  width: 80px;
-  font-size: 0.8em;
-  background-color: var(--objectColor);
-  border-radius: 15px;
-  left: 50%;
-  margin-left: calc(80px / -2);
-  text-align: center;
+
+.auth-input:focus {
+  border-color: rgba(244, 162, 97, 0.55);
 }
 
-@media only screen and (max-width: 414px) {
-  .auth {
-    font-size: 1.5em;
-  }
-  .company > .title {
-    font-size: 0.4em;
-  }
-  .direct-title-wrapper > .title {
-    font-size: 0.4em;
-  }
-  .direct-input > input {
-    font-size: 0.4em;
-  }
-  .auth-direct > .direct-input-wrapper > .direct-btn {
-    font-size: 0.4em;
-  }
-  .auth-direct > .direct-input-wrapper > .direct-text {
-    font-size: 0.4em;
-  }
-  .company > .logo {
-    width: 1em;
-    height: 1em;
-  }
+.auth-status {
+  margin: 0;
+  text-align: center;
+  color: var(--warm);
+  font-size: 0.88rem;
+}
+
+.auth-submit {
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.95rem 1rem;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 </style>

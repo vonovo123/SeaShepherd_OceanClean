@@ -1,8 +1,4 @@
 import { initializeApp } from 'firebase/app';
-import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' });
-const VUE_APP_FIREBASE = process.env.VUE_APP_FIREBASE;
-//storage
 import {
   getStorage,
   ref,
@@ -10,8 +6,6 @@ import {
   getDownloadURL,
   deleteObject,
 } from 'firebase/storage';
-
-//fireStore
 import {
   getFirestore,
   collection,
@@ -23,8 +17,6 @@ import {
   setDoc,
   writeBatch,
 } from 'firebase/firestore';
-
-//auth
 import {
   getAuth,
   sendSignInLinkToEmail,
@@ -33,14 +25,18 @@ import {
   signOut,
   updateProfile,
   onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
+
 const firebaseConfig = {
-  apiKey: VUE_APP_FIREBASE,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: 'seashepherd-oceanclean.firebaseapp.com',
   databaseURL: 'https://seashepherd-oceanclean-default-rtdb.firebaseio.com',
   projectId: 'seashepherd-oceanclean',
   storageBucket: 'seashepherd-oceanclean.appspot.com',
 };
+
 const metadata = {
   contentType: 'image/png',
 };
@@ -49,63 +45,60 @@ const firebase = initializeApp(firebaseConfig);
 const storage = getStorage(firebase);
 const db = getFirestore(firebase);
 const auth = getAuth(firebase);
-//스토리지 파일 등록
+const googleProvider = new GoogleAuthProvider();
+
 export const upLoadFile = async function (date, email, file) {
-  // eslint-disable-next-line no-async-promise-executor
   try {
     const imageRef = ref(storage, `images/${date}/${email}/${file.name}`);
     const snapshot = await uploadBytesResumable(imageRef, file, metadata);
     const url = await getDownloadURL(snapshot.ref);
     return url;
-  } catch (error) {
+  } catch {
     return 'error';
   }
 };
-//스토리지 파일 삭제
+
 export const desertFile = function (date, email, fileName) {
   const desertRef = ref(storage, `images/${date}/${email}/${fileName}`);
   deleteObject(desertRef).then(() => {});
 };
 
 export const deleteData = async function (collectionName, id) {
-  const ref = doc(db, collectionName, id);
-  await deleteDoc(ref);
-};
-export const patchData = async function (collectionName, id, obj) {
-  const ref = doc(db, collectionName, id);
-  await updateDoc(ref, obj);
-};
-export const postData = async function (collectionName, id, obj) {
-  const ref = doc(db, collectionName, id);
-  return await setDoc(ref, obj);
-};
-export const getData = async function (collectionName, id) {
-  if (id) {
-    const ref = doc(db, collectionName, id);
-    const snap = await getDoc(ref);
-    return snap.data();
-  } else {
-    const snaps = await getDocs(collection(db, collectionName));
-    const dataArray = snaps.docs.map(snap => snap.data());
-    return dataArray;
-  }
+  const refDoc = doc(db, collectionName, id);
+  await deleteDoc(refDoc);
 };
 
-export const batch = async function (...params) {
-  console.log(`batch: ${JSON.stringify(params)}`);
+export const patchData = async function (collectionName, id, obj) {
+  const refDoc = doc(db, collectionName, id);
+  await updateDoc(refDoc, obj);
+};
+
+export const postData = async function (collectionName, id, obj) {
+  const refDoc = doc(db, collectionName, id);
+  return await setDoc(refDoc, obj);
+};
+
+export const getData = async function (collectionName, id) {
+  if (id) {
+    const refDoc = doc(db, collectionName, id);
+    const snap = await getDoc(refDoc);
+    return snap.data();
+  }
+
+  const snaps = await getDocs(collection(db, collectionName));
+  return snaps.docs.map(snap => snap.data());
+};
+
+export const batchWrite = async function (...params) {
   const batch = writeBatch(db);
-  let ref = null;
   params.forEach(({ method, table, id, obj }) => {
-    //쓰기
-    ref = doc(db, table, id);
+    const refDoc = doc(db, table, id);
     if (method === 'post') {
-      batch.set(ref, obj);
-      //수정
+      batch.set(refDoc, obj);
     } else if (method === 'patch') {
-      batch.update(ref, obj);
-      //삭제
+      batch.update(refDoc, obj);
     } else if (method === 'delete') {
-      batch.delete(ref, obj);
+      batch.delete(refDoc);
     }
   });
   await batch.commit();
@@ -113,35 +106,34 @@ export const batch = async function (...params) {
 
 const actionCodeSettings = {
   url: 'https://vonovo123.github.io/SeaShepherd_OceanClean',
-  //url: 'https://679d-223-62-216-243.ngrok.io/realhome',
-  // This must be true.
   handleCodeInApp: true,
 };
+
 export const sendEmailAuth = async function (email, name) {
   try {
-    sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     window.localStorage.setItem('emailForSignIn', email);
     window.localStorage.setItem('nameForSignIn', name);
-  } catch (e) {
+  } catch {
     throw new Error(
       '인증 이메일 발신에 실패했습니다.<br/>잠시후 다시 시도해주세요.'
     );
   }
 };
-//이메일 인증 aipkey를 가지고 첫화면에 접근했는지 판단
+
 export const authWithEmailLink = async function () {
   try {
     if (isSignInWithEmailLink(auth, window.location.href)) {
       const name = window.localStorage.getItem('nameForSignIn');
       const email = window.localStorage.getItem('emailForSignIn');
       await signInWithEmailLink(auth, email, window.location.href);
-      updateProfile(auth.currentUser, { displayName: name });
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: name });
+      }
       return true;
-    } else {
-      return false;
     }
-  } catch (e) {
-    console.log(e);
+    return false;
+  } catch {
     throw new Error(
       '이메일 인증에 실패했습니다.<br/>잠시후 다시 시도해주세요.'
     );
@@ -149,7 +141,7 @@ export const authWithEmailLink = async function () {
 };
 
 export const checkEmailAuth = function () {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     onAuthStateChanged(auth, user => {
       resolve(user);
     });
@@ -157,6 +149,19 @@ export const checkEmailAuth = function () {
 };
 
 export const signOutEmailAuth = function () {
-  signOut(auth);
+  return signOut(auth);
 };
+
+export const signInWithGoogle = async function () {
+  const result = await signInWithPopup(auth, googleProvider);
+  return {
+    fullName: result.user.displayName || '',
+    mail: result.user.email || '',
+  };
+};
+
+export const signOutGoogle = async function () {
+  await signOut(auth);
+};
+
 export default firebase;

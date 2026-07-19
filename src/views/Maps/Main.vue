@@ -1,412 +1,333 @@
+<script setup>
+import { ref, onMounted, nextTick } from 'vue';
+import { storeToRefs } from 'pinia';
+import CurLocMarker from '@/util/CurLocMarker.js';
+import EventDetail from '@/components/EventDetail.vue';
+import EventRegist from '@/components/EventRegist.vue';
+import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
+import { useCleanEventStore } from '@/stores/cleanEvent';
+import { loadGoogleMaps, getGoogleMapsApiKey } from '@/util/loadGoogleMaps.js';
+import { animateTo } from '@/util/gsapSafe.js';
+import markerImg from '@/assets/images/pngwing.png';
+
+const appStore = useAppStore();
+const authStore = useAuthStore();
+const cleanEventStore = useCleanEventStore();
+
+const { currentPosition } = storeToRefs(appStore);
+const { eventMarkers, eventDetail } = storeToRefs(cleanEventStore);
+
+const mapEl = ref(null);
+const showBlock = ref(false);
+const renderRegist = ref(true);
+
+let map = null;
+let curMarker = null;
+
+function initMap() {
+  try {
+    map = new google.maps.Map(mapEl.value, {
+      center: currentPosition.value,
+      zoom: 16,
+      disableDefaultUI: true,
+      styles: [
+        { elementType: 'geometry', stylers: [{ color: '#0d1b26' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#8aa0b0' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#0d1b26' }] },
+        {
+          featureType: 'water',
+          elementType: 'geometry',
+          stylers: [{ color: '#041018' }],
+        },
+        {
+          featureType: 'road',
+          elementType: 'geometry',
+          stylers: [{ color: '#1a3142' }],
+        },
+      ],
+    });
+  } catch {
+    throw new Error(
+      '구글 지도 불러오기에 실패했습니다.</br>잠시후 다시 시도 바랍니다.'
+    );
+  }
+}
+
+async function initMapDetail() {
+  await setCurMarker();
+  setEventMarkers();
+  map.setCenter(currentPosition.value);
+  map.addListener('click', e => clickMapEvent(e));
+
+  const locationBtn = document.createElement('button');
+  locationBtn.textContent = '현재위치';
+  locationBtn.className = 'map-chip';
+  locationBtn.addEventListener('click', clickCurPosition);
+  map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationBtn);
+
+  const homeBtn = document.createElement('button');
+  homeBtn.textContent = '나가기';
+  homeBtn.className = 'map-chip map-chip--ghost';
+  homeBtn.addEventListener('click', () => appStore.moveToRealHome());
+  map.controls[google.maps.ControlPosition.TOP_CENTER].push(homeBtn);
+}
+
+async function setCurMarker() {
+  try {
+    const content = document.createElement('div');
+    content.innerHTML = '등록하기';
+    content.classList.add('custom-marker-text');
+
+    const geocoder = new google.maps.Geocoder();
+    const address = await geocoder.geocode({
+      location: currentPosition.value,
+    });
+    appStore.setCurAddress(address.results[0].formatted_address);
+
+    if (curMarker) {
+      curMarker.setMap(null);
+    }
+
+    curMarker = new CurLocMarker(
+      new google.maps.LatLng(
+        currentPosition.value.lat,
+        currentPosition.value.lng
+      ),
+      content
+    );
+    curMarker.setMap(map);
+    curMarker.addClickEvent(fncClickCurMarker);
+  } catch {
+    throw new Error(
+      '현재위치 조회에 실패했습니다.<br/>브라우저의 위치정보 제공상태를 확인하세요.'
+    );
+  }
+}
+
+async function openPanel(selector, top) {
+  await nextTick();
+  animateTo(document.querySelector(selector), {
+    duration: 0.45,
+    top,
+  });
+}
+
+function fncClickCurMarker() {
+  showBlock.value = true;
+  snapShot(currentPosition.value);
+  openPanel('.event-regist', '-1%');
+}
+
+function setIsAppear(flag) {
+  showBlock.value = flag;
+}
+
+async function successUpload(event) {
+  renderRegist.value = false;
+  setEventMarker(event);
+  await nextTick();
+  renderRegist.value = true;
+}
+
+function setEventMarker(e) {
+  const content = document.createElement('img');
+  content.classList.add('custom-marker-img');
+  content.src = markerImg;
+  const marker = new CurLocMarker(
+    new google.maps.LatLng(e.position.lat, e.position.lng),
+    content
+  );
+  marker.setMap(map);
+  marker.addClickEvent(() => {
+    clickEventMarker(e);
+  });
+  clickEventMarker(e, 'dir');
+}
+
+function setEventMarkers() {
+  eventMarkers.value.forEach(e => {
+    const content = document.createElement('img');
+    content.classList.add('custom-marker-img');
+    content.src = markerImg;
+    const marker = new CurLocMarker(
+      new google.maps.LatLng(e.position.lat, e.position.lng),
+      content
+    );
+    marker.setMap(map);
+    marker.addClickEvent(() => {
+      clickEventMarker(e);
+    });
+  });
+}
+
+function snapShot(position) {
+  const key = getGoogleMapsApiKey();
+  let staticMapUrl = 'https://maps.googleapis.com/maps/api/staticmap';
+  staticMapUrl += `?center=${position.lat},${position.lng}`;
+  staticMapUrl += '&size=220x220';
+  staticMapUrl += '&zoom=16';
+  staticMapUrl += `&markers=color:black|${position.lat},${position.lng}`;
+  staticMapUrl += `&key=${key}`;
+  cleanEventStore.setMapSnapshot(staticMapUrl);
+}
+
+async function clickEventMarker(event, type) {
+  let result = null;
+
+  if (!type) {
+    if (!eventDetail.value || event.id !== eventDetail.value.id) {
+      try {
+        result = await cleanEventStore.getCleanEvent(event.id);
+        snapShot(result.position);
+        showBlock.value = true;
+        await openPanel('.event-detail', '0');
+      } catch (e) {
+        if (e.message === 'noData') {
+          appStore.setError({
+            message: '조회할 데이터가 존재하지않습니다.',
+            type: 'browser',
+          });
+        } else {
+          appStore.setError({
+            message: e.message,
+            type: 'critical',
+          });
+        }
+      }
+    } else {
+      snapShot(eventDetail.value.position);
+      showBlock.value = true;
+      await openPanel('.event-detail', '0');
+    }
+  } else {
+    cleanEventStore.setEventDetail(event);
+    result = event;
+    snapShot(result.position);
+    showBlock.value = true;
+    await openPanel('.event-detail', '0');
+  }
+}
+
+async function clickCurPosition() {
+  try {
+    await appStore.setCurPosition();
+    await setCurMarker();
+    map.setCenter(currentPosition.value);
+    map.setZoom(16);
+  } catch (e) {
+    appStore.setError({
+      message: e.message,
+      type: 'critical',
+    });
+  }
+}
+
+async function clickMapEvent(e) {
+  try {
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+    await appStore.setCurPosition({ lat, lng });
+    await setCurMarker();
+  } catch (err) {
+    appStore.setError({
+      message: err.message,
+      type: 'critical',
+    });
+  }
+}
+
+onMounted(async () => {
+  appStore.setLoading(true);
+  try {
+    await authStore.loadDirAuthClient();
+    await loadGoogleMaps();
+    initMap();
+    await appStore.setCurPosition();
+    await cleanEventStore.getEventMarkers();
+    await initMapDetail();
+  } catch (e) {
+    appStore.setError({
+      message: e.message,
+      type: 'critical',
+    });
+  } finally {
+    appStore.setLoading(false);
+  }
+});
+</script>
+
 <template>
   <div class="map-main">
-    <div class="body"></div>
-    <div class="block" v-show="showBlock"></div>
-    <event-detail @setIsAppear="setIsAppear"></event-detail>
-    <event-regist
-      @setIsAppear="setIsAppear"
-      @successUpload="successUpload"
-      v-if="render"
-    ></event-regist>
+    <div ref="mapEl" class="map-main__canvas" />
+    <div v-show="showBlock" class="map-main__block" />
+    <EventDetail @set-is-appear="setIsAppear" />
+    <EventRegist
+      v-if="renderRegist"
+      @set-is-appear="setIsAppear"
+      @success-upload="successUpload"
+    />
   </div>
 </template>
 
-<script>
-import CurLocMaker from '../../util/CurLocMarker.js';
-import EventDetail from '../../components/EventDetail.vue';
-import EventRegist from '../../components/EventRegist.vue';
-import { mapGetters, mapActions, mapState } from 'vuex';
-import gsap from 'gsap';
-import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' });
-const VUE_APP_GOOGLE_MAP = process.env.VUE_APP_GOOGLE_MAP;
-export default {
-  data() {
-    return {
-      map: null,
-      infoWindow: null,
-      curMarker: null,
-      data: null,
-      eventMarkers: [],
-      //리포트 올라왔을때 지도 블락
-      showBlock: false,
-      render: true,
-    };
-  },
-  components: { EventDetail, EventRegist },
-  methods: {
-    //store Action
-    ...mapActions({
-      setCurPosition: 'setCurPosition',
-      setCurAddress: 'setCurAddress',
-      setError: 'setError',
-      getCleanEvent: 'cleanEventStore/getCleanEvent',
-      getEventMarkers: 'cleanEventStore/getEventMarkers',
-      setMapSnapshot: 'cleanEventStore/setMapSnapshot',
-      setEventDetail: 'cleanEventStore/setEventDetail',
-      googleSignOut: 'authStore/googleSignOut',
-      loadGoogleAuthClient: 'authStore/loadGoogleAuthClient',
-      loadDirAuthClient: 'authStore/loadDirAuthClient',
-    }),
-    //구글맵 생성
-    initMap() {
-      try {
-        this.map = new google.maps.Map(document.querySelector('.body'), {
-          center: this.currentPosition,
-          zoom: 16,
-        });
-        //mounted에서 최종예외처리
-      } catch (e) {
-        throw new Error(
-          '구글 지도 불러오기에 실패했습니다.</br>잠시후 다시 시도 바랍니다.'
-        );
-      }
-    },
-    //지도위의 요소추가
-    initMapDetail() {
-      //현재위치마커 추가
-      //mounted에서 최종예외처리
-      this.setCurMarker();
-      //이벤트 마커 추가
-      this.setEventMarkers();
-      this.map.setCenter(this.currentPosition);
-      //현재위치 마커 클릭 이벤트리스너 추가
-      this.map.addListener('click', e => this.clickMapEvent(e));
-      // 현재위치로 이동 버튼
-      const locationBtn = document.createElement('button');
-      locationBtn.textContent = '현재위치';
-      locationBtn.classList.add('custom-map-control-button');
-      locationBtn.classList.add('curLoc');
-      locationBtn.addEventListener('click', this.clickCurPosition);
-      this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(
-        locationBtn
-      );
-      //나가기 버튼
-      const logoutBtn = document.createElement('button');
-      logoutBtn.textContent = '나가기';
-      logoutBtn.classList.add('custom-map-control-button');
-      logoutBtn.classList.add('home');
-      logoutBtn.addEventListener('click', this.goToHome);
-      this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(logoutBtn);
-    },
-    //현재위치마커
-    async setCurMarker() {
-      try {
-        const content = document.createElement('div');
-        content.innerHTML = '등록하기';
-        content.classList.add('custom-marker-text');
-        const geocoder = new google.maps.Geocoder();
-        //geoCoder를 활용한 문자열 주소 생성
-        const address = await geocoder.geocode({
-          location: this.currentPosition,
-        });
-        //문자열 주소 store에 저장
-        this.setCurAddress(address.results[0].formatted_address);
-
-        //기존 현재위치마커 삭제
-        if (this.curMarker) {
-          this.curMarker.setMap(null);
-        }
-        //현재위치 마커 등록
-        this.curMarker = new CurLocMaker(
-          new google.maps.LatLng(
-            this.currentPosition.lat,
-            this.currentPosition.lng
-          ),
-          content
-        );
-        this.curMarker.setMap(this.map);
-        this.curMarker.addClickEvent(this.fncClickCurMarker);
-      } catch (e) {
-        throw new Error(
-          '현재위치 조회에 실패했습니다.<br/>브라우저의 위치정보 제공상태를 확인하세요.'
-        );
-      }
-    },
-    //현재위치마커 클릭시 이벤트
-    fncClickCurMarker() {
-      this.showBlock = true;
-      this.snapShot(this.currentPosition);
-      const $target = document.querySelector('.event-regist');
-      gsap.to($target, {
-        duration: 0.5,
-        top: '-1%',
-      });
-    },
-    setIsAppear(flag) {
-      this.showBlock = flag;
-    },
-    //등록완료 후 emit 이벤트
-    successUpload(event) {
-      this.render = false;
-      this.setEventMarker(event);
-      this.$nextTick(() => {
-        this.render = true;
-      });
-    },
-    //등록완료후 하나만 추가
-    setEventMarker(e) {
-      const content = document.createElement('img');
-      content.classList.add('custom-marker-img');
-      content.src = require('@/assets/images/pngwing.png');
-      const marker = new CurLocMaker(
-        new google.maps.LatLng(e.position.lat, e.position.lng),
-        content
-      );
-      marker.setMap(this.map);
-      marker.addClickEvent(() => {
-        this.clickEventMarker(e);
-      });
-      this.clickEventMarker(e, 'dir');
-    },
-    //정화활동 이벤트 모두 추가
-    setEventMarkers() {
-      this.eventMarkers = this.eventMarkerData.map(e => {
-        const content = document.createElement('img');
-        content.classList.add('custom-marker-img');
-        content.src = require('@/assets/images/pngwing.png');
-        const marker = new CurLocMaker(
-          new google.maps.LatLng(e.position.lat, e.position.lng),
-          content
-        );
-        marker.setMap(this.map);
-        marker.addClickEvent(() => {
-          this.clickEventMarker(e);
-        });
-      });
-    },
-    snapShot(position) {
-      var staticMapUrl = 'https://maps.googleapis.com/maps/api/staticmap';
-
-      //Set the Google Map Center.
-      staticMapUrl += '?center=' + position.lat + ',' + position.lng;
-
-      //Set the Google Map Size.
-      staticMapUrl += '&size=220x220';
-
-      //Set the Google Map Zoom.
-      staticMapUrl += '&zoom=16';
-      staticMapUrl +=
-        '&markers=color:black|' + position.lat + ',' + position.lng;
-      staticMapUrl += `&key=${VUE_APP_GOOGLE_MAP}`;
-      this.setMapSnapshot(staticMapUrl);
-    },
-    async clickEventMarker(event, type) {
-      //처음 조회하거나 다른 event를 조회하는 경우
-      let result = null;
-      if (!type) {
-        if (
-          !this.eventDetail ||
-          (this.eventDetail && event.id != this.eventDetail.id)
-        ) {
-          try {
-            result = await this.getCleanEvent(event.id);
-            this.snapShot(result.position);
-            this.showBlock = true;
-            const $target = document.querySelector('.event-detail');
-            gsap.to($target, {
-              duration: 0.5,
-              top: '0',
-            });
-          } catch (e) {
-            if (e.message === 'noData') {
-              this.setError({
-                message: '조회할 데이터가 존재하지않습니다.',
-                type: 'browser',
-              });
-            } else {
-              const message = e.message;
-              this.setError({
-                message,
-                type: 'critical',
-              });
-            }
-          }
-        } else {
-          //현재위치정보 snapShot 생성
-          this.snapShot(this.eventDetail.position);
-          this.showBlock = true;
-          const $target = document.querySelector('.event-detail');
-          gsap.to($target, {
-            duration: 0.5,
-            top: '0',
-          });
-        }
-      } else {
-        //이벤트 상세정보 조회
-        await this.setEventDetail(event);
-        result = event;
-        //위치정보 snapshot 생성
-        this.snapShot(result.position);
-        this.showBlock = true;
-        //상세정보 컴포넌트 show
-        const $target = document.querySelector('.event-detail');
-        gsap.to($target, {
-          duration: 0.5,
-          top: '0',
-        });
-      }
-
-      //이미 조회한 데이터를 다시 조회하는 경우 화면만 올리기
-    },
-    //현재위치로이동 버튼을 통해 현재위치마커를 현재위치로 이동
-    async clickCurPosition() {
-      try {
-        //클릭 지점 위치 저장
-        await this.setCurPosition();
-        // 현재위치 변경
-        await this.setCurMarker();
-        this.map.setCenter(this.currentPosition);
-        this.map.setZoom(16);
-      } catch (e) {
-        let message = e.message;
-        this.setError({
-          message,
-          type: 'critical',
-        });
-      }
-    },
-    //맵 클릭하는 위치로  현재위치 마커 변경
-    async clickMapEvent(e) {
-      try {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        await this.setCurPosition({ lat, lng });
-        await this.setCurMarker();
-      } catch (e) {
-        let message = e.message;
-        this.setError({
-          message,
-          type: 'critical',
-        });
-      }
-    },
-    async goToHome() {
-      this.$store.dispatch('moveToRealHome');
-    },
-  },
-  async mounted() {
-    let loader = this.$loading.show({
-      isFullPage: true,
-      canCancel: false,
-      onCancel: null,
-      color: '#ffffff',
-      backgroundColor: '#000000',
-      opacity: 0.5,
-    });
-    try {
-      //지도생성
-      await this.loadGoogleAuthClient();
-      await this.loadDirAuthClient();
-      this.initMap();
-      //현재위치
-      await this.setCurPosition();
-      //해양정화활동 이벤트 로드
-      await this.getEventMarkers();
-      this.initMapDetail(); //지도에 바인딩
-    } catch (e) {
-      console.log(e);
-      let message = e.message;
-      this.setError({
-        message,
-        type: 'critical',
-      });
-    } finally {
-      loader.hide();
-    }
-  },
-  computed: {
-    ...mapState([]),
-    ...mapGetters({
-      eventMarkerData: 'cleanEventStore/EventMarkerData',
-      eventDetail: 'cleanEventStore/EventDetail',
-      currentPosition: 'CurPosition',
-    }),
-  },
-};
-</script>
-
 <style>
 .map-main {
-  /* 1em : 16px */
-  width: 100%;
-  font-size: 1em;
-  height: 100%;
   position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  background-color: rgba(49, 48, 48, 1);
+  background: var(--ocean-mid);
 }
 
-.body {
-  /* 1em : 16px */
+.map-main__canvas {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  inset: 0;
 }
 
-.block {
-  /* 1em : 16px */
+.map-main__block {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: black;
-  opacity: 0.5;
+  inset: 0;
+  background: rgba(4, 16, 24, 0.55);
+  z-index: 10;
 }
 
-.custom-map-control-button {
-  background-color: rgb(255, 255, 255);
+.map-chip {
+  margin: 12px 6px;
   border: 0;
-  border-radius: 2px;
-  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.3);
-  margin: 10px;
-  padding: 0 0.5em;
-  font: 400 18px Roboto, Arial, sans-serif;
-  overflow: hidden;
-  height: 40px;
+  border-radius: 999px;
+  padding: 0.7rem 1.1rem;
+  background: rgba(6, 22, 34, 0.92);
+  color: var(--foam);
+  font-family: var(--font-display);
+  font-weight: 700;
   cursor: pointer;
-  width: 90px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
 }
 
-.curloc {
-  left: 0 !important;
+.map-chip--ghost {
+  background: rgba(238, 245, 248, 0.12);
 }
 
-.home {
-  right: 0 !important;
-}
-.custom-map-control-button:hover {
-  background: #ebebeb;
-}
-.gm-ui-hover-effect {
-  display: none !important;
-}
-.gmnoprint {
-  display: none;
-}
-/* The popup bubble styling. */
 .custom-marker-text {
-  /* Position the bubble centred-above its parent. */
   position: absolute;
   top: 0;
   left: 0;
   transform: translate(-50%, -100%);
-  /* Style the bubble. */
-  background-color: rgba(0, 0, 0, 1);
-  padding: 0.5em;
-  border-radius: 5px;
-  font-size: 1.5em;
-  font-weight: bold;
-  overflow-y: auto;
-  max-height: 60px;
-  box-shadow: 0px 2px 10px 1px rgba(0, 0, 0, 0.5);
-  opacity: 1;
-  transition: 0.5s;
+  background: var(--accent);
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  box-shadow: var(--shadow);
   cursor: pointer;
   color: white;
-  text-align: center;
+  white-space: nowrap;
 }
+
 .custom-marker-text:hover {
-  opacity: 0.4;
+  opacity: 0.85;
 }
 
 .custom-marker-img {
@@ -414,12 +335,11 @@ export default {
   top: 0;
   left: 0;
   transform: translate(-50%, -100%);
-  box-shadow: 0px 2px 10px 1px rgba(0, 0, 0, 1);
-  width: 50px;
-  border-radius: 25px;
+  width: 48px;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
-/* The parent of the bubble. A zero-height div at the top of the tip. */
 .custom-marker-anchor {
   position: absolute;
   width: 100%;
@@ -427,23 +347,19 @@ export default {
   left: 0;
 }
 
-/* This element draws the tip. */
 .custom-marker-anchor::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  /* Center the tip horizontally. */
   transform: translate(-50%, 0);
   width: 0;
   height: 0;
-  /* The tip is 8px high, and 12px wide. */
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 8px solid rgba(0, 0, 0, 1);
+  border-top: 8px solid var(--accent);
 }
 
-/* JavaScript will position this div at the bottom of the popup tip. */
 .custom-marker-container {
   cursor: auto;
   height: 0;

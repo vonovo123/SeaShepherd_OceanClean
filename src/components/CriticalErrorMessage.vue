@@ -1,62 +1,75 @@
+<script setup>
+import { computed } from 'vue';
+import { useAppStore } from '@/stores/app';
+import router from '@/router';
+
+const props = defineProps({
+  criticalErrorMessage: { type: String, default: '' },
+});
+
+const appStore = useAppStore();
+
+const criticalErrorMessageHTML = computed(
+  () => `<div>${props.criticalErrorMessage}</div>`
+);
+
+function goHome() {
+  appStore.initError();
+  router.push({ name: 'realhome' });
+  setTimeout(() => {
+    router.go(0);
+  }, 800);
+}
+</script>
+
 <template>
-  <div class="criticalErrorMessage" @click="goHome">
-    <div class="customCriticalMessageWrapper">
-      <div
-        class="customCriticalMessage"
-        v-html="criticalErrorMessageHTML"
-      ></div>
-      <div>터치시 처음화면으로 돌아갑니다.</div>
+  <div class="critical-error" @click="goHome">
+    <div class="critical-error__panel">
+      <p class="critical-error__eyebrow">Something went wrong</p>
+      <div class="critical-error__message" v-html="criticalErrorMessageHTML" />
+      <p class="critical-error__hint">화면을 터치하면 처음 화면으로 돌아갑니다</p>
     </div>
   </div>
 </template>
 
-<script>
-import router from '../router/index.js';
-export default {
-  data() {
-    return {};
-  },
-  props: {
-    criticalErrorMessage: String,
-  },
-  computed: {
-    criticalErrorMessageHTML: function () {
-      const criticalErrorMessageHTML = `<div>${this.criticalErrorMessage}</div>`;
-      return criticalErrorMessageHTML;
-    },
-  },
-  methods: {
-    goHome: () => {
-      router.push({
-        name: 'realhome',
-      });
-
-      setTimeout(() => {
-        router.go();
-      }, 1000);
-    },
-  },
-};
-</script>
-
-<style>
-.criticalErrorMessage {
-  background-color: var(--objectColor);
-  color: var(--fontColor);
-  font-weight: bold;
+<style scoped>
+.critical-error {
   position: fixed;
+  inset: 0;
   z-index: 1001;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top, rgba(214, 40, 40, 0.18), transparent 45%),
+    rgba(4, 16, 24, 0.94);
+  cursor: pointer;
+}
+
+.critical-error__panel {
+  max-width: 420px;
   text-align: center;
 }
-.customCriticalMessageWrapper {
-  position: relative;
-  top: 40%;
+
+.critical-error__eyebrow {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--accent-soft);
 }
-.customCriticalMessage {
-  margin-bottom: 20px;
+
+.critical-error__message {
+  margin-bottom: 1.25rem;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.critical-error__hint {
+  margin: 0;
+  color: var(--foam-muted);
+  font-size: 0.9rem;
 }
 </style>

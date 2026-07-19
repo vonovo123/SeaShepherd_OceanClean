@@ -1,0 +1,68 @@
+:root {
+  --ocean-deep: #041018;
+  --ocean-mid: #0a2233;
+  --ocean-surface: #123a52;
+  --foam: #eef5f8;
+  --foam-muted: #9bb4c4;
+  --accent: #d62828;
+  --accent-soft: #f07167;
+  --warm: #f4a261;
+  --panel: rgba(6, 22, 34, 0.94);
+  --panel-soft: rgba(12, 36, 52, 0.88);
+  --border: rgba(238, 245, 248, 0.14);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Figtree', sans-serif;
+  --radius: 18px;
+  --radius-sm: 12px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--foam);
+  background: var(--ocean-deep);
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior-y: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.gmnoprint,
+.gm-control-active,
+.gm-ui-hover-effect {
+  display: none !important;
+}

@@ -1,413 +1,268 @@
-<template>
-  <div class="event-detail" @click="hideEventDetail" v-if="eventDetail">
-    <div class="event-detail-header">
-      {{ eventDetail.userInfo.name }} 님의 청소리포트
-    </div>
-    <div class="event-detail-body">
-      <div class="photos-wrapper">
-        <div class="title-wrap">
-          <div class="title">활동 사진</div>
-          <div class="sub"></div>
-        </div>
+<script setup>
+import { storeToRefs } from 'pinia';
+import { useCleanEventStore } from '@/stores/cleanEvent';
+import { animateTo } from '@/util/gsapSafe.js';
+import recyclingBag from '@/assets/images/recycling-bag.png';
 
+const emit = defineEmits(['setIsAppear']);
+const cleanEventStore = useCleanEventStore();
+const { eventDetail, mapSnapshot } = storeToRefs(cleanEventStore);
+
+function hideEventDetail() {
+  animateTo(document.querySelector('.event-detail'), {
+    duration: 0.45,
+    top: '100%',
+  });
+
+  const body = document.querySelector('.event-detail__body');
+  if (body) body.scrollTop = 0;
+  emit('setIsAppear', false);
+}
+
+function scaleLabel(scale) {
+  if (scale === 0) return '20KG 이하를 수거했습니다';
+  if (scale > 0 && scale < 6) return `${20 * scale}KG 이상을 수거했습니다`;
+  return '';
+}
+</script>
+
+<template>
+  <div
+    v-if="eventDetail"
+    class="event-detail"
+    @click="hideEventDetail"
+  >
+    <div class="event-detail__header">
+      <span>{{ eventDetail.userInfo.name }} 님의 청소리포트</span>
+      <small>아래로 닫기</small>
+    </div>
+
+    <div class="event-detail__body" @click.stop>
+      <section class="panel">
+        <h3>활동 사진</h3>
         <div class="photos">
           <img
-            class="detail-image"
             v-for="(url, idx) in eventDetail.photoUrl"
             :key="idx"
+            class="photos__item"
             :src="url"
-            alt=""
+            alt="활동 사진"
           />
         </div>
-      </div>
+      </section>
 
-      <div class="detail-form">
-        <div class="column">
-          <div class="sub-column">
-            <div class="title-wrap">
-              <div class="title">사용자 정보</div>
-              <div class="sub"></div>
-            </div>
-            <div class="content">
-              <font-awesome-icon
-                class="icon"
-                :icon="['fas', 'user']"
-                size="lg"
-              />
-              <div class="text bold">{{ eventDetail.userInfo.name }}</div>
-            </div>
-            <div class="content">
-              <font-awesome-icon
-                class="icon"
-                :icon="['fas', 'envelope-square']"
-                size="lg"
-              />
-              <div class="text bold">{{ eventDetail.userInfo.email }}</div>
-            </div>
+      <div class="grid">
+        <section class="panel">
+          <h3>사용자 정보</h3>
+          <div class="row">
+            <font-awesome-icon :icon="['fas', 'user']" />
+            <strong>{{ eventDetail.userInfo.name }}</strong>
           </div>
-          <div class="sub-column">
-            <div class="title-wrap">
-              <div class="title">날짜와 위치</div>
-              <div class="sub"></div>
-            </div>
-            <div class="content date">
-              <font-awesome-icon
-                class="icon"
-                :icon="['fas', 'calendar-week']"
-                size="lg"
-              />
-              <div class="text">
-                {{ eventDetail.date.from }} 부터 <br />
-                {{ eventDetail.date.to }} 까지
-              </div>
-            </div>
-            <div class="content location">
-              <font-awesome-icon
-                class="icon"
-                :icon="['fas', 'globe-asia']"
-                size="lg"
-              />
-              <div class="text address">{{ eventDetail.address }}</div>
-            </div>
-            <img class="map-img" :src="this.mapSnapshot" />
+          <div class="row">
+            <font-awesome-icon :icon="['fas', 'envelope-square']" />
+            <strong>{{ eventDetail.userInfo.email }}</strong>
           </div>
-          <div class="sub-column">
-            <div class="title-wrap">
-              <div class="title">함께한 사람</div>
-              <div class="sub"></div>
-            </div>
-            <div class="content companion-title">
-              <font-awesome-icon
-                class="icon"
-                :icon="['fas', 'users']"
-                size="lg"
-              />
-              <div class="text">
-                {{ eventDetail.companions.length }} 명과 함께 했습니다
-              </div>
-            </div>
-            <div class="wrapper">
-              <div
-                class="content companion"
-                v-for="(com, idx) in eventDetail.companions"
-                :key="idx"
-              >
-                <font-awesome-icon
-                  class="icon"
-                  :icon="['fas', 'user-tag']"
-                  size="lg"
-                />
-                <div class="text">{{ com }}</div>
-              </div>
-            </div>
+        </section>
+
+        <section class="panel">
+          <h3>날짜와 위치</h3>
+          <div class="row">
+            <font-awesome-icon :icon="['fas', 'calendar-week']" />
+            <span>
+              {{ eventDetail.date.from }} 부터<br />
+              {{ eventDetail.date.to }} 까지
+            </span>
           </div>
-        </div>
-        <div class="column">
-          <div class="sub-column">
-            <div class="title-wrap">
-              <div class="title">쓰레기 수거량</div>
-              <div class="sub"></div>
-            </div>
+          <div class="row">
+            <font-awesome-icon :icon="['fas', 'globe-asia']" />
+            <span>{{ eventDetail.address }}</span>
+          </div>
+          <img v-if="mapSnapshot" class="map-shot" :src="mapSnapshot" alt="위치 미리보기" />
+        </section>
+
+        <section class="panel">
+          <h3>함께한 사람</h3>
+          <div class="row">
+            <font-awesome-icon :icon="['fas', 'users']" />
+            <span>{{ eventDetail.companions.length }} 명과 함께 했습니다</span>
+          </div>
+          <div class="companions">
             <div
-              class="content detail-trash-scale"
+              v-for="(com, idx) in eventDetail.companions"
+              :key="idx"
+              class="row"
+            >
+              <font-awesome-icon :icon="['fas', 'user-tag']" />
+              <span>{{ com }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>쓰레기 수거량</h3>
+          <div class="bags">
+            <img
               v-if="eventDetail.scale === 0"
-            >
-              <img
-                class="img detail-trash-scale"
-                src="../assets/images/recycling-bag.png"
-                style="opacity: 0.5"
-              />
-            </div>
-            <div class="content detail-trash-scale" v-else>
-              <img
-                class="img detail-trash-scale"
-                v-for="idx in eventDetail.scale"
-                :key="idx"
-                src="../assets/images/recycling-bag.png"
-              />
-            </div>
-            <div class="text detail-trash-scale" v-if="eventDetail.scale === 0">
-              20KG 이하를 수거했습니다
-            </div>
-            <div
-              class="text detail-trash-scale"
-              v-else-if="eventDetail.scale > 0 && eventDetail.scale < 6"
-            >
-              {{ 20 * eventDetail.scale }}KG 이상을 수거했습니다
-            </div>
-          </div>
-          <div class="sub-column">
-            <div class="title-wrap">
-              <div class="title">청소 후기</div>
-              <div class="sub"></div>
-            </div>
-            <textarea
-              class="textarea"
-              type="text"
-              id="memo"
-              name="memo"
-              placeholder="간단한 활동내역을 작성해주세요"
-              :value="eventDetail.memo"
-              readonly
+              :src="recyclingBag"
+              alt=""
+              style="opacity: 0.45"
+            />
+            <img
+              v-for="idx in eventDetail.scale"
+              v-else
+              :key="idx"
+              :src="recyclingBag"
+              alt=""
             />
           </div>
-        </div>
+          <p class="bags__label">{{ scaleLabel(eventDetail.scale) }}</p>
+        </section>
+
+        <section class="panel panel--wide">
+          <h3>청소 후기</h3>
+          <textarea class="memo" :value="eventDetail.memo" readonly />
+        </section>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import gsap from 'gsap';
-
-import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faEnvelopeOpenText,
-  faGlobeAsia,
-  faCalendarWeek,
-  faUsers,
-  faUserTag,
-  faEnvelopeSquare,
-  faUser,
-} from '@fortawesome/free-solid-svg-icons';
-library.add(faEnvelopeOpenText);
-library.add(faGlobeAsia);
-library.add(faCalendarWeek);
-library.add(faUsers);
-library.add(faUserTag);
-library.add(faEnvelopeSquare);
-library.add(faUser);
-
-export default {
-  props: {},
-  methods: {
-    hideEventDetail() {
-      const $target = document.querySelector('.event-detail');
-      gsap.to($target, {
-        duration: 0.5,
-        top: '100%',
-      });
-      document.querySelector('.event-detail-body').scrollTop = 0;
-      this.$emit('setIsAppear', false);
-    },
-  },
-  computed: {
-    ...mapGetters({
-      eventDetail: 'cleanEventStore/EventDetail',
-      mapSnapshot: 'cleanEventStore/MapSnapShot',
-    }),
-  },
-};
-</script>
-
 <style scoped>
 .event-detail {
-  --backgroundColor: rgba(49, 48, 48, 1);
-  --fontColor: rgb(246, 237, 237);
-  --objectColor: rgba(63, 59, 59, 0.959);
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
   position: absolute;
-  background-color: var(--backgroundColor);
-  width: 100%;
-  height: 100%;
+  inset: auto 0 0;
   top: 100%;
-  border: var(--backgroundColor), solid 2px;
-  border-top-left-radius: 2em;
-  border-top-right-radius: 2em;
-  font-size: 1.5em;
-  color: var(--fontColor);
-  padding-bottom: 3%;
-}
-
-.event-detail > .event-detail-header {
-  position: relative;
-  width: 100%;
-  padding-top: 15px;
-  height: 50px;
-  text-align: center;
-  font-weight: bold;
-  cursor: pointer;
-  border-top-left-radius: 2em;
-  border-top-right-radius: 2em;
-  background-color: var(--objectColor);
-}
-
-.event-detail > .event-detail-body {
-  position: relative;
-  background-color: var(--backgroundColor);
-  width: 100%;
-  height: 90%;
-  padding-left: 6%;
-  padding-right: 6%;
-  overflow: scroll;
-}
-
-.title-wrap {
-  margin-bottom: 3%;
-}
-
-.title-wrap > .title {
-  font-weight: bold;
-  width: 100%;
-  margin: 1%;
-}
-.title-wrap > .sub {
-  width: 100%;
-  margin: 1%;
-}
-.photos-wrapper {
-  position: relative;
-  width: 100%;
-  height: 80%;
-  margin-bottom: 5%;
-  padding: 2%;
-  margin-top: 3%;
-  background-color: var(--objectColor);
-  border-radius: 10px;
-}
-.photos-wrapper > .photos {
-  position: relative;
-  width: 100%;
-  height: 90%;
-  display: flex;
-  margin: 0;
-  padding: 1%;
-  border-radius: 20px;
-  overflow: scroll;
-}
-.photos-wrapper > .photos > .detail-image {
-  width: 40%;
-  object-fit: cover;
-  padding: 0.5%;
-  border-radius: 10px;
-}
-.event-detail > .event-detail-body > .detail-form {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-/* 각 컬럼 */
-.detail-form > .column {
-  width: 50%;
-  padding: 3%;
-}
-.column > .sub-column {
-  position: relative;
-  background-color: var(--objectColor);
-  width: 100%;
-  padding: 5%;
-  border-radius: 15px;
-  margin-bottom: 10%;
-}
-
-.sub-column .content {
-  margin-top: 5%;
-  margin-bottom: 5%;
-  display: flex;
-  flex-wrap: wrap;
-  background-color: var(--backgroundColor);
-  border-radius: 10px;
-  margin-left: 10px;
-  align-items: center;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.sub-column > .wrapper {
-  width: 100%;
-  height: 300px;
-  overflow: scroll;
-}
-
-.sub-column > .map-img {
-  margin-top: 5%;
-  width: 100%;
-  border-radius: 15px;
-}
-
-.sub-column > .wrapper {
-  width: 100%;
-  height: 300px;
-  overflow: scroll;
-}
-
-.sub-column .content .icon {
-  margin-left: 20px;
-  margin-right: 20px;
-}
-.sub-column .content .text {
-  font-weight: bold;
-  width: 70%;
-}
-.sub-column > .content.companion-title {
-  margin-bottom: 2%;
-}
-.sub-column > .content.companion-list {
-  width: 100%;
-  height: 300px;
-  overflow: scroll;
-}
-
-.sub-column > .content.detail-trash-scale {
-  width: 100%;
-  height: 120px;
-  display: flex;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  background-color: var(--objectColor);
-  margin-left: 0;
-}
-
-.sub-column > .content.detail-trash-scale > .img {
-  width: 20%;
   height: 100%;
-  padding: 1px;
-  opacity: 1;
+  z-index: 20;
+  background: var(--panel);
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  color: var(--foam);
+  overflow: hidden;
+}
+
+.event-detail__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 1rem 1.25rem 0.85rem;
+  background: var(--panel-soft);
   cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 700;
 }
-.sub-column > .text.detail-trash-scale {
+
+.event-detail__header small {
+  color: var(--foam-muted);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.event-detail__body {
+  height: calc(100% - 70px);
+  overflow: auto;
+  padding: 1rem 1.15rem 2rem;
+}
+
+.panel {
+  background: rgba(238, 245, 248, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel h3 {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.photos {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.photos__item {
+  width: min(42%, 220px);
+  flex: 0 0 auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.panel--wide {
+  grid-column: 1 / -1;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: rgba(4, 16, 24, 0.45);
+  line-height: 1.45;
+}
+
+.companions {
+  max-height: 220px;
+  overflow: auto;
+}
+
+.map-shot {
   width: 100%;
-  padding: 5% 0;
+  margin-top: 0.5rem;
+  border-radius: 14px;
+}
+
+.bags {
+  display: flex;
+  gap: 0.35rem;
+  min-height: 72px;
+  align-items: center;
+}
+
+.bags img {
+  width: 18%;
+  max-width: 64px;
+}
+
+.bags__label {
+  margin: 0.75rem 0 0;
   text-align: center;
-  font-weight: bold;
+  font-weight: 600;
 }
 
-.sub-column > .textarea {
-  display: block;
-  color: var(--fontColor);
-  padding: 5% 5%;
-  background-color: var(--objectColor);
+.memo {
   width: 100%;
-  min-height: 450px;
-  border-radius: 15px;
+  min-height: 220px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(4, 16, 24, 0.45);
+  color: var(--foam);
+  padding: 1rem;
+  resize: vertical;
 }
 
-@media only screen and (max-width: 414px) {
-  .event-detail {
-    font-size: 1em;
-  }
-  .detail-form > .column {
-    width: 100%;
-  }
-  .photos-wrapper > .photos > .detail-image {
-    width: 100%;
-    height: 100%;
-    border-radius: 20px !important;
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
   }
 
-  .sub-column .content .text.address {
-    font-size: 0.8em;
+  .photos__item {
+    width: 78%;
   }
-}
-
-.detail-form input:focus,
-.detail-form textarea:focus,
-.detail-form label:active + input,
-.detail-form label:active + textarea {
-  outline: none;
 }
 </style>
