@@ -100,199 +100,152 @@ function toggleDirAuth() {
 </script>
 
 <template>
-  <div class="auth-backdrop" @click.self="close">
-    <div class="auth-sheet">
-      <button class="auth-sheet__close" type="button" @click="close">닫기</button>
+  <div class="auth" @click.self="close">
+    <div class="auth__panel">
+      <button class="auth__close" type="button" @click="close">닫기</button>
 
-      <div class="auth-sheet__brand">
-        <p class="eyebrow">Join the cleanup</p>
-        <h2>인증하고 활동을 기록하세요</h2>
-        <p class="lead">해양정화 활동을 지도에 남기려면 로그인이 필요합니다.</p>
-      </div>
+      <h2 class="auth__title">로그인</h2>
 
-      <button class="auth-google" type="button" @click="fncGMailAuth">
+      <button class="auth__google" type="button" @click="fncGMailAuth">
         <img :src="gmailLogo" alt="" />
-        <span>Gmail로 인증하기</span>
+        Gmail로 인증하기
       </button>
 
-      <div class="auth-sheet__footer">
-        <button class="auth-toggle" type="button" @click="toggleDirAuth">
-          다른 이메일로 인증하기
-        </button>
+      <button class="auth__link" type="button" @click="toggleDirAuth">
+        다른 이메일로 인증하기
+      </button>
 
-        <div v-show="dirOpen" class="auth-direct">
-          <input
-            v-model="dirEmail"
-            type="email"
-            class="auth-input"
-            placeholder="이메일"
-            autocomplete="email"
-          />
-          <input
-            v-model="dirName"
-            type="text"
-            class="auth-input"
-            placeholder="이름"
-            autocomplete="name"
-          />
-          <p v-if="dirStatus" class="auth-status">{{ dirStatus }}</p>
-          <button
-            class="auth-submit"
-            type="button"
-            :disabled="sending"
-            @click="fncDirAuth"
-          >
-            {{ sending ? '전송 중…' : '인증 메일 보내기' }}
-          </button>
-        </div>
+      <div v-show="dirOpen" class="auth__form">
+        <input
+          v-model="dirEmail"
+          type="email"
+          placeholder="이메일"
+          autocomplete="email"
+        />
+        <input
+          v-model="dirName"
+          type="text"
+          placeholder="이름"
+          autocomplete="name"
+        />
+        <p v-if="dirStatus" class="auth__status">{{ dirStatus }}</p>
+        <button type="button" :disabled="sending" @click="fncDirAuth">
+          {{ sending ? '전송 중…' : '인증' }}
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.auth-backdrop {
+.auth {
   position: absolute;
   inset: 0;
   z-index: 100;
-  display: grid;
-  place-items: end center;
-  padding: 1rem;
-  background: rgba(4, 16, 24, 0.62);
-  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.55);
 }
 
-.auth-sheet {
-  width: min(460px, 100%);
-  margin-bottom: 4vh;
-  padding: 1.5rem 1.35rem 1.35rem;
-  border-radius: 24px 24px 18px 18px;
-  background:
-    linear-gradient(180deg, rgba(18, 58, 82, 0.95), rgba(6, 22, 34, 0.98));
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+.auth__panel {
   position: relative;
+  width: min(360px, 100%);
+  padding: 2rem 1.5rem 1.5rem;
+  background: #1a1a1a;
+  color: #f2f2f2;
 }
 
-.auth-sheet__close {
+.auth__close {
   position: absolute;
-  top: 1rem;
+  top: 0.85rem;
   right: 1rem;
   border: 0;
   background: transparent;
-  color: var(--foam-muted);
+  color: #999;
+  font-size: 0.85rem;
   cursor: pointer;
 }
 
-.auth-sheet__brand {
-  margin-bottom: 1.5rem;
-  padding-right: 2.5rem;
+.auth__title {
+  margin: 0 0 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
 }
 
-.eyebrow {
-  margin: 0 0 0.5rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--warm);
-  font-family: var(--font-display);
-}
-
-.auth-sheet__brand h2 {
-  margin: 0 0 0.55rem;
-  font-family: var(--font-display);
-  font-size: clamp(1.4rem, 4vw, 1.85rem);
-  line-height: 1.2;
-}
-
-.lead {
-  margin: 0;
-  color: var(--foam-muted);
-  line-height: 1.5;
-  font-size: 0.95rem;
-}
-
-.auth-google {
+.auth__google {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 0.95rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: rgba(238, 245, 248, 0.06);
-  color: var(--foam);
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border: 0;
+  background: #2a2a2a;
+  color: #f2f2f2;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.auth-google:hover {
-  background: rgba(238, 245, 248, 0.12);
-  transform: translateY(-1px);
+.auth__google:hover {
+  background: #333;
 }
 
-.auth-google img {
-  width: 1.4rem;
-  height: 1.4rem;
+.auth__google img {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
-.auth-sheet__footer {
-  margin-top: 1.25rem;
-}
-
-.auth-toggle {
+.auth__link {
   display: block;
   width: 100%;
+  margin-top: 1rem;
   border: 0;
   background: transparent;
-  color: var(--foam-muted);
+  color: #aaa;
+  font-size: 0.85rem;
   cursor: pointer;
-  padding: 0.5rem;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-align: center;
 }
 
-.auth-direct {
+.auth__form {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.65rem;
   margin-top: 1rem;
 }
 
-.auth-input {
+.auth__form input {
   width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: rgba(4, 16, 24, 0.55);
-  color: var(--foam);
-  padding: 0.9rem 1rem;
+  border: 0;
+  background: #2a2a2a;
+  color: #f2f2f2;
+  padding: 0.8rem 0.9rem;
   outline: none;
 }
 
-.auth-input:focus {
-  border-color: rgba(244, 162, 97, 0.55);
-}
-
-.auth-status {
-  margin: 0;
-  text-align: center;
-  color: var(--warm);
-  font-size: 0.88rem;
-}
-
-.auth-submit {
-  width: 100%;
+.auth__form button {
   border: 0;
-  border-radius: 999px;
-  padding: 0.95rem 1rem;
-  background: var(--accent);
-  color: white;
-  font-weight: 700;
+  background: #2a2a2a;
+  color: #f2f2f2;
+  padding: 0.8rem;
   cursor: pointer;
 }
 
-.auth-submit:disabled {
-  opacity: 0.6;
+.auth__form button:hover:not(:disabled) {
+  background: #333;
+}
+
+.auth__form button:disabled {
+  opacity: 0.5;
   cursor: default;
+}
+
+.auth__status {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #ccc;
 }
 </style>
